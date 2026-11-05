@@ -1,5 +1,5 @@
-// places Rabblings objects on generated terrain, using the layouts in the profile
-const GEN_ANY=[['auto','MATCH LAYOUT'],...GEN],GEN_AMT=[[0,'NONE'],[1,'FEW'],[2,'SOME'],[3,'MANY']],GEN_POOL=[[0,'NONE'],[1,'MATCH LAYOUT'],[2,'ALWAYS']];
+// places Rabblings objects on generated terrain, using the routes in the profile
+const GEN_ANY=[['auto','ANY'],...GEN],GEN_AMT=[[0,'NONE'],[1,'FEW'],[2,'SOME'],[3,'MANY']],GEN_POOL=[[0,'NONE'],[1,'AUTO'],[2,'ALWAYS']];
 function genLayout(m,o){const t=TPL.find(a=>a.k===o.tpl)||TPL[0],p=o.parts,r=rng((o.seed|0)+99),pickOf=a=>a[r()*a.length|0],whole=p.ter&&p.pts&&p.ene;if(whole&&t.mode)m.mode=t.mode;
  const W=m.w,H=m.h,mir=m.mode==='mirror',two=m.mode==='free',f=new Terrain(W,H,m.theme,7),S=new Shaper(f,7);let info=null;
  if(p.ter){const type=o.type&&o.type!=='auto'?o.type:pickOf(t.t);m.ops=[['G',type,o.seed]];info=genTerrain(S,type,o.seed);}else{if(typeof ImpArt!=='undefined')f.gfx=ImpArt.ready(m);S.run(m.ops);}
@@ -26,7 +26,7 @@ function genLayout(m,o){const t=TPL.find(a=>a.k===o.tpl)||TPL[0],p=o.parts,r=rng
   if(n&&(m.race==='dwarf'||m.race==='rat')){const s=spot(Math.round(lo+r()*span),1,'any');if(s&&clear(s[0],36,both))m.objs.push({k:m.race==='dwarf'?'keg':'scrap',x:s[0],y:s[1]});}}
  if(p.ene){drop('ene');const n=[0,Math.max(1,Math.round(W/500)),Math.max(2,Math.round(W/300)),Math.max(3,Math.round(W/190))][Math.max(o.foes|0,0)],toward=x=>(ds[0]&&ds[0].x<x)?1:-1;for(let i=0;i<n;i++){const s=spot(Math.round(lo+(i+.2+r()*.6)/n*span),1,'any');if(s&&clear(s[0],40,GEN_KINDS.ene))m.objs.push({k:'foe',kind:pickOf(t.fo),x:s[0],y:s[1],dir:toward(s[0])});}
   const nests=t.raid?Math.max(1,Math.round(W/700)):(o.foes|0)>=3?1:0;for(let i=0;i<nests&&(o.foes|0)>0;i++){const s=spot(Math.round(hi-i*Math.min(180,span/2)),-1,'top');if(s&&clear(s[0],30,['nest']))m.objs.push({k:'nest',kind:pickOf(t.fo),per:200,hp:8,cap:3,x:s[0],y:s[1]});}}
- if(whole){const fight=t.raid&&m.mode==='solo'&&(o.foes|0)>0;m.style=t.mode||fight?'battle':(o.traps|0)||(o.foes|0)?'hybrid':'puzzle';if(m.mode==='solo'){m.goal=fight?'both':'home';if(fight){m.swap={bash:'sword',pick:'bow'};m.skills={...m.skills,bash:8,pick:4};}else m.swap=null;}}
+ if(whole){const fight=t.raid&&m.mode==='solo'&&(o.foes|0)>0;m.style=m.mode!=='solo'||fight?'battle':(o.traps|0)||(o.foes|0)?'hybrid':'puzzle';if(m.mode==='solo'){m.goal=fight?'both':'home';if(fight){m.swap={bash:'sword',pick:'bow'};m.skills={...m.skills,bash:8,pick:4};}else m.swap=null;}}
  m.gen=GEN_VERSION;return ensureIds(m);}
 function genMap(o){const pick=o.style&&o.style!=='auto'?o.style:null,m=blankMap(pick||'puzzle'),tpl=o.tpl||'march';m.w=o.w;m.h=o.h;m.mode=o.mode;m.theme=o.theme;m.ops=[];m.objs=[];m.name=((TPL.find(a=>a.k===tpl)||TPL[0]).n).slice(0,24);m.time=clamp(Math.round(o.w/800*240/30)*30,120,600);
  const old=!o.tpl&&pick&&pick!=='puzzle'?1:0;genLayout(m,{tpl,type:o.type,seed:o.seed,traps:o.traps===undefined?old:o.traps,foes:o.foes===undefined?(o.style==='hybrid'?1:0):o.foes,pool:o.pool===undefined?1:o.pool,mach:o.mach|0,parts:{ter:1,pts:1,trp:1,mch:1,ene:1,poo:1}});

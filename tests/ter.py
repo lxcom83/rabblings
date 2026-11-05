@@ -2,7 +2,7 @@ import asyncio,json,base64
 from playwright.async_api import async_playwright
 SK='<!doctype html><html><head><meta charset="utf-8"></head><body>%s</body></html>'
 TEST='''()=>{const G=__GS,out=[];let total=0,bad=0,time=0,maxT=0;const sizes=[[480,240],[800,300],[1400,420],[2400,600],[3200,600]],NEW=['hills','floating','labyrinth','mountains','canyons','twinpeaks','pillars'];const per={};
- for(const ty of NEW)for(const[w,h]of sizes)for(let s=1;s<=10;s++)for(const mode of ['solo','mirror','free']){total++;const t0=performance.now();const m=G.genMap({tpl:mode==='solo'?'march':'arena',type:ty,traps:s%4,foes:s%3,pool:s%3,theme:'forge',mode,w,h,seed:s*613+ty.length});const dt=performance.now()-t0;time+=dt;maxT=Math.max(maxT,dt);
+ for(const ty of NEW)for(const[w,h]of sizes)for(let s=1;s<=10;s++)for(const mode of ['solo','mirror','free']){total++;const t0=performance.now();const m=G.genMap({tpl:'march',type:ty,traps:s%4,foes:s%3,pool:s%3,theme:'forge',mode,w,h,seed:s*613+ty.length});const dt=performance.now()-t0;time+=dt;maxT=Math.max(maxT,dt);
   const P=mapProblems(m),T=new Terrain(w,h,m.theme,7),S=new Shaper(T,7);S.run(m.ops);if(mode==='mirror')for(let y=0;y<h;y++)for(let x=0;x<w>>1;x++)T.m[y*w+w-1-x]=T.m[y*w+x];const e=[];
   let solid=0;for(let i=0;i<T.m.length;i++)if(T.m[i])solid++;if(solid<w*h*.03)e.push('almost empty '+(solid/(w*h)).toFixed(3));
   for(const o of m.objs){if(o.k==='door'&&!(T.solid(o.x,o.y)&&!T.solid(o.x,o.y-8)))e.push('door buried '+o.x+','+o.y);if(o.k==='hatch'&&(T.solid(o.x,o.y)||T.solid(o.x,o.y-6)))e.push('hatch buried '+o.x+','+o.y);if(['jaws','mine','foe','nest'].includes(o.k)&&!(T.solid(o.x,o.y)&&!T.solid(o.x,o.y-8)))e.push(o.k+' bad');}
