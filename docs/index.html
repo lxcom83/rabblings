@@ -2,30 +2,82 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Rabblings</title>
-<meta name="description" content="A free, open source 16-bit style game about bossing around tiny rabbles of goblins, frogs, imps and more.">
-<style>
-:root{--bg:#0b0812;--panel:#2c2236;--ink:#f4ecd8;--dim:#a898b8;--gold:#ffe07a;--green:#9fdc40;color-scheme:dark}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 ui-monospace,Menlo,Consolas,monospace;padding-inline:max(16px,env(safe-area-inset-left,0px))}
-main{max-width:640px;margin:0 auto;padding-block:12vh 48px;display:flex;flex-direction:column;gap:24px}
-h1{margin:0;color:var(--green);font-size:clamp(40px,12vw,72px);letter-spacing:.06em;line-height:1.1}
-p{margin:0}
-.lead{color:var(--ink)}
-.dim{color:var(--dim);font-size:15px}
-nav{display:flex;flex-wrap:wrap;gap:12px}
-a.b{display:block;background:var(--panel);color:var(--gold);border:2px solid #7e5a96;padding:12px 24px;font-weight:700;text-decoration:none}
-a.b:hover,a.b:focus-visible{background:#5a3a70}
-</style>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Rabblings: Tiny troops. Big trouble.</title>
+<meta name="description" content="A free 16-bit style strategy game. Boss around tiny rabbles of goblins, frogs, imps and more, or sabotage a friend in 2 player.">
+<meta property="og:title" content="Rabblings">
+<meta property="og:description" content="Tiny troops. Big trouble. A free 16-bit style strategy game with 8 races and a map builder.">
+<meta property="og:image" content="https://rabblings.com/img/logo.png">
+<link rel="icon" href="img/home-goblin-0.png">
+<link rel="preload" href="fonts/silkscreen-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<main>
-<h1>RABBLINGS</h1>
-<p class="lead">Boss around tiny rabbles of goblins, frogs, imps and more. Dig, build and blow your way home, or sabotage a friend.</p>
-<nav><a class="b" href="play/">PLAY</a><a class="b" href="builder/">MAP BUILDER</a></nav>
-<p class="dim">Free and open source. Your maps stay in your browser unless you share them.</p>
-<p class="dim"><a href="https://github.com/lxcom83/rabblings" style="color:inherit">Source on GitHub</a></p>
+<header class="top"><div class="wrap">
+ <a class="brand" href="#top">RABBLINGS</a>
+ <nav class="nav" aria-label="Main"><a href="#races">Races</a><a href="#game">The game</a><a href="#updates">Updates</a><a href="play/">Play</a><a href="builder/">Builder</a></nav>
+</div></header>
+<main id="top">
+<div class="hero">
+ <div class="wrap">
+  <h1 style="margin:0"><img class="logo" src="img/logo.png" width="330" height="100" alt="Rabblings"></h1>
+  <p class="tag">Tiny troops. Big trouble.</p>
+  <p class="lead">Lead a marching rabble of goblins, frogs, imps and worse. Dig, build and blow your way home, or sabotage a friend.</p>
+  <div class="cta"><a class="btn go" href="play/">PLAY NOW</a><a class="btn" href="builder/">MAP BUILDER</a></div>
+ </div>
+ <div class="march" id="march" aria-hidden="true"></div>
+</div>
+
+<section class="races" id="races"><div class="wrap">
+ <h2>Pick your rabble</h2>
+ <p class="sub">Eight races, two clans each, and every one plays differently. Take a look.</p>
+ <div class="show" id="show" tabindex="0" role="group" aria-roledescription="slideshow" aria-label="Playable races">
+  <div class="left"><div class="shot"><img id="r-shot" alt="" width="480" height="270"></div>
+   <div class="stage" id="r-stage"><div class="sprite" id="r-sprite" role="img" aria-label="Walking trooper"></div><img class="home" id="r-home" alt="" width="52" height="46"></div></div>
+  <div class="info" aria-live="polite">
+   <h3 id="r-name"></h3>
+   <p class="like" id="r-like"></p>
+   <ul class="pm"><li class="good" id="r-good"></li><li class="bad" id="r-bad"></li><li id="r-world"></li></ul>
+   <ul class="skills" id="r-skills"></ul>
+   <div class="clans" id="r-clans"></div>
+   <p class="perk" id="r-perk"></p>
+  </div>
+ </div>
+ <div class="ctrl">
+  <button class="arrow" id="prev" type="button" aria-label="Previous race">&lt;</button>
+  <div class="dots" id="dots"></div>
+  <button class="arrow" id="next" type="button" aria-label="Next race">&gt;</button>
+ </div>
+</div></section>
+
+<section id="game"><div class="wrap">
+ <h2>Small soldiers. Bad plans.</h2>
+ <div class="grid">
+  <article class="card"><h3>Guide the march</h3><p>Your troops walk on their own. Hand out skills at the right moment and get enough of them home.</p></article>
+  <article class="card"><h3>2 player sabotage</h3><p>Race a friend on one screen. Steal their troops, wreck their route and enjoy the shouting.</p></article>
+  <article class="card"><h3>Fight back</h3><p>Arm your rabble with swords and bows, then clear nests, skeletons and golems.</p></article>
+  <article class="card"><h3>Grumpy little morale</h3><p>Lose too many and your troops answer back, refuse orders or sit down in protest.</p></article>
+  <article class="card"><h3>Build your own maps</h3><p>Paint terrain or generate a starting point, add traps and triggers, then share the code.</p></article>
+  <article class="card"><h3>Classic mode</h3><p>Want the pure old-school puzzle? Switch off the morale and the chatter.</p></article>
+ </div>
+</div></section>
+
+<section class="upd" id="updates"><div class="wrap">
+ <h2>Latest updates</h2>
+ <ul class="log">
+  <li><time datetime="2026-11">Nov 2026</time><span>rabblings.com is live, with the game and map builder on their own pages.</span></li>
+  <li><time datetime="2026-11">Nov 2026</time><span>New map builder with a side menu, setup pages, object previews and tooltips.</span></li>
+  <li><time datetime="2026-11">Nov 2026</time><span>Six new terrain layouts, from Floating Islands to Twin Peaks.</span></li>
+  <li><time datetime="2026-11">Nov 2026</time><span>All 8 races are playable, and each race has its own home.</span></li>
+ </ul>
+</div></section>
 </main>
+<footer><div class="wrap">
+ <p>Rabblings is free to play and source available, by Lucas (lxcom83).</p>
+ <p><a href="https://github.com/lxcom83/rabblings">Source on GitHub</a> · <a href="https://github.com/lxcom83/rabblings/blob/main/LICENSE.md">Licence</a></p>
+ <p>Your saved maps stay in your browser unless you share them. This site has no accounts and no trackers of its own.</p>
+</div></footer>
+<script src="races.js"></script>
+<script src="site.js"></script>
 </body>
 </html>
