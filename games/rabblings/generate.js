@@ -1,0 +1,33 @@
+// places Rabblings objects on generated terrain, using the layouts in the profile
+const GEN_ANY=[['auto','MATCH LAYOUT'],...GEN],GEN_AMT=[[0,'NONE'],[1,'FEW'],[2,'SOME'],[3,'MANY']],GEN_POOL=[[0,'NONE'],[1,'MATCH LAYOUT'],[2,'ALWAYS']];
+function genLayout(m,o){const t=TPL.find(a=>a.k===o.tpl)||TPL[0],p=o.parts,r=rng((o.seed|0)+99),pickOf=a=>a[r()*a.length|0],whole=p.ter&&p.pts&&p.ene;if(whole&&t.mode)m.mode=t.mode;
+ const W=m.w,H=m.h,mir=m.mode==='mirror',two=m.mode==='free',f=new Terrain(W,H,m.theme,7),S=new Shaper(f,7);let info=null;
+ if(p.ter){const type=o.type&&o.type!=='auto'?o.type:pickOf(t.t);m.ops=[['G',type,o.seed]];info=genTerrain(S,type,o.seed);}else{if(typeof ImpArt!=='undefined')f.gfx=ImpArt.ready(m);S.run(m.ops);}
+ if(mir)for(let y=0;y<H;y++)for(let x=0;x<W>>1;x++)f.m[y*W+W-1-x]=f.m[y*W+x];
+ const lim=mir?(W>>1)-10:W-9,drop=k=>{m.objs=m.objs.filter(a=>!GEN_KINDS[k].includes(a.k));};
+ // where water sits decides which ground counts as walkable
+ let pool=null;if(p.poo){drop('poo');if(o.pool!==0&&info&&info.pool)pool=info.pool;}else{const e=m.objs.find(a=>a.k==='pool');if(e)pool=e.y;}
+ const floor=()=>pool===null?H-6:pool-2,ledges=x=>{const L=[],top=floor();for(let y=14;y<top;y++)if(f.solid(x,y)&&!f.solid(x,y-1)&&!f.solid(x,y-8)&&!f.solid(x,y-14))L.push(y);return L;},flat=(x,y)=>f.solid(x-8,y+2)&&f.solid(x+8,y+2)&&!f.solid(x-8,y-5)&&!f.solid(x+8,y-5),
+  spot=(x,d,how)=>{for(let i=0;i<W;i+=6){const a=clamp(x+d*i,8,lim),L=ledges(a).filter(y=>flat(a,y));if(L.length)return[a,how==='low'?L[L.length-1]:how==='any'?pickOf(L):L[0]];}return null;},
+  best=(a,b,sign)=>{let bx=null;for(let x=a;x<=b;x+=12){for(const y of ledges(x))if(flat(x,y)&&(!bx||(y-bx[1])*sign>0))bx=[x,y];}return bx;};
+ const air=(x,y)=>{let n=0;while(n<64&&y-n-1>0&&!f.solid(x,y-n-1))n++;return n;},hatchAt=(x,y,dir,team)=>{const h={k:'hatch',x,y:Math.max(12,y-Math.round(clamp(air(x,y)*.6,10,64))),dir};if(team!==undefined)h.team=team;return h;};
+ if(p.pts){drop('pts');const x0=Math.round(W*.09),xE=Math.round(W*(mir||two?.44:.9)),a=spot(x0,1,t.from)||[x0,H-30],b=t.to==='top'?spot(xE,-1,'top'):t.to==='low'?spot(xE,-1,'low'):best(Math.round(W*(mir||two?.24:.5)),xE,-1)||spot(xE,-1,'top');const c=b||[xE,H-30];
+  if(two){m.objs.push(hatchAt(a[0],a[1],1,0),{k:'door',x:c[0],y:c[1],team:0});const a2=spot(W-1-a[0],-1,t.from)||[W-1-a[0],a[1]],c2=spot(W-1-c[0],1,'top')||[W-1-c[0],c[1]];m.objs.push(hatchAt(a2[0],a2[1],-1,1),{k:'door',x:c2[0],y:c2[1],team:1});}
+  else m.objs.push(hatchAt(a[0],a[1],c[0]>=a[0]?1:-1),{k:'door',x:c[0],y:c[1]});}
+ const hs=m.objs.filter(a=>a.k==='hatch'),ds=m.objs.filter(a=>a.k==='door'),ends=[...hs,...ds],lo=Math.min(...ends.map(a=>a.x),W*.09)+60,hi=Math.max(...ends.filter(a=>!mir||a.x<W>>1).map(a=>a.x),mir?W*.44:W*.9)-50;
+ if(p.poo&&o.pool===2&&pool===null){let dip=0;for(let x=8;x<lim;x+=8){const L=ledges(x);if(L.length)dip=Math.max(dip,L[L.length-1]);}const deep=Math.max(...ds.map(a=>a.y),...ends.map(a=>a.y));pool=Math.min(H-8,Math.max(dip-6,deep+6));}
+ if(p.poo&&pool!==null)m.objs.push({k:'pool',x:0,y:pool,w:mir?(W>>1)-1:W-1});
+ const clear=(x,gap,kinds)=>!ends.some(a=>Math.abs(a.x-x)<56)&&!m.objs.some(a=>kinds.includes(a.k)&&Math.abs(a.x-x)<gap),span=Math.max(120,hi-lo);
+ if(p.trp){drop('trp');const n=[0,Math.max(1,Math.round(W/420)),Math.max(2,Math.round(W/260)),Math.max(3,Math.round(W/170))][o.traps|0];for(let i=0;i<n;i++){const s=spot(Math.round(lo+(i+.2+r()*.6)/n*span),1,'any');if(s&&clear(s[0],30,[...GEN_KINDS.trp,...GEN_KINDS.mch])){const k=pickOf(t.tr),e={k,x:s[0],y:s[1]};if(k==='jet'||k==='press')e.per=70;m.objs.push(e);}}}
+ if(p.mch){drop('mch');const n=[0,Math.max(1,Math.round(W/600)),Math.max(2,Math.round(W/380)),Math.max(3,Math.round(W/240))][o.mach|0],both=[...GEN_KINDS.trp,...GEN_KINDS.mch],toward=x=>{const e=ds.find(a=>!a.team)||ds[0];return e&&e.x<x?-1:1;};let pairs=0;
+  for(let i=0;i<n;i++){const k=pickOf(t.ma||['spring','catapult','warp']),x0=Math.round(lo+(i+.2+r()*.6)/n*span),s=spot(x0,1,'any');if(!s||!clear(s[0],36,both))continue;
+   if(k==='warp'){if(pairs>=3)continue;const q=spot(Math.round(lo+r()*span),1,'any');if(!q||Math.abs(q[0]-s[0])<120||!clear(q[0],36,both))continue;m.objs.push({k:'warp',x:s[0],y:s[1],p:pairs},{k:'warp',x:q[0],y:q[1],p:pairs});pairs++;}
+   else if(k==='catapult')m.objs.push({k,x:s[0],y:s[1],dir:toward(s[0]),pow:pickOf([3.75,4.5,5.25])});else if(k==='belt'){const bw=pickOf([40,60]);if(f.solid(s[0]+bw,s[1]+2)&&!f.solid(s[0]+bw,s[1]-5))m.objs.push({k,x:s[0],y:s[1],w:bw,dir:toward(s[0])});}else m.objs.push({k,x:s[0],y:s[1],pow:7});}
+  if(n&&(m.race==='dwarf'||m.race==='rat')){const s=spot(Math.round(lo+r()*span),1,'any');if(s&&clear(s[0],36,both))m.objs.push({k:m.race==='dwarf'?'keg':'scrap',x:s[0],y:s[1]});}}
+ if(p.ene){drop('ene');const n=[0,Math.max(1,Math.round(W/500)),Math.max(2,Math.round(W/300)),Math.max(3,Math.round(W/190))][Math.max(o.foes|0,0)],toward=x=>(ds[0]&&ds[0].x<x)?1:-1;for(let i=0;i<n;i++){const s=spot(Math.round(lo+(i+.2+r()*.6)/n*span),1,'any');if(s&&clear(s[0],40,GEN_KINDS.ene))m.objs.push({k:'foe',kind:pickOf(t.fo),x:s[0],y:s[1],dir:toward(s[0])});}
+  const nests=t.raid?Math.max(1,Math.round(W/700)):(o.foes|0)>=3?1:0;for(let i=0;i<nests&&(o.foes|0)>0;i++){const s=spot(Math.round(hi-i*Math.min(180,span/2)),-1,'top');if(s&&clear(s[0],30,['nest']))m.objs.push({k:'nest',kind:pickOf(t.fo),per:200,hp:8,cap:3,x:s[0],y:s[1]});}}
+ if(whole){const fight=t.raid&&m.mode==='solo'&&(o.foes|0)>0;m.style=t.mode||fight?'battle':(o.traps|0)||(o.foes|0)?'hybrid':'puzzle';if(m.mode==='solo'){m.goal=fight?'both':'home';if(fight){m.swap={bash:'sword',pick:'bow'};m.skills={...m.skills,bash:8,pick:4};}else m.swap=null;}}
+ m.gen=GEN_VERSION;return ensureIds(m);}
+function genMap(o){const pick=o.style&&o.style!=='auto'?o.style:null,m=blankMap(pick||'puzzle'),tpl=o.tpl||'march';m.w=o.w;m.h=o.h;m.mode=o.mode;m.theme=o.theme;m.ops=[];m.objs=[];m.name=((TPL.find(a=>a.k===tpl)||TPL[0]).n).slice(0,24);m.time=clamp(Math.round(o.w/800*240/30)*30,120,600);
+ const old=!o.tpl&&pick&&pick!=='puzzle'?1:0;genLayout(m,{tpl,type:o.type,seed:o.seed,traps:o.traps===undefined?old:o.traps,foes:o.foes===undefined?(o.style==='hybrid'?1:0):o.foes,pool:o.pool===undefined?1:o.pool,mach:o.mach|0,parts:{ter:1,pts:1,trp:1,mch:1,ene:1,poo:1}});
+ if(pick)m.style=pick;m.need=clamp(Math.round(m.n*.5),1,50);return m;}

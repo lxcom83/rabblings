@@ -1,0 +1,23 @@
+<style>
+/* One screen, one console: a dark living-room frame around a 480x270 pixel canvas. Single deliberate look. */
+:root{--room:#0b0812;--ink:#f4ecd8;--lamp:#ffd27a;color-scheme:dark}
+html,body{height:100%;margin:0;background:var(--room);color:var(--ink);overflow:hidden;overscroll-behavior:none}
+#wrap{position:relative;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;touch-action:none;user-select:none;-webkit-user-select:none}
+#stage{position:relative;line-height:0}
+#game{display:block;image-rendering:pixelated;image-rendering:crisp-edges;image-rendering:pixelated;touch-action:none;outline:none}
+#game:focus-visible{outline:1px solid rgba(255,210,122,.35);outline-offset:-1px}
+#scan{position:absolute;left:0;top:0;pointer-events:none;background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0,rgba(0,0,0,0) 2px,rgba(0,0,0,.2) 2px,rgba(0,0,0,.2) 3px)}
+#turn{font:600 14px/1.4 ui-monospace,Menlo,Consolas,monospace;color:var(--lamp);padding-inline:16px;text-align:center}
+[hidden]{display:none!important}
+#dlg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(8,5,14,.7);line-height:1.4;font:14px/1.4 ui-monospace,Menlo,Consolas,monospace;z-index:5}
+#dlg-box{background:#2c2236;border:2px solid #120a18;outline:1px solid #7e5a96;color:var(--ink);padding:14px;width:min(420px,90%);display:flex;flex-direction:column;gap:8px}
+#dlg-file,#dlg-files,#dlg-dir{color:var(--ink);font:13px ui-monospace,Menlo,Consolas,monospace;max-width:100%}#dlg-pick{display:flex;flex-direction:column;gap:6px}
+#dlg-title{color:var(--lamp);font-weight:700}
+#dlg label{font-size:12px;color:#d8cce0}
+#dlg textarea{font:13px/1.35 ui-monospace,Menlo,Consolas,monospace;background:#120a18;color:#fff;border:1px solid #7e5a96;padding:6px;resize:none;width:100%;box-sizing:border-box;word-break:break-all}
+#dlg-note{font-size:12px;color:var(--lamp);min-height:1em;margin:0}
+#dlg-row{display:flex;gap:8px;justify-content:flex-end}
+#dlg button{font:700 13px ui-monospace,Menlo,Consolas,monospace;background:#5a3a70;color:#fff;border:1px solid #120a18;padding:6px 12px;cursor:pointer}
+#dlg button:focus-visible,#dlg textarea:focus-visible{outline:2px solid var(--lamp)}
+</style>
+<div id="wrap"><div id="stage"><canvas id="game" width="480" height="270" tabindex="0" aria-label="Rabblings game screen"></canvas><div id="scan"></div><div id="dlg" hidden><div id="dlg-box"><div id="dlg-title"></div><label id="dlg-la" for="dlg-a"></label><textarea id="dlg-a" rows="1"></textarea><label id="dlg-lb" for="dlg-b"></label><textarea id="dlg-b" rows="2"></textarea><input id="dlg-file" type="file" accept=".json,.txt,application/json,text/plain" hidden><div id="dlg-pick" hidden><label for="dlg-files">Zips or .nxlv levels</label><input id="dlg-files" type="file" multiple accept=".zip,.nxlv"><label for="dlg-dir">Or a whole folder</label><input id="dlg-dir" type="file" webkitdirectory></div><p id="dlg-note"></p><div id="dlg-row"><button id="dlg-x" type="button">Cancel</button><button id="dlg-alt" type="button" hidden></button><button id="dlg-ok" type="button">OK</button></div></div></div></div><p id="turn" hidden>Turn your phone sideways for a bigger screen.</p></div>

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rabblings</title>
+<meta name="description" content="A free, open source 16-bit style game about bossing around tiny rabbles of goblins, frogs, imps and more.">
+<style>
+:root{--bg:#0b0812;--panel:#2c2236;--ink:#f4ecd8;--dim:#a898b8;--gold:#ffe07a;--green:#9fdc40;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 ui-monospace,Menlo,Consolas,monospace;padding-inline:max(16px,env(safe-area-inset-left,0px))}
+main{max-width:640px;margin:0 auto;padding-block:12vh 48px;display:flex;flex-direction:column;gap:24px}
+h1{margin:0;color:var(--green);font-size:clamp(40px,12vw,72px);letter-spacing:.06em;line-height:1.1}
+p{margin:0}
+.lead{color:var(--ink)}
+.dim{color:var(--dim);font-size:15px}
+nav{display:flex;flex-wrap:wrap;gap:12px}
+a.b{display:block;background:var(--panel);color:var(--gold);border:2px solid #7e5a96;padding:12px 24px;font-weight:700;text-decoration:none}
+a.b:hover,a.b:focus-visible{background:#5a3a70}
+</style>
+</head>
+<body>
+<main>
+<h1>RABBLINGS</h1>
+<p class="lead">Boss around tiny rabbles of goblins, frogs, imps and more. Dig, build and blow your way home, or sabotage a friend.</p>
+<nav><a class="b" href="play/">PLAY</a><a class="b" href="builder/">MAP BUILDER</a></nav>
+<p class="dim">Free and open source. Your maps stay in your browser unless you share them.</p>
+<p class="dim"><a href="https://github.com/lxcom83/rabblings" style="color:inherit">Source on GitHub</a></p>
+</main>
+</body>
+</html>

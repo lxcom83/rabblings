@@ -1,0 +1,18 @@
+// shared map format: version wrapper, IDs, share codes, files and browser storage
+// fmt: format version, game: which profile the map belongs to, gen: generator version
+// objects carry a uid so one object can point at another with link. A zone's id is its trigger number
+const MAP_FORMAT=2;
+function ensureIds(m){const seen=new Set();let n=0;for(const o of m.objs)if(Number.isFinite(o.uid))n=Math.max(n,o.uid);for(const o of m.objs){if(!Number.isFinite(o.uid)||seen.has(o.uid))o.uid=++n;seen.add(o.uid);}for(const o of m.objs)if(o.link!==undefined&&!seen.has(o.link))delete o.link;return m;}
+function upgradeMap(m){if(!m||!Array.isArray(m.objs))return m;if(!m.fmt||m.fmt<MAP_FORMAT)m.fmt=MAP_FORMAT;if(!m.game)m.game=PROFILE.id;if(!m.gen)m.gen=1;return ensureIds(m);}
+// share codes: deflated JSON in URL-safe base64, so maps fit in a chat message
+const b64=u=>btoa(String.fromCharCode(...u)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const unb64=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
+async function packMap(m){upgradeMap(m);const raw=new TextEncoder().encode(JSON.stringify(m));try{const st=new Blob([raw]).stream().pipeThrough(new CompressionStream('deflate-raw')),b=new Uint8Array(await new Response(st).arrayBuffer());let o='';for(let i=0;i<b.length;i+=8192)o+=String.fromCharCode(...b.subarray(i,i+8192));return'GS1z'+btoa(o).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}catch(e){return'GS1p'+b64(raw);}}
+async function unpackMap(code){code=code.trim().replace(/\s+/g,'');if(!/^GS1[zp]/.test(code))throw new Error('That does not look like a map code. Codes start with GS1.');const kind=code[3],b=unb64(code.slice(4));let raw=b;if(kind==='z'){const st=new Blob([b]).stream().pipeThrough(new DecompressionStream('deflate-raw'));raw=new Uint8Array(await new Response(st).arrayBuffer());}return cleanMap(JSON.parse(new TextDecoder().decode(raw)));}
+const FILE_TAG='goblin-scramble-maps';
+function mapsToFile(list){return JSON.stringify({game:FILE_TAG,v:1,maps:list.map(upgradeMap)},null,0);}
+async function readMapFile(text){text=text.trim();if(/^GS1[zp]/.test(text)){const m=await unpackMap(text);m.id=null;return[m];}let d;try{d=JSON.parse(text);}catch(e){throw new Error('That file is not a map file.');}const list=Array.isArray(d.maps)?d.maps:d.ops?[d]:null;if(!list||!list.length)throw new Error('No maps were found in that file.');return list.map(cleanMap);}
+async function saveFile(name,text){if(!window.claude){const a=document.createElement('a'),u=URL.createObjectURL(new Blob([text],{type:'application/json'}));a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),2000);return'saved';}let dl=null;try{dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null;}catch(e){}if(!dl)return'none';try{await dl.save({filename:name,data:text});return'saved';}catch(e){return e&&e.code==='declined'?'declined':e&&e.code==='rate_limited'?'busy':'none';}}
+const fileName=m=>'rabblings-map-'+(m.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'untitled')+'.json';
+const Store={key:'goblin-scramble-maps',mem:null,all(){if(this.mem)return this.mem;try{this.mem=JSON.parse(localStorage.getItem(this.key)||'[]');}catch(e){this.mem=[];}this.mem.forEach(upgradeMap);return this.mem;},
+ save(){try{localStorage.setItem(this.key,JSON.stringify(this.mem));return true;}catch(e){return false;}},put(m){upgradeMap(m);const a=this.all();if(!m.id)m.id=Date.now().toString(36)+(Math.random()*1e4|0);const i=a.findIndex(o=>o.id===m.id);if(i>=0)a[i]=JSON.parse(JSON.stringify(m));else a.unshift(JSON.parse(JSON.stringify(m)));return this.save();},del(id){const a=this.all(),i=a.findIndex(o=>o.id===id);if(i>=0)a.splice(i,1);this.save();}};
