@@ -40,5 +40,4 @@ def write(path, text):
 write('build/rabblings-all.html', bundle('all'))
 write('docs/play/index.html', full_page(bundle('play')))
 write('docs/builder/index.html', full_page(bundle('builder')))
-for name in os.listdir('site'):
-    shutil.copy(os.path.join('site', name), os.path.join('docs', name))
+shutil.copytree('site', 'docs', dirs_exist_ok=True)

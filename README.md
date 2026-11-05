@@ -1,6 +1,6 @@
 # Rabblings
 
-A free, open source, 16-bit style game. Boss around tiny rabbles of goblins, frogs, imps and more. Dig, build and blow your way home, or sabotage a friend.
+A free, source available, 16-bit style game. Boss around tiny rabbles of goblins, frogs, imps and more. Dig, build and blow your way home, or sabotage a friend.
 
 Everything is hand-made in code: pixel art, FM music and gibberish voices. There are no dependencies to run the game.
 
@@ -15,6 +15,7 @@ Everything is hand-made in code: pixel art, FM music and gibberish voices. There
 | `site/` | The website home page |
 | `docs/` | The built website, served by GitHub Pages. Do not edit this by hand |
 | `tests/` | Browser tests that use Playwright |
+| `tools/` | `site_art.py` exports the website's logo, sprites and screenshots from the game |
 
 ## Building
 
@@ -49,4 +50,10 @@ This repo contains no NeoLemmix levels or graphics. Players import from their ow
 
 ## Licence
 
-No licence has been chosen yet, so all rights are reserved for now.
+Rabblings is released under the [PolyForm Noncommercial License 1.0.0](LICENSE.md). You can play, study, change and share it for non-commercial purposes, and keep it going if the original author moves on. You may not sell it or use it commercially, including as a paid app. Because of that limit it is source available, not open source.
+
+Commercial use needs written permission from the copyright holder. Donations to the original project are welcome.
+
+## The Rabblings name
+
+The licence covers the code and art, not the name. The Rabblings name and logo are reserved. Forks must use their own name and logo, must not suggest they are the official game, and must keep the licence and its Required Notice.
