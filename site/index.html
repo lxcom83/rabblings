@@ -17,7 +17,7 @@
 <body>
 <header class="top"><div class="wrap">
  <a class="brand" href="#top">RABBLINGS</a>
- <nav class="nav" aria-label="Main"><a href="#races">Races</a><a href="#game">The game</a><a href="#updates">Updates</a><a href="play/">Play</a><a href="builder/">Builder</a></nav>
+ <nav class="nav" aria-label="Main"><a href="#races">Races</a><a href="#game">The game</a><a href="#updates">Updates</a><a href="play/">Play</a><a href="builder/">Builder</a><button class="acct-btn" id="acct-btn" type="button">Sign in</button></nav>
 </div></header>
 <main id="top">
 <div class="hero">
@@ -78,13 +78,47 @@
  </ul>
 </div></section>
 </main>
+<dialog class="acct" id="acct" aria-labelledby="acct-title">
+ <div class="acct-head"><h2 id="acct-title">Your account</h2><button class="acct-x" id="acct-close" type="button" aria-label="Close">X</button></div>
+ <div id="acct-wait"><p>One moment...</p></div>
+ <div id="acct-out" hidden>
+  <p>Sign in or make an account with just your email. We send you a link, so there is no password to remember.</p>
+  <form id="acct-send" class="acct-form">
+   <label for="acct-addr">Email address</label>
+   <input id="acct-addr" type="email" autocomplete="email" required placeholder="you@example.com">
+   <button class="btn go" id="acct-send-btn" type="submit">SEND MY LINK</button>
+  </form>
+  <p class="acct-msg" id="acct-out-msg" aria-live="polite"></p>
+ </div>
+ <div id="acct-sent" hidden>
+  <p>Check your email. We sent a sign-in link to <strong id="acct-sent-to"></strong>.</p>
+  <p class="acct-small">Open it on this device to sign in here. It works once. If nothing arrives in a few minutes, check your spam folder.</p>
+  <button class="btn" id="acct-again" type="button">USE ANOTHER EMAIL</button>
+ </div>
+ <div id="acct-in" hidden>
+  <p>Signed in as <strong id="acct-email"></strong>.</p>
+  <form id="acct-save" class="acct-form">
+   <label for="acct-name">Player name</label>
+   <input id="acct-name" type="text" maxlength="24" autocomplete="nickname" placeholder="Shown in every Rabblings game">
+   <button class="btn go" type="submit">SAVE NAME</button>
+  </form>
+  <p class="acct-msg" id="acct-in-msg" aria-live="polite"></p>
+  <div class="acct-row"><button class="btn" id="acct-signout" type="button">SIGN OUT</button><button class="btn acct-danger" id="acct-del" type="button">DELETE MY ACCOUNT</button></div>
+  <div class="acct-confirm" id="acct-del-confirm" hidden>
+   <p>Delete your account and player name for good? Maps saved in this browser stay here.</p>
+   <div class="acct-row"><button class="btn acct-danger" id="acct-del-yes" type="button">YES, DELETE IT</button><button class="btn" id="acct-del-no" type="button">KEEP IT</button></div>
+  </div>
+ </div>
+ <p class="acct-small"><a href="privacy.html">What we store, and why</a></p>
+</dialog>
 <footer><div class="wrap">
  <p>Rabblings: Marching Orders is free to play and source available, by Luke83.</p>
  <p><a href="https://github.com/lxcom83/rabblings">Source on GitHub</a> · <a href="https://github.com/lxcom83/rabblings/blob/main/LICENSE.md">Licence</a></p>
- <p>Your saved maps stay in your browser unless you share them.</p>
+ <p>Your saved maps stay in your browser unless you share them. <a href="privacy.html">Privacy</a></p>
 </div></footer>
 <script src="races.js"></script>
 <script src="site.js"></script>
+<script src="account.js"></script>
 <script>if('serviceWorker'in navigator)addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});</script>
 </body>
 </html>

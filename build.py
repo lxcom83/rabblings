@@ -36,7 +36,7 @@ def file_list():
     for root, _, names in os.walk('site'):
         for n in names:
             rel = os.path.relpath(os.path.join(root, n), 'site').replace(os.sep, '/')
-            if rel not in ('CNAME', 'index.html', 'sw.js') and 'LICENSE' not in rel:
+            if rel not in ('CNAME', 'index.html', 'sw.js') and 'LICENSE' not in rel and not rel.startswith('vendor/'):
                 files.append(rel)
     return sorted(set(files))
 

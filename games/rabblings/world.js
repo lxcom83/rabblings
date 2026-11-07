@@ -34,7 +34,7 @@ class World{
   this.floodY=T.h+8;this.lavaY=T.h+8;this.holes=(d.holes||[]).map(h=>({...h}));this.zones=d.zones||[];
   this.traps=(d.traps||[]).map(t=>{const o={...t,cd:0,live:1,off:(t.x*7)%40};if(!t.raw){let y=clamp(t.y,0,T.h-1);if(T.solid(t.x,y))while(y>0&&T.solid(t.x,y-1))y--;else while(y<T.h&&!T.solid(t.x,y))y++;o.y=y;}return o;});
   this.trig=(d.trig||[]).map(t=>({...t,hit:0}));
-  this.moodOn=d.morale!==0&&!this.classic;this.talkT=0;this.piles=[];this.gustDir=0;for(const p of this.pl)p.scrap=(d.scrap===undefined?6:d.scrap)+(p.perk.scrap||0);if((d.rules||[]).includes('regrow')){T.grow=[];}this.wildOn=!!(d.wild||this.diff.wild);this.wildNext=300;this.quakeOff=0;for(const p of this.pl)Object.assign(p,{mood:100,moodT:0,lastLost:0,lastSaved:0,total:Math.max(1,this.hatches.filter(h=>h.team===p.id).reduce((a,h)=>a+h.left,0))});this.need=clamp(Math.ceil((d.need||1)*this.diff.need),1,this.pl[0].total);
+  this.moodOn=d.morale!==0&&!this.classic;this.talkT=0;this.piles=[];this.gustDir=0;for(const p of this.pl)p.scrap=(d.scrap===undefined?6:d.scrap)+(p.perk.scrap||0);if((d.rules||[]).includes('regrow')){T.grow=[];}this.wildOn=!!(d.wild||this.diff.wild);this.under=isUnder(d.theme,d.under);this.tmp={};this.surgeT=0;this.wildNext=300;this.quakeOff=0;for(const p of this.pl)Object.assign(p,{mood:100,moodT:0,lastLost:0,lastSaved:0,total:Math.max(1,this.hatches.filter(h=>h.team===p.id).reduce((a,h)=>a+h.left,0))});this.need=clamp(Math.ceil((d.need||1)*this.diff.need),1,this.pl[0].total);
   this.fightMap=!!((d.nests||[]).length||(d.foes||[]).length);this.nests=(d.nests||[]).map(n=>{let y=clamp(n.y,0,T.h-1);if(T.solid(n.x,y))while(y>0&&T.solid(n.x,y-1))y--;else while(y<T.h&&!T.solid(n.x,y))y++;return{...n,y,hp:n.hp||8,max:n.hp||8,cd:60,dead:0,flip:1};});for(const f of d.foes||[])this.addMob(f.kind||'skel',f.x,f.y,f.dir||-1);
   for(const h of this.holes)if(h.awake)this.spawnRats(h,3);}
  say(s){this.banner=s;this.bannerT=70;}
@@ -50,7 +50,13 @@ class World{
  addMob(kind,x,y,dir){const T=this.T;if(!FOES[kind])kind='skel';x=clamp(x,2,T.w-3);let yy=clamp(y,0,T.h-1);if(T.solid(x,yy))while(yy>0&&T.solid(x,yy-1))yy--;else while(yy<T.h&&!T.solid(x,yy))yy++;const m={kind,x,y:yy,px:x,py:yy,dir:dir||1,t:0,dead:0,hp:FOES[kind].hp,aim:30};this.mobs.push(m);return m;}
  stepNests(){const T=this.T;for(const n of this.nests){if(n.dead)continue;if(!T.solid(n.x,n.y)&&!T.solid(n.x-9,n.y)&&!T.solid(n.x+9,n.y)){n.y+=2;if(n.y>T.h+10){n.dead=1;this.say('NEST DESTROYED!');}continue;}if(--n.cd<=0){n.cd=n.per||200;if(this.mobs.filter(m=>!m.dead&&m.nest===n).length<(n.cap||3)){n.flip=-n.flip;const m=this.addMob(n.kind||'skel',n.x+n.flip*16,n.y,n.flip);m.nest=n;}}}}
  isClear(){return this.nests.every(n=>n.dead)&&this.mobs.every(m=>m.dead||m.wild);}
- stepWild(){if(this.quakeOff&&this.tick>=this.quakeOff){this.rule.quake=0;this.quakeOff=0;}if(!this.wildOn||this.tick<this.wildNext)return;this.wildNext=this.tick+500+(this.rnd()*400|0);this.fire(['meteors','bigquake','spider'][this.rnd()*3|0]);}
+ stepWild(){if(this.quakeOff&&this.tick>=this.quakeOff){this.rule.quake=0;this.quakeOff=0;}
+  for(const k in this.tmp)if(this.tick>=this.tmp[k]){delete this.tmp[k];this.rule[k]=0;if(k==='gust')this.gustDir=0;}if(this.surgeT>0)this.surgeT--;
+  if(!this.wildOn||this.tick<this.wildNext)return;this.wildNext=this.tick+500+(this.rnd()*400|0);
+  const L=this.under?['cavein','bigquake','spider','tunnelflood','dark']:['debris','surge','swoop','gale','bigquake'];this.fire(L[this.rnd()*L.length|0]);}
+ // a wildcard rule that switches itself off again. Never touches a rule the map already uses
+ tempRule(k,t){if(this.rule[k]&&!this.tmp[k])return false;this.rule[k]=1;this.tmp[k]=this.tick+t;return true;}
+ openSky(x,y){const T=this.T;for(let j=y-18;j>0;j-=3)if(T.solid(x,j))return false;return true;}
  leavePile(g){if(g.race!=='bone'||g.raised||this.piles.filter(p=>p.live).length>=14)return;const T=this.T;let x=g.x,y=0,ok=false;for(const o of [0,10,-10,20,-20,30,-30]){const a=g.x+o;if(a<9||a>=T.w-9)continue;let yy=clamp(g.y-8,0,T.h-1),n=0;if(T.solid(a,yy))continue;while(yy<T.h&&!T.solid(a,yy)&&n<56){yy++;n++;}if(yy>=T.h||n>=56||T.m[yy*T.w+a]===7)continue;x=a;y=yy;ok=true;break;}if(!ok)return;const cells=[];for(let j=0;j<7;j++){const hw=8-j;for(let i=-hw;i<=hw;i++){const a=x+i,b=y-1-j;if(a<0||b<0||a>=T.w)continue;const k=b*T.w+a;if(!T.m[k]){T.m[k]=7;T.t[k]=boneCol(a,b);cells.push(k);}}}if(!cells.length)return;T.mark(x-9,y-8,19,9);this.piles.push({x,y,team:g.team,live:1,cells});}
  nearPile(g,r,team){let b=null,bd=r;for(const p of this.piles){if(!p.live||p.team!==team)continue;const d=Math.hypot(p.x-g.x,p.y-g.y);if(d<=bd){bd=d;b=p;}}return b;}
  takePile(p){const T=this.T;p.live=0;for(const k of p.cells)if(T.m[k]===7)T.m[k]=0;T.mark(p.x-9,p.y-8,19,9);}
@@ -72,6 +78,13 @@ class World{
  fire(a){const[k,v]=a.split(':');const N={lowg:'LOW GRAVITY',highg:'HIGH GRAVITY',flood:'THE FLOOD IS RISING',lava:'LAVA IS RISING',dark:'THE LIGHTS GO OUT',wind:'THE WIND PICKS UP',quake:'EARTHQUAKE',fast:'DOUBLE SPEED'};
   if(k==='on'){this.rule[v]=1;this.say(N[v]+'!');this.snd('door');}else if(k==='off'){this.rule[v]=0;}
   else if(k==='rats'){const hs=this.holes.length?this.holes:this.hatches;for(const h of hs)this.spawnRats(h,4);this.say('RATS!');this.snd('stink');}
+  else if(k==='debris'){this.say('ISLAND DEBRIS!');const live=this.gobs.filter(g=>this.alive(g));for(let i=0;i<5;i++){const g=live.length?live[(this.rnd()*live.length)|0]:null,tx=clamp((g?g.x:this.rnd()*this.T.w)+(this.rnd()*160-80|0)|0,8,this.T.w-9);let ty=0;while(ty<this.T.h&&!this.T.solid(tx,ty))ty++;const n=(ty+40)/8;this.ents.push({k:'meteor',rock:1,tx,ty,x:tx-n*1.4,y:-40,wait:30+i*22});}this.snd('rock');}
+  else if(k==='surge'){const o=['lowg','highg','fast'].filter(q=>!this.rule[q]);if(!o.length)return;const q=o[this.rnd()*o.length|0];this.tempRule(q,200);this.surgeT=200;this.say('VORTEX SURGE! '+{lowg:'LOW GRAVITY',highg:'HIGH GRAVITY',fast:'DOUBLE SPEED'}[q]);this.shake=4;this.snd('door');}
+  else if(k==='gale'){if(!this.tempRule('wind',260))return;this.tempRule('gust',260);this.gustDir=this.rnd()<.5?1:-1;this.say('A GALE BLOWS!');this.snd('door');}
+  else if(k==='swoop'){const live=this.gobs.filter(g=>this.alive(g)&&g.s!=='home'&&this.openSky(g.x,g.y)),g=live.length?live[(this.rnd()*live.length)|0]:null,d=this.rnd()<.5?1:-1;this.ents.push({k:'swoop',g,d,x:(g?g.x:this.T.w/2)-d*220,y:-30,ph:0,t:0,c:null});this.say(g?'SOMETHING CIRCLES ABOVE!':'A SHADOW PASSES OVERHEAD');this.snd('stink');}
+  else if(k==='cavein'){this.fire('boulders');this.say('CAVE-IN!');this.shake=6;}
+  else if(k==='tunnelflood'){if(!this.tempRule('flood',160))return;this.say('THE TUNNEL FLOODS!');this.snd('door');}
+  else if(k==='dark'){if(!this.tempRule('dark',300))return;this.say('THE LIGHTS GO OUT!');this.snd('door');}
   else if(k==='meteors'){this.say('METEOR STRIKE!');const live=this.gobs.filter(g=>this.alive(g));for(let i=0;i<5;i++){const g=live.length?live[(this.rnd()*live.length)|0]:null,tx=clamp((g?g.x:this.rnd()*this.T.w)+(this.rnd()*160-80|0)|0,8,this.T.w-9);let ty=0;while(ty<this.T.h&&!this.T.solid(tx,ty))ty++;const n=(ty+40)/8;this.ents.push({k:'meteor',tx,ty,x:tx-n*1.4,y:-40,wait:30+i*22});}this.snd('door');}
   else if(k==='spider'){this.say('GIANT SPIDER!');const live=this.gobs.filter(g=>this.alive(g)),g=live.length?live[(this.rnd()*live.length)|0]:null,x=clamp(g?g.x+(g.dir>0?170:-170):this.T.w>>1,12,this.T.w-13);const m=this.addMob('spider',x,0,g?-g.dir:1);m.wild=1;m.life=620;m.air=0;this.snd('stink');}
   else if(k==='bigquake'){this.say('EARTHQUAKE!');this.rule.quake=1;this.quakeOff=this.tick+150;}
@@ -242,6 +255,10 @@ class World{
   if(e.k==='tongueFx')return--e.l>0;
   if(e.k==='rmine'){if(--e.t>0)return true;T.carveEll(e.x,e.y-6,26,22,e.y-1);for(const g of this.gobs)if(this.alive(g)&&Math.hypot(g.x-e.x,g.y-6-e.y+6)<20)this.kill(g,'boom');for(const m of this.mobs)if(!m.dead&&Math.hypot(m.x-e.x,m.y-e.y)<30)this.hurtFoe(m,4);for(const n of this.nests)if(!n.dead&&Math.hypot(n.x-e.x,n.y-e.y)<38)this.hurtNest(n,5);this.boomFx(e.x,e.y-6);this.snd('boom');this.shake=7;return false;}
   if(e.k==='meteor'){if(e.wait>0){e.wait--;return true;}e.vy=Math.min((e.vy||3)+.5,9);e.y+=e.vy;e.x+=1.4;if(e.y<e.ty)return true;const x=e.tx,y=e.ty;if(y<T.h){T.carveEll(x,y,24,20);this.dust(x,y,18,1.5);}for(const g of this.gobs)if(this.alive(g)&&Math.hypot(g.x-x,g.y-y)<27)this.kill(g,'boom');for(const m of this.mobs)if(!m.dead&&Math.hypot(m.x-x,m.y-y)<27)this.hurtFoe(m,3);for(const n of this.nests)if(!n.dead&&Math.hypot(n.x-x,n.y-y)<34)this.hurtNest(n,3);this.boomFx(x,y-6);this.snd('boom');this.shake=8;return false;}
+  if(e.k==='swoop'){e.t++;const g=e.g;
+   if(e.ph===0){e.x+=e.d*3;e.y=Math.min(e.y+.6,20);if(e.t>50){if(g&&this.alive(g)&&g.s!=='home'&&this.openSky(g.x,g.y))e.ph=1;else{e.ph=2;e.g=null;}}return true;}
+   if(e.ph===1){if(!this.alive(g)||g.s==='home'){e.ph=2;e.g=null;return true;}const dx=g.x-e.x,dy=g.y-12-e.y,l=Math.hypot(dx,dy);if(l<8){e.ph=2;if(g.ward>0||g.big)this.kill(g,'jaws');else{e.c=CLAN[g.team];this.pl[g.team].lost++;g.s='dead';this.float(g.x,g.y-18,'SNATCHED','#eb6f39');this.snd('splat');}e.g=null;return true;}e.x+=dx/l*6;e.y+=dy/l*6;if(e.t>260)e.ph=2;return true;}
+   e.x+=e.d*4;e.y-=3;return e.y>-60;}
   if(e.k==='say'){if(e.g.s==='dead')e.g={...e.g,s:'gone'};return--e.l>0;}
   if(e.k==='ghost'){e.t++;e.y-=.7;e.x=e.x0+Math.sin(e.t*.18)*5;return--e.l>0;}
   if(e.k==='hat'||e.k==='boots'){if(e.vx||e.vy){e.vy+=.28;e.x+=e.vx;e.y+=e.vy;if(e.vy>0&&T.solid(e.x|0,e.y|0)){e.vx=0;e.vy=0;}}return--e.l>0;}

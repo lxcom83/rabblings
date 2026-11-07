@@ -198,7 +198,39 @@ function buildBackdrop(name){const T=THEME[name],[sky,sx]=ditherSky(VW,VH,T.sky)
  else if(name==='caves'){layer(.15,x=>{for(let y=0;y<270;y++)for(let i=0;i<LW;i++){const n=noise(i>>1,y>>1);if(n>.5){x.fillStyle=n>.62?'#1b1d25':'#14171c';x.fillRect(i,y,1,1);}}});
   layer(.3,x=>{for(let i=0;i<7;i++){const a=r()*LW|0,h=70+r()*90,w=26+r()*30;shroom(x,a,240,h,w,'#31353e','#374451','#5483a3');}});
   layer(.5,x=>{ridge(x,240,7,3,'#0d0e12','#475c6c');for(let i=0;i<16;i++){const a=r()*LW|0;shroom(x,a,240,8+r()*16,6+r()*8,'#4b505d',['#494f73','#475c6c','#822b3b'][i%3],'#fff');}for(let i=0;i<40;i++){x.fillStyle='#5483a3';x.fillRect(r()*LW,r()*230,1,1);}});}
+ if(!UNDER_DEF[name])skyLore(sx,name);
  return{sky,L};}
-const BACKDROP={};function backdrop(n){return BACKDROP[n]||(BACKDROP[n]=buildBackdrop(n));}
+// the vortex rising far off and floating islands drifting in every surface sky
+const VORTEX_X={bog:70,marsh:390,garden:80,crypts:420};
+function skyLore(sx,name){const r=rng(name.length*131+7),vx=VORTEX_X[name]||400,base=168;
+ for(let y=0;y<base;y++){const w=3+(base-y)*.075;for(let i=-w|0;i<=w;i++){const t=1-Math.abs(i)/w,band=.6+.4*Math.sin(y*.13+i/w*2.4);if(bayer(vx+i,y)>t*band*.95)continue;sx.fillStyle=t>.72?'#d6b0e6':t>.38?'#9a56ac':'#4e2c5a';sx.fillRect(vx+i,y,1,1);}}
+ for(let j=-26;j<8;j++)for(let i=-40;i<=40;i++){const q=1-Math.hypot(i/40,j/26);if(q<=0||bayer(vx+i,base+j)>q*.5)continue;sx.fillStyle='#3a2440';sx.fillRect(vx+i,base+j,1,1);}
+ const isl=[];for(let n=0,tries=0;n<6&&tries<60;tries++){const x=20+r()*(VW-40),y=26+r()*92,w=8+r()*20;if(Math.abs(x-vx)<w+16)continue;if(name==='bog'&&Math.hypot(x-340,y-120)<w+34)continue;if(name==='marsh'&&Math.hypot(x-120,y-150)<w+40)continue;if(name==='garden'&&Math.hypot(x-380,y-50)<w+30)continue;if(name==='crypts'&&Math.abs(x-240)<70)continue;if(isl.some(o=>Math.abs(o.x-x)<o.w+w+6&&Math.abs(o.y-y)<20))continue;isl.push({x,y,w});n++;}
+ for(const o of isl){const h=o.w*.8+2;for(let j=0;j<h;j++){const hw=o.w/2*Math.pow(1-j/h,.75)+(j%3===1?1:0);sx.fillStyle=j===0?'#3d3644':j<3?'#2e2834':'#231f29';sx.fillRect(Math.round(o.x-hw),Math.round(o.y+j),Math.max(1,Math.round(hw*2)),1);}
+  if(o.w>14){sx.fillStyle='#231f29';const tx=Math.round(o.x-o.w/4+r()*o.w/2);sx.fillRect(tx,o.y-5,1,5);sx.fillRect(tx-2,o.y-4,2,1);sx.fillRect(tx+1,o.y-3,2,1);}}}
+// an underground version of a surface world: a cave in that world's own rock
+const dimHex=(h,f)=>'#'+hex2(h).map(v=>Math.round(v*f).toString(16).padStart(2,'0')).join('');
+function buildCave(name){const T=THEME[name],R=T.ramp.map((h,i)=>dimHex(h,i<2?.75:.62)),[sky]=ditherSky(VW,VH,[R[1],R[1],R[2],R[2],R[1]]),L=[],r=rng(name.length*91+3);
+ const layer=(f,fn)=>{const[c,x]=mk(LW,270);fn(x);L.push({c,f});};
+ layer(.15,x=>{for(let y=0;y<270;y++)for(let i=0;i<LW;i++){const n=noise(i>>1,y>>1);if(n>.58||n<.36){x.fillStyle=n>.58?R[3]:R[0];x.globalAlpha=.55;x.fillRect(i,y,1,1);}}x.globalAlpha=1;});
+ layer(.3,x=>{for(let i=0;i<LW;i+=2){const h=10+Math.abs(wave(i,2.4))*28;x.fillStyle=R[2];x.fillRect(i,0,2,h);}for(let k=0;k<14;k++){const a=r()*LW|0,h=20+r()*50|0;for(let j=0;j<h;j++){const w=Math.max(1,(h-j)/5|0);x.fillStyle=j%5?R[2]:R[3];x.fillRect(a-w,j,w*2,1);}}
+  if(name==='crypts'){for(let row=0;row<4;row++)for(let i=0;i<LW;i+=26){if(r()<.45)continue;const y=70+row*38+(r()*6|0),a=i+(r()*8|0),w=14+(r()*6|0);x.fillStyle=R[3];x.fillRect(a,y,w+4,13);x.fillStyle='#09090a';x.fillRect(a+2,y+2,w,9);if(r()<.7){const sx=a+2+(r()*(w-6)|0);x.fillStyle='#5e5a50';x.fillRect(sx,y+5,5,4);x.fillStyle='#09090a';x.fillRect(sx+1,y+6,1,1);x.fillRect(sx+3,y+6,1,1);}if(r()<.5){x.fillStyle='#4a463e';x.fillRect(a+3,y+9,w-2,1);}}}
+  else if(name==='bog'||name==='marsh'){for(let k=0;k<26;k++){let a=r()*LW|0;const h=20+r()*70|0;for(let j=0;j<h;j++){x.fillStyle='#2a1f18';x.fillRect(a,24+j,1,1);if(j%6===5)a+=r()<.5?1:-1;}}}
+  else if(name==='garden'){for(let k=0;k<10;k++){const a=r()*LW|0,h=30+r()*60|0;x.fillStyle='#55534e';x.fillRect(a,20,1,h);for(let j=0;j<12;j++){const w=j<2||j>9?2:4;x.fillStyle=j%3?'#8a8880':'#6e6c66';x.fillRect(a-w/2,20+h+j,w,1);}}}
+  else if(T.hot){for(let k=0;k<12;k++){let a=r()*LW|0,b=40+r()*170|0;for(let q=0;q<18;q++){x.fillStyle=q%3?T.cap[0]:T.cap[1];x.fillRect(a,b,2,2);a+=r()<.5?2:-1;b+=2;}}}
+  else{for(let k=0;k<16;k++){const a=r()*LW|0,h=12+r()*30|0;for(let j=0;j<h;j++){const w=Math.max(1,(h-j)/4|0);x.fillStyle=j<2?T.cap[0]:T.cap[2];x.fillRect(a-w,j+18,w*2,1);}}}});
+ layer(.5,x=>{ridge(x,238,8,3.3,R[0],T.cap[2]);for(let i=0;i<50;i++){x.fillStyle=T.amb;x.globalAlpha=.6;x.fillRect(r()*LW,r()*230,1,1);}x.globalAlpha=1;});
+ return{sky,L};}
+// a surface version of an underground world: the defended way in, under the open sky
+function buildEntrance(name){const T=THEME[name],R=T.ramp,[sky,sx]=ditherSky(VW,VH,['#121318','#1e1f27','#2b2226','#6a3328','#a5552c']),L=[],r=rng(name.length*57+11);skyLore(sx,name);
+ const layer=(f,fn)=>{const[c,x]=mk(LW,270);fn(x);L.push({c,f});};
+ layer(.12,x=>ridge(x,176,24,1.6,'#221a1d'));
+ layer(.28,x=>{ridge(x,150,40,2.2,R[2],R[4]);for(let i=0;i<3;i++){const a=60+i*170,b=212;
+   if(name==='halls'){x.fillStyle=R[4];x.fillRect(a-30,b-66,60,66);x.fillStyle=R[5];x.fillRect(a-30,b-66,60,4);x.fillStyle='#070708';x.fillRect(a-14,b-44,28,44);x.fillStyle=T.amb;x.globalAlpha=.5;x.fillRect(a-10,b-36,20,36);x.globalAlpha=1;for(const s of [-26,18]){x.fillStyle=R[3];x.fillRect(a+s,b-58,8,58);}}
+   else if(name==='sewers'){x.fillStyle=R[4];x.beginPath();x.arc(a,b-20,26,0,TAU);x.fill();x.fillStyle='#070708';x.beginPath();x.arc(a,b-20,19,0,TAU);x.fill();x.fillStyle=T.haz[1];x.fillRect(a-4,b-4,8,20);}
+   else{x.fillStyle='#070708';x.beginPath();x.arc(a,b,24,Math.PI,0);x.fill();x.fillRect(a-24,b,48,20);x.fillStyle=T.amb;x.globalAlpha=.35;x.beginPath();x.arc(a,b+6,16,Math.PI,0);x.fill();x.globalAlpha=1;if(name==='mine'){x.fillStyle='#3c2f26';x.fillRect(a-27,b-26,6,40);x.fillRect(a+21,b-26,6,40);x.fillRect(a-30,b-30,60,6);}}}});
+ layer(.5,x=>{ridge(x,236,8,4.4,'#141216','#2b2226');for(let i=0;i<LW;i+=5){if((i*7)%23<9)continue;const h=6+(i*13)%7;x.fillStyle='#1d1a1e';x.fillRect(i,236-h,2,h);x.fillRect(i,236-h-1,1,1);}for(let k=0;k<3;k++){const a=40+k*170+r()*40|0;x.fillStyle='#1d1a1e';x.fillRect(a,206,1,30);x.fillStyle='#8e897a';x.fillRect(a-2,202,5,4);x.fillStyle='#070708';x.fillRect(a-1,203,1,1);x.fillRect(a+1,203,1,1);}});
+ return{sky,L};}
+const BACKDROP={};function backdrop(n,under){const u=isUnder(n,under),nat=!!UNDER_DEF[n],key=n+(u?'_u':'_s');return BACKDROP[key]||(BACKDROP[key]=u===nat?buildBackdrop(n):u?buildCave(n):buildEntrance(n));}
 function drawBackdrop(C,b,vx,vw,camX,camY,maxY){C.drawImage(b.sky,0,0,vw,VIEWH,vx,0,vw,VIEWH);
  for(const l of b.L){const off=((camX*l.f)%LW+LW)%LW,oy=Math.round(-camY*l.f*.5+(maxY*l.f*.25));let dx=-Math.round(off);while(dx<vw){C.drawImage(l.c,vx+dx,oy-10);dx+=LW;}}}

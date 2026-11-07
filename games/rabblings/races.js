@@ -40,6 +40,9 @@ const RACES={
   clan({name:'REDCAP',glow:'#c8d07a',skin:'#e3d4b2',skinD:'#9a8966',skinL:'#f9eac7',hood:'#a33b2d',hoodD:'#66231b',tun:'#c9b991',tunD:'#7e715a',boot:'#524736',ui:'#ec5a3a',head:SHROOM,headO:SHROOMO,perk:{skill:'puff'},perkT:'+1 SPORE PUFF PER MAP',seed:14}),
   clan({name:'BLACKSPORE',glow:'#c8d07a',skin:'#7e818e',skinD:'#5d5f64',skinL:'#8b90a3',hood:'#2e3038',hoodD:'#1b1d23',tun:'#53565f',tunD:'#383a41',boot:'#25262b',ui:'#5f6b99',head:SHROOM,headO:SHROOMO,perk:{heal:1.1},perkT:'BUNCHED MORALE HEALS 10% MORE',seed:15})]}};
 const RK=Object.keys(RACES);for(const k of RK)if(!RACES[k].swap)RACES[k].swap={};
+// worlds whose own backdrop is underground. Any map can override with its Setting
+const UNDER_DEF={mine:1,halls:1,sewers:1,caves:1};
+function isUnder(theme,under){return under===undefined||under===null?!!UNDER_DEF[theme]:!!under;}
 const WORLDS=[['bog','GOBLIN BOG'],['mine','GOBLIN MINES'],['marsh','DROWNED MARSH'],['cinder','CINDER FORGE'],['garden','GIANT GARDEN'],['halls','DEEP HALLS'],['sewers','CLOCKWORK SEWERS'],['crypts','THE CRYPTS'],['caves','GLOWING CAVES'],['forge','WAR FORGE'],['frost','FROST CAVES']];
 const artCache=new Map();
 // grimdark homes: dull the cheerful colours, then add stakes and a skull post

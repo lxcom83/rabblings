@@ -7,6 +7,11 @@ JS='''()=>{const G=__GS,o={};const l=G.WAR_LEVELS[0];
  {const w=new G.World({...l,foes:[],rate:20},{quiet:true});for(let i=0;i<200;i++)w.step();w.fire('spider');const m=w.mobs.at(-1);let air=0,n=0;for(;n<700&&!m.dead;n++){w.step();if(m.air)air++;}o.spider={jumpTicks:air,ended:n,lost:w.pl[0].lost,clear:w.isClear()};}
  // meteor actually carves and kills
  {const w=new G.World({...l,foes:[]},{quiet:true});for(let i=0;i<150;i++)w.step();const before=w.T.m.reduce((a,b)=>a+(b?1:0),0);w.fire('meteors');for(let i=0;i<260;i++)w.step();o.meteor={carved:before-w.T.m.reduce((a,b)=>a+(b?1:0),0),lost:w.pl[0].lost};}
+ // surface and underground maps draw from different wildcard sets, and every new wildcard does its job
+ {const set=u=>{const w=new G.World({...l,foes:[],under:u},{quiet:true,diff:3}),seen={},orig=w.fire.bind(w);w.fire=a=>{seen[a]=1;orig(a)};for(let i=0;i<20000&&!w.over;i++){w.step();if(w.over){w.over=0;}if(w.gobs.length>200)break;}return Object.keys(seen).sort();};o.sets={surface:set(0),under:set(1)};
+  const one=k=>{const w=new G.World({...l,foes:[],rate:20},{quiet:true});for(let i=0;i<220;i++)w.step();const lost=w.pl[0].lost;w.fire(k);const on=Object.keys(w.rule).filter(q=>w.rule[q]);for(let i=0;i<420;i++)w.step();return{on,off:Object.keys(w.rule).filter(q=>w.rule[q]).length===0,lost:w.pl[0].lost-lost};};
+  o.each={};for(const k of ['debris','surge','swoop','gale','cavein','tunnelflood','dark'])o.each[k]=one(k);
+  const w=new G.World({...l,foes:[],rules:['lowg']},{quiet:true});w.fire('surge');for(let i=0;i<300;i++)w.step();o.keepsMapRule=!!w.rule.lowg;}
  // difficulty values
  o.diff=G.DIFFS.map((d,i)=>{const w=new G.World(l,{quiet:true,diff:i});return [d.n,w.need,Math.round(w.time/25),w.wildOn];});
  // Skeletons: water, fire, construct on trap

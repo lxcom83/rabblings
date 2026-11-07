@@ -84,7 +84,7 @@ const Ed={map:null,T:null,S:null,tool:'paint',mat:1,size:7,sz:1,obj:'hatch',stam
  zoom(){const c=this.w(EDX+EDW/2,EDY+EDH/2);this.z=this.z===1?.5:this.z===.5?.25:1;this.cx=c[0]-EDW/2/this.z;this.cy=c[1]-EDH/2/this.z;this.clampCam();sfx('move');},
  setTool(t){this.tool=t;this.sel=null;sfx('move');},
  draw(){const C=ctx,m=this.map;hits.length=0;C.fillStyle='#0b0812';C.fillRect(0,0,VW,VH);
-  C.save();C.beginPath();C.rect(EDX,EDY,EDW,EDH);C.clip();C.translate(0,EDY);if(this.bg)drawBackdrop(C,backdrop(m.theme),EDX,EDW,this.cx|0,this.cy|0,Math.max(0,m.h-VIEWH));else{C.fillStyle='#1c1428';C.fillRect(EDX,0,EDW,EDH);}C.restore();
+  C.save();C.beginPath();C.rect(EDX,EDY,EDW,EDH);C.clip();C.translate(0,EDY);if(this.bg)drawBackdrop(C,backdrop(m.theme,m.setting==='surface'?0:m.setting==='under'?1:undefined),EDX,EDW,this.cx|0,this.cy|0,Math.max(0,m.h-VIEWH));else{C.fillStyle='#1c1428';C.fillRect(EDX,0,EDW,EDH);}C.restore();
   C.save();C.beginPath();C.rect(EDX,EDY,EDW,EDH);C.clip();C.translate(EDX,EDY);C.scale(this.z,this.z);C.translate(-Math.round(this.cx),-Math.round(this.cy));this.drawMapLayer(C);C.restore();
   // top bar
   C.fillStyle='#3a2e44';C.fillRect(0,0,VW,EDY);C.fillStyle='#120a18';C.fillRect(0,EDY-1,VW,1);let x=1;const B=(w,l,fn,o={})=>{this.tb(C,x,1,w,14,l,o.on,fn,o.col);x+=w+1;};
@@ -116,7 +116,7 @@ const Ed={map:null,T:null,S:null,tool:'paint',mat:1,size:7,sz:1,obj:'hatch',stam
    if(k==='terrain'){ED_DRAW.forEach(([t,n],i)=>cell(i,n,this.tool===t,()=>this.setTool(t)));y+=27;MATS.forEach(([v,n],i)=>cell(i,n,this.mat===v,()=>{this.mat=v;if(this.tool==='erase'||!ED_DRAW.some(a=>a[0]===this.tool))this.tool='paint';sfx('move');},3));y+=14;SIZES.forEach(([v,n],i)=>cell(i,n,this.size===v,()=>{this.size=v;sfx('move');},4));y+=15;}
    else if(k==='decor'){ED_KINDS.forEach(([q,n],i)=>{cell(i,n,this.dk===q,()=>{this.dk=q;sfx('move');},3);hits[hits.length-1].tip={paint:'Art painted over the ground.',solid:'Art that adds real ground.',prop:'Art behind the troops.'}[q];});y+=13;cell(0,'IMAGES',this.dk==='img',()=>{this.dk='img';sfx('move');});hits[hits.length-1].tip='Your own imported pictures.';cell(1,'REMOVE',this.tool==='undecor',()=>this.setTool('undecor'));hits[hits.length-1].tip='Click decor on the map to remove it.';y+=13;
     if(this.dk==='img'){const L=this.map.pics||[];cell(0,'ADD',false,()=>this.pickImage());hits[hits.length-1].tip='Turn a picture into a stamp or a whole map.';L.slice(0,5).forEach((p,i)=>{cell(i+1,p.name||'IMAGE '+(i+1),this.tool==='pic'&&this.pic===i,()=>{this.pic=i;this.setTool('pic');});hits[hits.length-1].prev='p:'+i;});}
-    else{const L=decorKinds(this.map.theme).filter(q=>DECOR[q].kind===this.dk);L.slice(0,6).forEach((q,i)=>{cell(i,DECOR[q].n,this.tool==='decor'&&this.dec===q,()=>{this.dec=q;this.setTool('decor');});hits[hits.length-1].prev='d:'+q;});}y+=39;}
+    else{const L=decorKinds(this.map.theme).filter(q=>DECOR[q].kind===this.dk);const pages=L.length>6?Math.ceil(L.length/5):1,pg=(this.dpage||0)%pages,V=pages>1?L.slice(pg*5,pg*5+5):L;V.forEach((q,i)=>{cell(i,DECOR[q].n,this.tool==='decor'&&this.dec===q,()=>{this.dec=q;this.setTool('decor');});hits[hits.length-1].prev='d:'+q;});if(pages>1){cell(5,'MORE '+(pg+1)+'/'+pages,false,()=>{this.dpage=pg+1;sfx('move');});hits[hits.length-1].tip='Show more decor.';}}y+=39;}
    else if(k==='shapes'){const K=Object.keys(STAMPS);K.forEach((s,i)=>{cell(i,STAMPS[s].n,this.tool==='stamp'&&this.stamp===s,()=>{this.stamp=s;this.setTool('stamp');});hits[hits.length-1].prev='s:'+s;});y+=Math.ceil(K.length/2)*13+2;}
    else{items.forEach((o,i)=>{cell(i,(PROFILE.objects.find(a=>a[0]===o)||['',o])[1],this.tool==='place'&&this.obj===o,()=>{this.obj=o;this.setTool('place');});hits[hits.length-1].prev=o;});y+=Math.ceil(items.length/2)*13+2;}}
   const py=VH-53;txt(C,'MAP SETUP',EDX/2-1,py+1,'#ffe07a',{c:1});y=py+11;ED_PAGES.forEach(([k,l],i)=>cell(i,l,this.panel===k,()=>{this.panel=k;sfx('select');}));},
@@ -146,6 +146,7 @@ const Ed={map:null,T:null,S:null,tool:'paint',mat:1,size:7,sz:1,obj:'hatch',stam
  pBasics(C,lx,y,X,Y,W){const m=this.map,vx=lx+60,row=(l,f)=>{txt(C,l,lx,y+3,'#e0d8e8');f(vx,y);y+=17;};
   row('NAME',(x,yy)=>button(C,x,yy,150,13,m.name,()=>this.rename()));row('DESIGNER',(x,yy)=>button(C,x,yy,150,13,m.by||'ADD YOUR NAME',()=>this.designer()));
   row('WORLD',(x,yy)=>this.dd(C,x,yy,150,m.theme,WORLDS,t=>{m.theme=t;this.build();this.dirty=true;}));
+  row('SETTING',(x,yy)=>this.dd(C,x,yy,150,m.setting||'auto',[['auto',UNDER_DEF[m.theme]?'AUTO: UNDERGROUND':'AUTO: SURFACE'],['surface','SURFACE'],['under','UNDERGROUND']],t=>{m.setting=t;this.dirty=true;}));
   row('MAP TYPE',(x,yy)=>this.dd(C,x,yy,150,m.mode,ED_MODES,k=>this.setMode(k)));
   row('STYLE',(x,yy)=>this.dd(C,x,yy,150,m.style,ED_STYLES,k=>{m.style=k;this.dirty=true;}));
   if(m.mode==='solo')row('RACE',(x,yy)=>this.dd(C,x,yy,150,m.race||'goblin',RK.filter(k=>RACES[k].play).map(k=>[k,RACES[k].n]),k=>{m.race=k;this.touch();}));

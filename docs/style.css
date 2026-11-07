@@ -82,3 +82,27 @@ footer{padding-block:32px;background:#120a18;border-top:3px solid var(--line);co
 footer .wrap{display:flex;flex-direction:column;gap:6px}
 @media (max-width:760px){.show{grid-template-columns:minmax(0,1fr)}.nav a{font-size:13px;padding:5px 7px}}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.trooper,.sprite{animation:none}.trooper{left:calc(var(--i)*9%)}}
+
+/* account */
+.acct-btn{display:block;padding:6px 10px;border:2px solid var(--gold);background:#3a2a18;color:var(--gold);font:700 14px Silkscreen,monospace;cursor:pointer;max-width:16em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acct-btn:hover{background:#4a3620}
+.acct{width:min(460px,calc(100vw - 32px));max-height:calc(100vh - 32px);overflow:auto;padding:20px;background:var(--panel);color:var(--ink);border:3px solid var(--line);box-shadow:0 6px 0 #120a18}
+.acct::backdrop{background:rgba(6,4,10,.75)}
+.acct>div{display:flex;flex-direction:column;gap:14px}
+.acct p{margin:0}
+.acct-head{flex-direction:row!important;align-items:center;justify-content:space-between;margin-bottom:14px}
+.acct-head h2{font-size:24px}
+.acct-x{width:44px;height:44px;background:var(--panel2);color:var(--ink);border:2px solid var(--line);font:700 16px Silkscreen,monospace;cursor:pointer}
+.acct-form{display:flex;flex-direction:column;gap:8px}
+.acct-form label{font:700 14px Silkscreen,monospace;color:var(--dim)}
+.acct-form input{font:inherit;font-size:18px;padding:10px 12px;background:#0b0812;color:var(--ink);border:2px solid var(--line);min-width:0}
+.acct-form input:focus{outline:3px solid var(--gold);outline-offset:1px}
+.acct .btn{font-size:16px;padding:12px 18px;text-align:center}
+.acct .btn.go{font-size:18px;padding:12px 18px}
+.acct-row{display:flex;flex-wrap:wrap;gap:10px}
+.acct-danger{color:var(--red);border-color:#8a3a30}
+.acct-confirm{display:flex;flex-direction:column;gap:10px;padding:12px;border:2px dashed #8a3a30}
+.acct-msg{min-height:1.5em;color:var(--green)}
+.acct-msg.bad{color:var(--red)}
+.acct-small{font-size:16px;color:var(--dim);margin-top:14px!important}
+.acct [hidden]{display:none!important}
