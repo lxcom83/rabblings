@@ -22,3 +22,12 @@
  // everyone joins the march
  var m=$('march'),n=0;R.forEach(function(r){[0,1].forEach(function(k){var t=document.createElement('div');t.className='trooper';t.style.backgroundImage='url(img/walk-'+r.k+'-'+k+'.png)';var dur=20+(n%5)*2.2;t.style.setProperty('--t',dur+'s');t.style.setProperty('--d',-(n*2.9%dur).toFixed(1)+'s');t.style.setProperty('--i',n);m.appendChild(t);n++;});});
 })();
+
+// Install button: shows when the browser can install the game, or a tip on iPhone and iPad
+(function(){var b=document.getElementById('install'),tip=document.getElementById('install-tip'),ev=null;if(!b||!tip)return;
+ var solo=matchMedia('(display-mode: standalone)').matches||navigator.standalone;if(solo)return;
+ addEventListener('beforeinstallprompt',function(e){e.preventDefault();ev=e;b.hidden=false;tip.hidden=false;});
+ addEventListener('appinstalled',function(){ev=null;b.hidden=true;tip.textContent='Installed. Rabblings now opens from your desktop or home screen, even offline.';});
+ b.addEventListener('click',function(){if(!ev)return;ev.prompt();ev.userChoice.then(function(r){if(r.outcome==='accepted'){b.hidden=true;}ev=null;});});
+ if(/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)){tip.textContent='Play offline: tap Share, then Add to Home Screen.';tip.hidden=false;}
+})();

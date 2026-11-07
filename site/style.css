@@ -106,3 +106,5 @@ footer .wrap{display:flex;flex-direction:column;gap:6px}
 .acct-msg.bad{color:var(--red)}
 .acct-small{font-size:16px;color:var(--dim);margin-top:14px!important}
 .acct [hidden]{display:none!important}
+
+.install-tip{margin:0;font-size:15px;color:var(--ink);opacity:.85}
