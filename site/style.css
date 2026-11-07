@@ -26,6 +26,7 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offse
 .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(11,8,18,.3),rgba(11,8,18,.1) 50%,rgba(11,8,18,.55))}
 .hero .wrap{position:relative;z-index:1;width:100%;padding-block:32px 112px;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center}
 .logo{width:min(660px,100%);height:auto}
+.sub-name{margin:0;font:700 clamp(24px,5vw,38px)/1.1 Silkscreen,monospace;color:var(--ink);text-shadow:2px 2px 0 #120a18;letter-spacing:.04em}
 .tag{font:700 clamp(20px,4vw,30px)/1.2 Silkscreen,monospace;color:var(--gold);text-shadow:2px 2px 0 #120a18;text-wrap:balance;margin:0}
 .lead{max-width:34em;text-shadow:1px 1px 0 #120a18;background:rgba(11,8,18,.62);padding:8px 14px}
 .cta{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:8px}

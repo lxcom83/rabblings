@@ -3,14 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Rabblings: Tiny troops. Big trouble.</title>
+<title>Rabblings: Marching Orders</title>
 <meta name="description" content="A free 16-bit style strategy game. Boss around tiny rabbles of goblins, frogs, imps and more, or sabotage a friend in 2 player.">
-<meta property="og:title" content="Rabblings">
+<meta property="og:title" content="Rabblings: Marching Orders">
 <meta property="og:description" content="Tiny troops. Big trouble. A free 16-bit style strategy game with 8 races and a map builder.">
 <meta property="og:image" content="https://rabblings.com/img/logo.png">
 <link rel="icon" href="img/home-goblin-0.png">
 <link rel="preload" href="fonts/silkscreen-700.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#120a18">
 </head>
 <body>
 <header class="top"><div class="wrap">
@@ -21,6 +23,7 @@
 <div class="hero">
  <div class="wrap">
   <h1 style="margin:0"><img class="logo" src="img/logo.png" width="330" height="100" alt="Rabblings"></h1>
+  <p class="sub-name">Marching Orders</p>
   <p class="tag">Tiny troops. Big trouble.</p>
   <p class="lead">Lead a marching rabble of goblins, frogs, imps and worse. Dig, build and blow your way home, or sabotage a friend.</p>
   <div class="cta"><a class="btn go" href="play/">PLAY NOW</a><a class="btn" href="builder/">MAP BUILDER</a></div>
@@ -55,7 +58,7 @@
  <div class="grid">
   <article class="card"><h3>Guide the march</h3><p>Your troops walk on their own. Hand out skills at the right moment and get enough of them home.</p></article>
   <article class="card"><h3>2 player sabotage</h3><p>Race a friend on one screen. Steal their troops, wreck their route and enjoy the shouting.</p></article>
-  <article class="card"><h3>Fight back</h3><p>Arm your rabble with swords and bows, then clear nests, skeletons and golems.</p></article>
+  <article class="card"><h3>Swords and spells</h3><p>Arm your rabble, clear nests and golems, and save rare magic for when it counts. Campaign mana is gone once spent.</p></article>
   <article class="card"><h3>Grumpy little morale</h3><p>Lose too many and your troops answer back, refuse orders or sit down in protest.</p></article>
   <article class="card"><h3>Build your own maps</h3><p>Paint terrain or generate a starting point, add traps and triggers, then share the code.</p></article>
   <article class="card"><h3>Classic mode</h3><p>Want the pure old-school puzzle? Switch off the morale and the chatter.</p></article>
@@ -65,6 +68,9 @@
 <section class="upd" id="updates"><div class="wrap">
  <h2>Latest updates</h2>
  <ul class="log">
+  <li><time datetime="2026-11">Nov 2026</time><span>The first Rabblings game now has a name: Marching Orders.</span></li>
+  <li><time datetime="2026-11">Nov 2026</time><span>Spells arrive, and the game now works offline after your first visit.</span></li>
+  <li><time datetime="2026-11">Nov 2026</time><span>Decor stamps and image import for map builders.</span></li>
   <li><time datetime="2026-11">Nov 2026</time><span>rabblings.com is live, with the game and map builder on their own pages.</span></li>
   <li><time datetime="2026-11">Nov 2026</time><span>New map builder with a side menu, setup pages, object previews and tooltips.</span></li>
   <li><time datetime="2026-11">Nov 2026</time><span>Six new terrain layouts, from Floating Islands to Twin Peaks.</span></li>
@@ -73,11 +79,12 @@
 </div></section>
 </main>
 <footer><div class="wrap">
- <p>Rabblings is free to play and source available, by Luke83.</p>
+ <p>Rabblings: Marching Orders is free to play and source available, by Luke83.</p>
  <p><a href="https://github.com/lxcom83/rabblings">Source on GitHub</a> · <a href="https://github.com/lxcom83/rabblings/blob/main/LICENSE.md">Licence</a></p>
  <p>Your saved maps stay in your browser unless you share them.</p>
 </div></footer>
 <script src="races.js"></script>
 <script src="site.js"></script>
+<script>if('serviceWorker'in navigator)addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});</script>
 </body>
 </html>

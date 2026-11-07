@@ -1,6 +1,6 @@
-# Rabblings
+# Rabblings: Marching Orders
 
-A free, source available, 16-bit style game. Boss around tiny rabbles of goblins, frogs, imps and more. Dig, build and blow your way home, or sabotage a friend.
+The first game in the Rabblings series. A free, source available, 16-bit style game. Boss around tiny rabbles of goblins, frogs, imps and more. Dig, build and blow your way home, or sabotage a friend.
 
 Everything is hand-made in code: pixel art, FM music and gibberish voices. There are no dependencies to run the game.
 
@@ -9,7 +9,7 @@ Everything is hand-made in code: pixel art, FM music and gibberish voices. There
 | Folder | What it holds |
 | --- | --- |
 | `kit/` | Shared code for any game: screen, font, audio, voices, input, buttons, pop-up box |
-| `maps/` | Shared map code: terrain, shapes, terrain generators, map format, share codes, storage, NeoLemmix import |
+| `maps/` | Shared map code: terrain, shapes, decor, terrain generators, map format, share codes, storage, NeoLemmix import |
 | `games/rabblings/` | The game: engine, levels, races, art, and `profile.js`, which tells the builder about this game |
 | `builder/` | The map builder |
 | `site/` | The website home page |
@@ -29,6 +29,10 @@ This writes `docs/play/`, `docs/builder/` and the home page, plus `build/rabblin
 
 To try the website locally, run `python3 -m http.server --directory docs`. The game and builder share saved maps because they live on the same site.
 
+## Offline
+
+After one visit, `docs/sw.js` keeps the home page, game and builder working offline. It tries the network first, so players get updates when they are online. `build.py` writes its file list and version.
+
 ## Tests
 
 Run these from the repo root after `python3 build.py`, for example `python3 tests/races.py`. They need Python Playwright with Chromium. Some reuse the `run.html` that `tests/races.py` writes, so run that one first. `tests/imp3.py` takes your own level pack and NeoLemmix zip as arguments, and `tests/oldmaps.py` needs an older build to compare against.
@@ -38,6 +42,7 @@ Run these from the repo root after `python3 build.py`, for example `python3 test
 - Each map records its format version (`fmt`), game profile (`game`) and generator version (`gen`).
 - Objects have a `uid`, and `link` can point one object at another. The builder has no link tool yet.
 - Maps built from `['G', type, seed]` regenerate their terrain, so never change an existing terrain type. Add a new one.
+- `['D', name, x, y, flip, size]` places decor, and `['I', picture, x, y, flip, material]` places a picture from `m.pics`.
 - Older maps and GS1 share codes upgrade automatically, and their proofs stay valid.
 
 ## Adding another game

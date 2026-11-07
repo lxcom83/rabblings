@@ -1,0 +1,26 @@
+// Rabblings decor. kind: paint recolours ground, solid adds ground, prop sits behind the troops. in: worlds it belongs to
+const BOG=['bog','marsh','garden','caves'],FORGE=['forge','cinder','halls','sewers','mine'];
+const DECOR={
+ rocks:{n:'ROCKS',kind:'paint',w:44,h:26,art(P){for(const[x,y,r]of [[8,16,7],[22,10,8],[35,17,7],[20,21,5]]){for(let j=-r;j<=r;j++)for(let i=-r;i<=r;i++)if(i*i+j*j*1.5<=r*r)P(i+j<-r*.5?'#5f5f62':i+j>r*.6?'#303133':'#474749',x+i,y+j);}}},
+ ore:{n:'ORE',kind:'paint',w:40,h:24,art(P){for(const[x,y]of [[4,18],[10,14],[15,16],[20,10],[26,11],[31,6],[36,4]]){P('#2d2323',x-1,y-1,5,4);P('#c09629',x,y,3,2);P('#bdac5d',x,y,1,1);}}},
+ bones:{n:'BONES',kind:'paint',w:44,h:24,art(P){P('#96927f',4,6,10,8);P('#96927f',6,14,6,3);P('#121010',6,8,2,3);P('#121010',10,8,2,3);for(let k=0;k<4;k++){P('#96927f',20+k*5,8,2,12);P('#6f6e65',20+k*5,18,2,2);}P('#96927f',18,6,20,2);}},
+ bricks:{n:'BRICKS',kind:'paint',w:48,h:30,art(P){for(let j=0;j<5;j++)for(let i=-1;i<5;i++){const x=i*12+(j%2?6:0),y=j*6;if((i*7+j*3)%5===0)continue;P('#2d2323',x,y,12,6);P(j%2?'#603e33':'#6c4a3c',x+1,y+1,10,4);P('#815d4c',x+1,y+1,10,1);}}},
+ roots:{n:'ROOTS',kind:'paint',in:BOG,w:40,h:34,art(P){const[a,b]=['#442f21','#5c422c'];let x=20;for(let y=0;y<34;y++){P(a,x,y,2,1);if(y%3===0)x+=y%2?1:-1;if(y%7===3){for(let k=1;k<10;k++)P(b,x+(y%2?k:-k),y+(k>>1),1,1);}}}},
+ moss:{n:'MOSS',kind:'paint',in:BOG,w:44,h:22,art(P){for(let j=0;j<22;j++)for(let i=0;i<44;i++){const a=(i-22)/22,b=(j-11)/11;if(a*a+b*b<1&&(i*7+j*13)%5<3)P((i+j)%3?'#484e38':'#5e6345',i,j);}}},
+ embers:{n:'EMBERS',kind:'paint',in:FORGE,w:42,h:28,art(P){let x=4,y=4;for(let k=0;k<30;k++){P(k%3?'#dd5d16':'#e9b61e',x,y,2,1);x+=1;y+=k%4===1?1:k%7===5?-1:0;if(k%9===4){for(let q=1;q<6;q++)P('#d14615',x,y+q,1,1);}}}},
+ plate:{n:'PLATE',kind:'paint',in:FORGE,w:36,h:26,art(P){P('#1a1b1c',0,0,36,26);P('#3c3d3f',1,1,34,24);P('#4d4e51',1,1,34,1);for(const[x,y]of [[3,3],[31,3],[3,21],[31,21]]){P('#767c85',x,y,2,2);}}},
+ pillar:{n:'PILLAR',kind:'solid',w:20,h:64,art(P){P('#555557',2,0,16,6);P('#6b6c6f',2,0,16,1);for(let j=6;j<58;j++){P('#444547',4,j,12,1);P('#58585b',5,j,3,1);P('#343537',14,j,2,1);}P('#555557',1,58,18,6);}},
+ boulder:{n:'BOULDER',kind:'solid',w:36,h:22,art(P){for(let j=0;j<22;j++)for(let i=0;i<36;i++){const a=(i-18)/18,b=(j-22)/22;if(a*a+b*b<1)P(i+j<20?'#626366':i>24?'#343537':'#4c4c4e',i,j);}}},
+ crystal:{n:'CRYSTAL',kind:'solid',w:28,h:32,art(P){for(const[x,t,w]of [[3,14,6],[10,0,8],[19,9,6]])for(let j=t;j<32;j++){const n=Math.min(w,1+(j-t)>>0);P('#4c5f71',x+(w-n>>1),j,n,1);P('#6f95b5',x+(w-n>>1),j,1,1);}}},
+ stump:{n:'STUMP',kind:'solid',mat:3,in:BOG,w:32,h:22,art(P){P('#503723',3,6,26,16);P('#684d33',0,18,32,4);P('#a47c44',3,2,26,5);P('#684d33',8,3,16,3);P('#a47c44',12,4,8,1);for(let i=5;i<27;i+=5)P('#38261a',i,8,1,12);}},
+ log:{n:'LOG',kind:'solid',mat:3,in:BOG,w:60,h:14,art(P){P('#503723',0,1,52,13);P('#684d33',0,1,52,2);P('#38261a',0,12,52,2);P('#a47c44',50,0,10,14);P('#684d33',53,3,4,8);}},
+ anvil:{n:'ANVIL',kind:'solid',mat:2,in:FORGE,w:32,h:20,art(P){P('#313234',4,0,26,6);P('#505154',4,0,26,1);P('#313234',0,1,5,3);P('#27282a',12,6,10,8);P('#313234',7,14,20,6);}},
+ crate:{n:'CRATE',kind:'solid',mat:3,in:FORGE,w:22,h:22,art(P){P('#5c422c',0,0,22,22);P('#7f5f3b',0,0,22,2);P('#7f5f3b',0,20,22,2);P('#7f5f3b',0,0,2,22);P('#7f5f3b',20,0,2,22);for(let k=0;k<18;k++)P('#442f21',2+k,2+k,2,1);}},
+ sign:{n:'SIGN',kind:'prop',w:20,h:24,art(P){P('#503723',9,8,3,16);P('#7f5f3b',0,0,20,11);P('#503723',0,10,20,1);P('#38261a',3,3,14,1);P('#38261a',3,6,10,1);}},
+ torch:{n:'TORCH',kind:'prop',w:8,h:26,art(P){P('#503723',3,8,2,18);P('#dd5d16',1,3,6,6);P('#e9b61e',2,1,4,6);P('#bdac5d',3,3,2,3);}},
+ tomb:{n:'TOMB',kind:'prop',w:18,h:24,art(P){P('#444547',2,4,14,20);P('#444547',4,1,10,3);P('#5f5f62',4,1,10,1);P('#242426',8,7,2,9);P('#242426',5,10,8,2);}},
+ reeds:{n:'REEDS',kind:'prop',in:BOG,w:16,h:28,art(P){for(const[x,t]of [[3,8],[8,2],[12,10]]){P('#4a4e38',x,t,1,28-t);P('#503723',x-1,t-2,3,7);}}},
+ tree:{n:'TREE',kind:'prop',in:BOG,w:40,h:48,art(P){const c='#141011';P(c,18,16,5,32);for(const[x,y,d]of [[20,24,-1],[21,18,1],[20,12,-1]])for(let k=0;k<14;k++)P(c,x+k*d,y-(k>>1),2,1);P(c,19,6,2,12);}},
+ gear:{n:'GEAR',kind:'prop',in:FORGE,w:36,h:36,art(P){for(let j=0;j<36;j++)for(let i=0;i<36;i++){const x=i-17.5,y=j-17.5,d=Math.hypot(x,y),t=Math.cos(Math.atan2(y,x)*8)>.2;if(d<(t?18:14)&&d>5)P((i+j)%2||d>12?'#453b2c':'#554937',i,j);}}},
+ chain:{n:'CHAIN',kind:'prop',in:FORGE,w:6,h:56,art(P){for(let j=0;j<56;j+=6){P('#484a4c',1,j,4,4);P('#1a1b1c',2,j+1,2,2);}}},
+ banner:{n:'BANNER',kind:'prop',in:FORGE,w:18,h:42,art(P){P('#242426',0,0,18,2);P('#7d2b23',2,2,14,34);P('#a33b2d',2,2,14,1);for(let i=0;i<7;i++)P('#7d2b23',2+i,36,14-i*2,1+i);P('#e9b61e',6,10,6,10);}}};
