@@ -23,31 +23,55 @@ async function zipEntries(file){const size=file.size,tail=Math.min(size,66000),b
  return out;}
 
 // everything the player has given us this session, kept in memory only
-const ImpFiles={styles:{},levels:[],names:[],
+const ImpFiles={styles:{},levels:[],names:[],nxmi:{},plist:null,
  note(p,read,src){p=p.replace(/\\/g,'/');const s=p.match(/(?:^|\/)styles\/([^\/]+)\/(terrain|objects)\/([^\/]+)\.(png|nxmt|nxmo)$/i);
   if(s){this.styles[(s[1]+'/'+s[2]+'/'+s[3]+'.'+s[4]).toLowerCase()]=read;return;}
-  if(/\.nxlv$/i.test(p)){const seg=p.split('/');seg.pop();let i=seg.findIndex(a=>a.toLowerCase()==='levels');const top=i>=0&&seg[i+1]?seg[i+1]:seg[0]||src;this.levels.push({path:p,pack:top,name:p.split('/').pop().replace(/\.nxlv$/i,''),read});}},
+  if(/\.nxmi$/i.test(p)){this.nxmi[p.toLowerCase()]=read;return;}
+  if(/\.nxlv$/i.test(p)){const seg=p.split('/');seg.pop();const i=seg.findIndex(a=>a.toLowerCase()==='levels'),pi=i>=0&&seg[i+1]?i+1:0,top=seg[pi]||src;this.levels.push({path:p,pack:top,base:seg.slice(0,pi+1).join('/'),dir:seg.join('/'),name:p.split('/').pop().replace(/\.nxlv$/i,''),read});}},
  async add(list){for(const f of list){const n=f.name,rel=f.webkitRelativePath||n;if(/\.zip$/i.test(n)){for(const e of await zipEntries(f))this.note(e.path,e.read,n.replace(/\.zip$/i,''));this.names.push(n);}else this.note(rel,async()=>new Uint8Array(await f.arrayBuffer()),'MY LEVELS');}
-  const seen=new Set();this.levels=this.levels.filter(l=>!seen.has(l.pack+'/'+l.path)&&seen.add(l.pack+'/'+l.path));},
- packs(){const m={};for(const l of this.levels)(m[l.pack]=m[l.pack]||[]).push(l);return Object.keys(m).sort().map(k=>({name:k,levels:m[k].sort((a,b)=>a.path<b.path?-1:1)}));},
+  const seen=new Set();this.levels=this.levels.filter(l=>!seen.has(l.pack+'/'+l.path)&&seen.add(l.pack+'/'+l.path));try{await this.order();}catch(e){this.plist=null;}},
+ // pack order the way NeoLemmix reads it: levels.nxmi in each folder (LEVEL lines and $GROUP folders, in that order),
+ // otherwise alphabetical; info.nxmi gives the pack title and author
+ async order(){const lc=x=>String(x).toLowerCase(),text=async k=>{const r=this.nxmi[lc(k)];return r?txtOf(await r()):null;},byBase={};
+  for(const l of this.levels)(byBase[l.base]=byBase[l.base]||[]).push(l);
+  const out=[];
+  for(const base of Object.keys(byBase).sort()){const all=byBase[base],used=new Set(),seq=[],walk=async(dir,rank,depth)=>{if(depth>8)return;
+    const here=all.filter(l=>lc(l.dir)===lc(dir)),subs=[...new Set(all.filter(l=>lc(l.dir).startsWith(lc(dir)+'/')).map(l=>l.dir.slice(dir.length+1).split('/')[0]))].sort((a,b)=>lc(a)<lc(b)?-1:1),nx=await text(dir+'/levels.nxmi'),take=l=>{if(used.has(l))return;used.add(l);seq.push({...l,rank});};
+    if(nx){const items=impNxmi(nx);for(const it of items){if(it.level){const f=lc(it.level).replace(/\.nxlv$/,''),l=here.find(a=>lc(a.name)===f);if(l)take(l);}else if(it.group){const sub=subs.find(a=>lc(a)===lc(it.group.folder||''));if(sub)await walk(dir+'/'+sub,it.group.name||sub,depth+1);}}}
+    for(const l of here.slice().sort((a,b)=>lc(a.path)<lc(b.path)?-1:1))take(l);
+    for(const sub of subs)await walk(dir+'/'+sub,sub,depth+1);};
+   await walk(base,'',0);
+   const info=await text(base+'/info.nxmi'),I=info?nxParse(info):{},nm=all[0].pack;
+   out.push({name:String(I.TITLE&&I.TITLE!==true?I.TITLE:nm).slice(0,48),folder:nm,by:I.AUTHOR&&I.AUTHOR!==true?String(I.AUTHOR):'',ver:I.VERSION&&I.VERSION!==true?String(I.VERSION):'',base,levels:seq});}
+  this.plist=out.sort((a,b)=>a.name<b.name?-1:1);return this.plist;},
+ packs(){if(this.plist)return this.plist;const m={};for(const l of this.levels)(m[l.pack]=m[l.pack]||[]).push(l);return Object.keys(m).sort().map(k=>({name:k,folder:k,by:'',ver:'',levels:m[k].sort((a,b)=>a.path<b.path?-1:1)}));},
  hasStyles(){return Object.keys(this.styles).length>0;}};
 
 // .nxlv and its relatives are plain text: KEY value lines, with $SECTION ... $END blocks
 function nxParse(text){const root={},stack=[root];for(let line of text.split(/\r?\n/)){line=line.trim();if(!line||line[0]==='#')continue;
   if(line[0]==='$'){const k=line.slice(1).trim().toUpperCase();if(k==='END'){if(stack.length>1)stack.pop();continue;}const o={};(stack[stack.length-1]['$'+k]=stack[stack.length-1]['$'+k]||[]).push(o);stack.push(o);continue;}
-  const sp=line.search(/\s/),k=(sp<0?line:line.slice(0,sp)).toUpperCase(),v=sp<0?true:line.slice(sp+1).trim();stack[stack.length-1][k]=v;}return root;}
+  const sp=line.search(/\s/),k=(sp<0?line:line.slice(0,sp)).toUpperCase(),v=sp<0?true:line.slice(sp+1).trim();const cur=stack[stack.length-1];if(k==='LINE'&&v!==true)(cur.LINES=cur.LINES||[]).push(v);cur[k]=v;}return root;}
 const txtOf=u=>new TextDecoder().decode(u);
+// levels.nxmi: LEVEL <file> lines and $GROUP blocks (NAME, FOLDER), kept in the order written
+function impNxmi(text){const items=[];let g=null;for(let line of text.split(/\r?\n/)){line=line.trim();if(!line||line[0]==='#')continue;const sp=line.search(/\s/),k=(sp<0?line:line.slice(0,sp)).toUpperCase(),v=sp<0?'':line.slice(sp+1).trim();
+  if(k==='$GROUP'){g={};continue;}if(k==='$END'){if(g){items.push({group:g});g=null;}continue;}if(g){if(k==='NAME'||k==='FOLDER')g[k.toLowerCase()]=v;continue;}if(k==='LEVEL'&&v)items.push({level:v});}return items;}
 
 // piece shapes are read once from the player's files and only their outline is used
 const ImpCache={shape:{},meta:{},steel:{}};
 async function pngMask(bytes){const bmp=await createImageBitmap(new Blob([bytes],{type:'image/png'})),[c,x]=mk(bmp.width,bmp.height);x.drawImage(bmp,0,0);const id=x.getImageData(0,0,bmp.width,bmp.height),d=id.data,m=new Uint8Array(bmp.width*bmp.height);for(let i=0;i<m.length;i++)m[i]=d[i*4+3]>=128?1:0;const o={w:bmp.width,h:bmp.height,m,c:new Uint32Array(d.buffer)};bmp.close&&bmp.close();return o;}
 async function impShape(style,piece){const k=(style+'/terrain/'+piece).toLowerCase();if(k in ImpCache.shape)return ImpCache.shape[k];const r=ImpFiles.styles[k+'.png'];if(!r)return ImpCache.shape[k]=null;
- const s=await pngMask(await r());const mt=ImpFiles.styles[k+'.nxmt'];s.steel=mt?/^\s*STEEL/mi.test(txtOf(await mt())):/(^|_)steel/i.test(piece);return ImpCache.shape[k]=s;}
+ const s=await pngMask(await r());const mt=ImpFiles.styles[k+'.nxmt'];const mx=mt?txtOf(await mt()):'';s.steel=mt?/^\s*STEEL/mi.test(mx):/(^|_)steel/i.test(piece);const ns={};mx.replace(/NINE_SLICE_(LEFT|RIGHT|TOP|BOTTOM)\s+(\d+)/gi,(_,a,b)=>{ns[a.toLowerCase()[0]]=+b;});if(Object.keys(ns).length)s.nine={l:ns.l||0,r:ns.r||0,t:ns.t||0,b:ns.b||0};return ImpCache.shape[k]=s;}
 async function impMeta(style,piece){const k=(style+'/objects/'+piece).toLowerCase();if(k in ImpCache.meta)return ImpCache.meta[k];const r=ImpFiles.styles[k+'.nxmo'];if(!r)return ImpCache.meta[k]=null;const p=nxParse(txtOf(await r()));
  const a=(p.$PRIMARY_ANIMATION||[{}])[0],fr=+(a.FRAMES||p.FRAMES||1)||1,horiz=!!(a.HORIZONTAL_STRIP||p.HORIZONTAL_STRIP);let w=+p.TRIGGER_WIDTH||0,h=+p.TRIGGER_HEIGHT||0,fw=0,fh=0;const png=ImpFiles.styles[k+'.png'];if(png){const bmp=await createImageBitmap(new Blob([await png()],{type:'image/png'}));fw=horiz?bmp.width/fr:bmp.width;fh=horiz?bmp.height:bmp.height/fr;bmp.close&&bmp.close();}
  return ImpCache.meta[k]={fx:String(p.EFFECT||'').toUpperCase(),tx:+p.TRIGGER_X||0,ty:+p.TRIGGER_Y||0,tw:w,th:h,fw,fh};}
-function impTurn(s,rot,fh,fv){let{w,h,m,c}=s;if(rot){const n=new Uint8Array(w*h),e=new Uint32Array(w*h);for(let y=0;y<h;y++)for(let x=0;x<w;x++){const k=x*h+(h-1-y);n[k]=m[y*w+x];e[k]=c[y*w+x];}m=n;c=e;[w,h]=[h,w];}
- if(fh||fv){const n=new Uint8Array(w*h),e=new Uint32Array(w*h);for(let y=0;y<h;y++)for(let x=0;x<w;x++){const k=(fv?h-1-y:y)*w+(fh?w-1-x:x);n[k]=m[y*w+x];e[k]=c[y*w+x];}m=n;c=e;}return{w,h,m,c};}
+function impTurn(s,rot,fh,fv){let{w,h}=s,A=[s.m,s.c,s.ow];
+ if(rot){A=A.map(a=>{if(!a)return a;const n=new a.constructor(w*h);for(let y=0;y<h;y++)for(let x=0;x<w;x++)n[x*h+(h-1-y)]=a[y*w+x];return n;});[w,h]=[h,w];}
+ if(fh||fv)A=A.map(a=>{if(!a)return a;const n=new a.constructor(w*h);for(let y=0;y<h;y++)for(let x=0;x<w;x++)n[y*w+x]=a[(fv?h-1-y:y)*w+(fh?w-1-x:x)];return n;});
+ return{w,h,m:A[0],c:A[1],ow:A[2],steel:s.steel,lost:s.lost};}
+// resizable pieces (WIDTH/HEIGHT on a placement): only nine-slice pieces can stretch, the corners stay as drawn
+function impSize(s,W,H){W=Math.round(+W)||s.w;H=Math.round(+H)||s.h;if(!s.nine||(W===s.w&&H===s.h)||W<1||H<1||W>4096||H>4096)return s;const{l,r,t,b}=s.nine;if(W<l+r||H<t+b||s.w-l-r<1||s.h-t-b<1)return s;
+ const sx=d=>d<l?d:d>=W-r?s.w-(W-d):l+Math.floor((d-l)*(s.w-l-r)/(W-l-r)),sy=d=>d<t?d:d>=H-b?s.h-(H-d):t+Math.floor((d-t)*(s.h-t-b)/(H-t-b)),m=new Uint8Array(W*H),c=new Uint32Array(W*H);
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){const k=sy(y)*s.w+sx(x);m[y*W+x]=s.m[k];c[y*W+x]=s.c[k];}return{w:W,h:H,m,c,steel:s.steel};}
 
 // material runs, stored inside the map as one text step: A-G is the material, lowercase/digits the run length
 function impPack(a){let s='',i=0;const n=a.length,L=[];while(i<n){let j=i+1;while(j<n&&a[j]===a[i])j++;L.push(String.fromCharCode(65+a[i])+(j-i).toString(36));i=j;}return L.join('');}
@@ -57,14 +81,29 @@ function impGrow(a,w,h){const W=w*2,o=new Uint8Array(W*h*2);for(let y=0;y<h;y++)
 // used by Shaper for the imported terrain step
 function impStamp(S,o){const[,w,h,sc,ox,oy,run]=o,T=S.T;let a=impUnpack(run,w,h),W=w,H=h;if(sc===2){a=impGrow(a,w,h);W*=2;H*=2;}for(let y=0;y<H;y++){const ty=y+oy;if(ty<0||ty>=T.h)continue;for(let x=0;x<W;x++){const tx=x+ox;if(tx>=0&&tx<T.w&&a[y*W+x])T.m[ty*T.w+tx]=a[y*W+x];}}}
 
+// level text, screen start and talismans: kept with the map, never needed to play it
+function impExtras(L,X,Y,sc,oy,w,h,Wn,Hn){const o={},pre=briefLines((L.$PRETEXT||[{}])[0].LINES),post=briefLines((L.$POSTTEXT||[{}])[0].LINES);if(pre.length)o.pre=pre;if(post.length)o.post=post;
+ if(L.START_X!==undefined&&L.START_Y!==undefined&&Number.isFinite(parseInt(L.START_X,10))&&Number.isFinite(parseInt(L.START_Y,10))){o.screenX=clamp(X(parseInt(L.START_X,10)),0,Wn-1);o.screenY=clamp(Y(parseInt(L.START_Y,10)),0,Hn-1);}
+ const tal=[];for(const t of L.$TALISMAN||[]){const e={t:impName(t.TITLE||'TALISMAN'),c:/^(bronze|silver|gold)$/i.test(String(t.COLOR))?String(t.COLOR).toLowerCase():'bronze'},n=parseInt(t.SAVE_REQUIREMENT,10),f=parseInt(t.TIME_LIMIT,10),sl=parseInt(t.SKILL_LIMIT,10);if(n>0)e.need=n;if(f>0)e.time=Math.round(f/17*1.36);if(sl>=0)e.skillLimit=sl;if(t.USE_ONLY_SKILL&&t.USE_ONLY_SKILL!==true)e.only=String(t.USE_ONLY_SKILL).toLowerCase().slice(0,16);tal.push(e);if(tal.length>=8)break;}
+ if(tal.length)o.tal=tal;return o;}
 function impName(s){return String(s||'IMPORTED').toUpperCase().replace(/[^A-Z0-9 .,!?'&:+\-]/g,' ').replace(/\s+/g,' ').trim().slice(0,24)||'IMPORTED';}
 async function impConvert(lv,race,art){const src=txtOf(await lv.read()),L=nxParse(src),rep=[],num=(k,d)=>{const v=parseInt(L[k],10);return Number.isFinite(v)?v:d;};
  const w=num('WIDTH',320),h=num('HEIGHT',160),style=String(L.THEME||L.STYLE||'').trim(),m=blankMap('puzzle'),gone={};const miss=(t)=>{gone[t]=(gone[t]||0)+1;};
  if(w<1||h<1||w*h>9e6)throw new Error('The level size looks wrong.');
  const mat=new Uint8Array(w*h),one=new Uint8Array(w*h),col=art?new Uint32Array(w*h):null,T=L.$TERRAIN||[],G=L.$GADGET||L.$OBJECT||[];let lost=0;
- for(const p of T){const st=p.STYLE||p.COLLECTION||style,sh=p.PIECE?await impShape(st,p.PIECE):null;if(!sh){lost++;miss('style:'+st);continue;}
-  const q=impTurn(sh,p.ROTATE,p.FLIP_HORIZONTAL,p.FLIP_VERTICAL),px=+p.X||0,py=+p.Y||0,er=!!p.ERASE,keep=!!p.NO_OVERWRITE,ow=p.ONE_WAY&&!sh.steel?1:0;
-  for(let j=0;j<q.h;j++){const ty=j+py;if(ty<0||ty>=h)continue;for(let i=0;i<q.w;i++){if(!q.m[j*q.w+i])continue;const tx=i+px;if(tx<0||tx>=w)continue;const k=ty*w+tx;if(er){mat[k]=0;one[k]=0;if(col)col[k]=0;}else if(!keep||!mat[k]){mat[k]=sh.steel?2:1;one[k]=ow;if(col)col[k]=q.c[j*q.w+i]|0xff000000;}}}}
+ // $TERRAINGROUP: a named bundle of pieces, placed later with STYLE *GROUP. Built once, from the members' own outlines
+ const grpDefs={},grpDone={};for(const gd of L.$TERRAINGROUP||[])if(gd.NAME&&gd.NAME!==true)grpDefs[String(gd.NAME).trim().toLowerCase()]=gd;
+ const pieceOf=async(st,pc,depth)=>/^\*group$/i.test(String(st))?await impGroup(String(pc||'').trim().toLowerCase(),depth):(pc?await impShape(st,pc):null);
+ async function impGroup(key,depth){if(key in grpDone)return grpDone[key];const gd=grpDefs[key];if(!gd||depth>5)return grpDone[key]=null;grpDone[key]=null;
+  const ms=[];let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9,gl=0,steel=false;
+  for(const p of gd.$TERRAIN||[]){const sh=await pieceOf(p.STYLE||p.COLLECTION||style,p.PIECE,depth+1);if(!sh){gl++;continue;}const q=impTurn(impSize(sh,p.WIDTH,p.HEIGHT),p.ROTATE,p.FLIP_HORIZONTAL,p.FLIP_VERTICAL),px=+p.X||0,py=+p.Y||0;gl+=sh.lost||0;if(!p.ERASE&&sh.steel)steel=true;
+   x0=Math.min(x0,px);y0=Math.min(y0,py);x1=Math.max(x1,px+q.w);y1=Math.max(y1,py+q.h);ms.push({p,q,px,py});}
+  if(!ms.length||x1<=x0||(x1-x0)*(y1-y0)>4e6)return null;const gw=x1-x0,gh=y1-y0,m=new Uint8Array(gw*gh),c=new Uint32Array(gw*gh),ow=new Uint8Array(gw*gh);
+  for(const{p,q,px,py}of ms){const er=!!p.ERASE,keep=!!p.NO_OVERWRITE,o1=p.ONE_WAY&&!q.steel?1:0;for(let j=0;j<q.h;j++)for(let i=0;i<q.w;i++){if(!q.m[j*q.w+i])continue;const k=(py-y0+j)*gw+(px-x0+i);if(er){m[k]=0;ow[k]=0;c[k]=0;}else if(!keep||!m[k]){m[k]=1;c[k]=q.c[j*q.w+i];ow[k]=o1||(q.ow&&q.ow[j*q.w+i]?1:0);}}}
+  return grpDone[key]={w:gw,h:gh,m,c,ow,steel,lost:gl};}
+ for(const p of T){const st=p.STYLE||p.COLLECTION||style,sh=await pieceOf(st,p.PIECE,0);if(!sh){lost++;miss('style:'+st);continue;}lost+=sh.lost||0;
+  const q=impTurn(impSize(sh,p.WIDTH,p.HEIGHT),p.ROTATE,p.FLIP_HORIZONTAL,p.FLIP_VERTICAL),px=+p.X||0,py=+p.Y||0,er=!!p.ERASE,keep=!!p.NO_OVERWRITE,ow=p.ONE_WAY&&!sh.steel?1:0;
+  for(let j=0;j<q.h;j++){const ty=j+py;if(ty<0||ty>=h)continue;for(let i=0;i<q.w;i++){if(!q.m[j*q.w+i])continue;const tx=i+px;if(tx<0||tx>=w)continue;const k=ty*w+tx;if(er){mat[k]=0;one[k]=0;if(col)col[k]=0;}else if(!keep||!mat[k]){mat[k]=sh.steel?2:1;one[k]=sh.steel?0:(ow||(q.ow&&q.ow[j*q.w+i]?1:0));if(col)col[k]=q.c[j*q.w+i]|0xff000000;}}}}
  const objs=[],pairs={},extra={};let hatches=0,doors=0,ways=0;const sc=(w*h*IMP_SCALE*IMP_SCALE>IMP_MAXAREA)?1:IMP_SCALE,Wn=Math.max(480,w*sc),Hn=Math.max(240,h*sc),ox=0,oy=Hn-h*sc;const X=v=>Math.round(v*sc)+ox,Y=v=>Math.round(v*sc)+oy;
  if(sc===1)rep.push('Very large level: kept at half size, so it will feel tight.');
  const groundAt=(x,y)=>{x=clamp(x/sc|0,0,w-1);let j=clamp((y-oy)/sc|0,0,h-1);if(mat[j*w+x]){let n=0;while(j>0&&mat[(j-1)*w+x]&&n<16){j--;n++;}if(n>=16)return null;}else{let n=0;while(j<h&&!mat[j*w+x]&&n<16){j++;n++;}if(j>=h||n>=16)return null;}return j;};
@@ -79,21 +118,21 @@ async function impConvert(lv,race,art){const src=txtOf(await lv.read()),L=nxPars
   case'TRAP':case'TRAPONCE':objs.push({k:'jaws',x:X(cx),y:Y(ry+th),rw:Math.round(tw*sc),rh:Math.round(th*sc),raw:1});break;
   case'TELEPORTER':case'RECEIVER':{const id=g.PAIRING!==undefined?+g.PAIRING:(g.S!==undefined?+g.S:(pairs.n=(pairs.n||0)+(mt.fx==='TELEPORTER'?1:0)));(pairs[id]=pairs[id]||{})[mt.fx]={x:X(cx),y:Y(ry+th),dir:fh?-1:1};break;}
   case'ONEWAYLEFT':case'ONEWAYRIGHT':case'ONEWAYDOWN':{const v=mt.fx==='ONEWAYLEFT'?4:mt.fx==='ONEWAYRIGHT'?5:6;for(let j=Math.max(0,ry);j<Math.min(h,ry+th);j++)for(let i=Math.max(0,rx);i<Math.min(w,rx+tw);i++){const k=j*w+i;if(one[k]&&mat[k]){mat[k]=v;ways++;}}break;}
-  case'PICKUPSKILL':{const s=IMP_SKILL[String(g.SKILL||'').toUpperCase()];if(s){extra[s]=(extra[s]||0)+(+g.SKILL_COUNT||1);miss('Skill pickups added to the panel');}else miss('Skill pickup removed');break;}
+  case'PICKUPSKILL':{const s=IMP_SKILL[String(g.SKILL||'').toUpperCase()];if(s){extra[s]=(extra[s]||0)+(+g.SKILLCOUNT||+g.SKILL_COUNT||1);miss('Skill pickups added to the panel');}else miss('Skill pickup removed');break;}
   case'BACKGROUND':case'':case'NONE':case'ONEWAYWALL':break;
   case'UNLOCKBUTTON':break;
   default:miss(mt.fx.charAt(0)+mt.fx.slice(1).toLowerCase()+' object removed');}}
  let p=0;for(const id of Object.keys(pairs)){const q=pairs[id];if(!q||typeof q!=='object')continue;if(q.TELEPORTER&&q.RECEIVER){objs.push({k:'warp',...q.TELEPORTER,p:p+3,raw:1},{k:'warp',...q.RECEIVER,p:p+3,recv:1,raw:1});p++;}else miss('Unpaired teleporter removed');}
- const placed=L.$LEMMING||[];if(!hatches)for(const q of placed){objs.push({k:'hatch',x:X(+q.X||0),y:Y(+q.Y||0),dir:q.FLIP_HORIZONTAL||q.DIRECTION==='left'||q.DIRECTION==='LEFT'?-1:1,ghost:1});hatches++;}
- if(!hatches||!doors){const ms=[...new Set(G.map(g=>g.STYLE||g.COLLECTION||style).concat(T.map(p=>p.STYLE||p.COLLECTION||style)))].filter(s=>!Object.keys(ImpFiles.styles).some(k=>k.startsWith(s.toLowerCase()+'/')));throw new Error(ms.length?'Missing style: '+ms[0]:!hatches?'This level has no hatch that could be read.':'This level has no exit that could be read.');}
+ const placed=L.$LEMMING||[];if(!hatches)for(const q of placed){objs.push({k:'hatch',x:X(+q.X||0),y:Y(+q.Y||0),dir:q.FLIP_HORIZONTAL||q.DIRECTION==='left'||q.DIRECTION==='LEFT'?-1:1,ghost:1,...(q.CLIMBER?{cl:1}:{}),...(q.FLOATER||q.GLIDER?{fl:1}:{})});hatches++;}
+ if(!hatches||!doors){const ms=[...new Set(G.map(g=>g.STYLE||g.COLLECTION||style).concat(T.map(p=>p.STYLE||p.COLLECTION||style)))].filter(s=>!/^\*group$/i.test(s)&&!Object.keys(ImpFiles.styles).some(k=>k.startsWith(s.toLowerCase()+'/')));throw new Error(ms.length?'Missing style: '+ms[0]:!hatches?'This level has no hatch that could be read.':'This level has no exit that could be read.');}
  // skills
  const SKS=(L.$SKILLSET||[{}])[0],sk={climb:0,flap:0,boom:0,block:0,build:0,bash:0,pick:0,dig:0};
- for(const k of Object.keys(SKS)){const c=SKS[k]===true?99:(parseInt(SKS[k],10)||0),s=IMP_SKILL[k];if(s)sk[s]+=Math.min(99,c);else if(IMP_CLOSE[k]){sk[IMP_CLOSE[k]]+=Math.min(99,c);rep.push(k.charAt(0)+k.slice(1).toLowerCase()+' became '+skName(IMP_CLOSE[k])+'.');}else rep.push(k.charAt(0)+k.slice(1).toLowerCase()+' skill removed.');}
+ for(const k of Object.keys(SKS)){const raw=SKS[k],c=raw===true||/^inf/i.test(String(raw))?99:(parseInt(raw,10)||0),s=IMP_SKILL[k];if(s)sk[s]+=Math.min(99,c);else if(IMP_CLOSE[k]){sk[IMP_CLOSE[k]]+=Math.min(99,c);rep.push(k.charAt(0)+k.slice(1).toLowerCase()+' became '+skName(IMP_CLOSE[k])+'.');}else rep.push(k.charAt(0)+k.slice(1).toLowerCase()+' skill removed.');}
  m.skills=Object.fromEntries(SK.map(k=>[k,Math.min(99,sk[k]+(extra[k]||0))]));
- const total=clamp(num('LEMMINGS',num('LEMMING_COUNT',20)),1,200),si=L.MAX_SPAWN_INTERVAL!==undefined?num('MAX_SPAWN_INTERVAL',53):(L.RELEASE_RATE!==undefined?53-Math.round(num('RELEASE_RATE',1)/2):53);
- const preset=placed.length,ghosts=objs.some(o=>o.ghost);if(preset&&!ghosts)rep.push(preset+' placed troops now come from the hatch.');if(ghosts)rep.push('Troops start where they were placed, without their special skills.');
+ const total=clamp(num('LEMMINGS',num('LEMMING_COUNT',20)),1,999),si=L.MAX_SPAWN_INTERVAL!==undefined?num('MAX_SPAWN_INTERVAL',53):(L.RELEASE_RATE!==undefined?103-num('RELEASE_RATE',50):53),tl=parseInt(L.TIME_LIMIT,10),noTime=!Number.isFinite(tl)||tl<=0;
+ const preset=placed.length,ghosts=objs.some(o=>o.ghost);if(preset&&!ghosts)rep.push(preset+' placed troops now come from the hatch.');if(ghosts){const lost=placed.filter(q=>q.BLOCKER||q.SWIMMER||q.SLIDER||q.DISARMER||q.ZOMBIE||q.NEUTRAL||q.SHIMMIER).length;rep.push(lost?'Troops start where they were placed. Climbers and floaters keep their skill; the other states are dropped.':'Troops start where they were placed.');}
  const packed=impPack(mat);
- Object.assign(m,{v:1,imported:1,by:impName(L.AUTHOR||'UNKNOWN'),name:impName(L.TITLE||lv.name),hint:impName(L.AUTHOR?'By '+L.AUTHOR:'Imported').slice(0,24)+'. '+'May not play like the original.',theme:IMP_WORLD[(style.match(/_(.+)$/)||[])[1]]||'bog',style:'puzzle',mode:'solo',race:race==='goblin'?undefined:race,w:Wn,h:Hn,n:objs.some(o=>o.ghost)?1:Math.ceil(total/hatches),need:clamp(num('SAVE_REQUIREMENT',1),1,total),rate:clamp(si*2,12,220),time:L.TIME_LIMIT!==undefined?clamp(Math.round(num('TIME_LIMIT',300)*1.36),30,1800):1800,ops:[['M',w,h,sc,ox,oy,packed]],objs,rules:[],trig:[],plan:[],src:lv.pack,key:lv.path});
+ Object.assign(m,{v:1,imported:1,by:impName(L.AUTHOR||'UNKNOWN'),name:impName(L.TITLE||lv.name),hint:impName(L.AUTHOR?'By '+L.AUTHOR:'Imported').slice(0,24)+'. '+'May not play like the original.',theme:IMP_WORLD[(style.match(/_(.+)$/)||[])[1]]||'bog',style:'puzzle',mode:'solo',race:race==='goblin'?undefined:race,w:Wn,h:Hn,n:objs.some(o=>o.ghost)?1:Math.ceil(total/hatches),need:clamp(num('SAVE_REQUIREMENT',1),1,total),rate:clamp(si*2,12,220),time:noTime?1800:clamp(Math.round(tl*1.36),30,5999),...(noTime?{noTime:1}:{}),...impExtras(L,X,Y,sc,oy,w,h,Wn,Hn),ops:[['M',w,h,sc,ox,oy,packed]],objs,rules:[],trig:[],plan:[],src:lv.pack,key:lv.path});
  if(lost)rep.push(lost+' terrain pieces could not be found.');
  if(ways)rep.push('One-way walls included.');
  for(const[k,n]of Object.entries(gone)){if(k.startsWith('style:'))rep.push('Missing style: '+k.slice(6));else if(k.startsWith('object:'))rep.push('Unknown object: '+k.slice(7));else if(!rep.includes(k+'.'))rep.push(k+'.');}

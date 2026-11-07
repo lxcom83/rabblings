@@ -1,11 +1,12 @@
 'use strict';
 // ---------- screen ----------
-const VW=480,VH=270,HUDH=46,VIEWH=VH-HUDH,TPS=25,TAU=Math.PI*2;
+const VW=480,VH=270,TPS=25,TAU=Math.PI*2;let HUDH=46,VIEWH=VH-HUDH;function setHud(h){HUDH=h;VIEWH=VH-h;}
 const cv=document.getElementById('game'),ctx=cv.getContext('2d',{alpha:false});
-ctx.imageSmoothingEnabled=false;
+// The simulation and every map stay on the 480x270 grid. The screen is drawn at RS times that, so art can carry more detail.
+const RS=2;cv.width=VW*RS;cv.height=VH*RS;ctx.imageSmoothingEnabled=false;
 function mk(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.imageSmoothingEnabled=false;return [c,x];}
 const clamp=(v,a,b)=>v<a?a:v>b?b:v,lerp=(a,b,t)=>a+(b-a)*t;
-function rng(seed){let a=seed>>>0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function rng(seed){let a=seed>>>0;const f=()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};f.get=()=>a;f.set=v=>{a=v|0;};return f;}
 const rgb32=(r,g,b)=>(0xff000000|(clamp(b|0,0,255)<<16)|(clamp(g|0,0,255)<<8)|clamp(r|0,0,255))>>>0;
 const mul32=(c,f)=>rgb32((c&255)*f,((c>>8)&255)*f,((c>>16)&255)*f);
 const css=a=>`rgb(${a[0]|0},${a[1]|0},${a[2]|0})`;

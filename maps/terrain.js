@@ -2,7 +2,7 @@
 const boneCol=(x,y)=>{const q=noise(x*3,y*3);return q>.62?rgb32(236,230,206):q>.34?rgb32(204,198,174):rgb32(150,144,126);};
 class Terrain{
  constructor(w,h,theme,seed){Object.assign(this,{w,h,theme:THEME[theme],seed});this.m=new Uint8Array(w*h);this.t=new Uint32Array(w*h);this.dirty=[];
-  [this.cv,this.cx]=mk(w,h);[this.deco,this.dx]=mk(w,h);this.decos=[];this.mir=false;this.img=this.cx.createImageData(w,h);this.b=new Uint32Array(this.img.data.buffer);}
+  [this.cv,this.cx]=mk(w,h);[this.deco,this.dx]=mk(w,h);this.decos=[];this.pcs=[];this.mir=false;this.img=this.cx.createImageData(w,h);this.b=new Uint32Array(this.img.data.buffer);}
  solid(x,y){if(x<0||x>=this.w)return !this.open;if(y<0||y>=this.h)return false;return this.m[y*this.w+x]!==0;}
  iron(x,y){return x>=0&&x<this.w&&y>=0&&y<this.h&&this.m[y*this.w+x]===2;}
  hasIron(x,y,w,h){for(let j=y;j<y+h;j++)for(let i=x;i<x+w;i++)if(this.iron(i,j))return true;return false;}
@@ -33,7 +33,7 @@ class Terrain{
    else if(v===2)t[k]=this.ironTex(x,y);else{const q=((y>>2)&1)?(x+8)%16:x%16,c=q===0||(y&3)===3?0xff2a5480:0xff3c78b4;t[k]=c>>>0;}}
   for(let x=x0;x<x1;x++){let d=-1;for(let y=0;y<h;y++){const k=y*w+x;if(m[k]===0){d=0;continue;}if(d<0)continue;if(m[k]===1){const lim=T.capD+((noise(x*3,17)*6)|0);if(d<lim){const q=clamp(((d/lim)*T.c32.length+bayer(x,y)*.8)|0,0,T.c32.length-1);t[k]=T.c32[q];}}d++;if(d>30)d=30;}}
   if(this.gfx){const G=this.gfx,px=(i,j)=>i>=0&&j>=0&&i<G.w&&j<G.h?G.d[j*G.w+i]:0;for(let y=0;y<h;y++)for(let x=x0;x<x1;x++){const k=y*w+x,v=m[k];if(!v||v===3||v===7)continue;const a=(x-G.ox)/G.s|0,b=(y-G.oy)/G.s|0;let c=px(a,b)||px(a+1,b)||px(a-1,b)||px(a,b+1)||px(a,b-1);if(!c)continue;if(v>=4){const p=x&15,q=y&15,e=v===6?Math.abs(p-8)+(15-q):v===4?Math.abs(q-8)+p:Math.abs(q-8)+(15-p);c=mul32(c,e===8||e===9?1.75:.86);}t[k]=c;}}
-  if(this.decos.length)this.applyDecor(x0,x1);}
+  if(this.decos.length)this.applyDecor(x0,x1);if(this.pcs.length)this.applyPieces(x0,x1);}
  paint(){this.texCols(0,this.w);this.flushAll();if(!this.gfx)this.decorate(rng(this.seed));}
  repaint(x0,x1){x0=clamp(x0-3|0,0,this.w);x1=clamp(x1+3|0,0,this.w);if(x1<=x0)return;this.texCols(x0,x1);for(let j=0;j<this.h;j++)for(let i=x0;i<x1;i++)this.b[j*this.w+i]=this.shade(i,j);this.cx.putImageData(this.img,0,0,x0,0,x1-x0,this.h);}
  ironTex(x,y){const px=x%24,py=y%16,B=this.theme.iron;let f=.82+noise(x*2,y*2)*.4;if(px===0||py===0)f=.42;else if(px===1||py===1)f*=1.32;else if(px===23||py===15)f*=.7;const rv=(px>=2&&px<=4||px>=20&&px<=22)&&(py>=2&&py<=4||py>=12&&py<=13);if(rv)f=1.6;return rgb32(B[0]*f,B[1]*f,B[2]*f);}
@@ -61,7 +61,7 @@ class Shaper{constructor(T,seed){this.T=T;this.s=seed;}
  dab(m,x,y,r){const T=this.T,r2=r*r;for(let j=-r;j<=r;j++)for(let i=-r;i<=r;i++)if(i*i+j*j<=r2){const a=x+i,b=y+j;if(a>=0&&b>=0&&a<T.w&&b<T.h)T.m[b*T.w+a]=m;}}
  seg(m,r,x0,y0,x1,y1){const n=Math.max(1,Math.ceil(Math.hypot(x1-x0,y1-y0)/Math.max(1,r/2)));for(let i=0;i<=n;i++)this.dab(m,Math.round(lerp(x0,x1,i/n)),Math.round(lerp(y0,y1,i/n)),r);}
  op(o){switch(o[0]){case'L':{const p=o.slice(3);if(p.length<4)this.dab(o[1],p[0],p[1],o[2]);for(let i=2;i+1<p.length;i+=2)this.seg(o[1],o[2],p[i-2],p[i-1],p[i],p[i+1]);break;}
-   case'B':this.box(o[2],o[3],o[4],o[5],o[1]);break;case'E':this.ell(o[2],o[3],o[4],o[5],o[1]);break;case'S':if(STAMPS[o[1]])STAMPS[o[1]].make(this,o[2],o[3]);break;case'G':genTerrain(this,o[1],o[2]);break;case'M':impStamp(this,o);break;case'D':this.placeDecor(o);break;case'I':this.placePic(o);break;}}
+   case'B':this.box(o[2],o[3],o[4],o[5],o[1]);break;case'E':this.ell(o[2],o[3],o[4],o[5],o[1]);break;case'S':if(STAMPS[o[1]])STAMPS[o[1]].make(this,o[2],o[3]);break;case'G':genTerrain(this,o[1],o[2]);break;case'M':impStamp(this,o);break;case'D':this.placeDecor(o);break;case'I':this.placePic(o);break;case'P':this.placePiece(o);break;case'C':this.copyRegion(o);break;}}
  run(ops){for(const o of ops)this.op(o);}
 }
 const STAMPS={

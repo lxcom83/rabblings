@@ -4,7 +4,7 @@ Run from the repo root after build.py. Needs Python Playwright with Chromium."""
 import asyncio, base64, json
 from playwright.async_api import async_playwright
 ART = '''()=>{const G=__GS,R=G.RACES,K=Object.keys(R),out={},png=c=>c.toDataURL('image/png');out.logo=png(LOGO);
- const races=[];for(const k of K){const r=R[k],pan=Object.values(r.swap||{});const rows=[];r.clans.forEach((cl,i)=>{const A=clanArt(cl),[c,x]=mk(CELL*8,CELL);x.drawImage(A.sheet,0,ROW.walk*2*CELL,CELL*8,CELL,0,0,CELL*8,CELL);out['walk-'+k+'-'+i]=png(c);out['home-'+k+'-'+i]=png(A.hut);rows.push({name:cl.name,perk:cl.perkT,ui:cl.ui||'#fff'});});
+ const races=[];for(const k of K){const r=R[k],pan=Object.values(r.swap||{});const rows=[];r.clans.forEach((cl,i)=>{const A=clanArt(cl),[c,x]=mk(CELL*8,CELL);x.drawImage(A.sheet,0,ROW.walk*2*SRC,SRC*8,SRC,0,0,CELL*8,CELL);out['walk-'+k+'-'+i]=png(c);out['home-'+k+'-'+i]=png(A.hut);rows.push({name:cl.name,perk:cl.perkT,ui:cl.ui||'#fff'});});
   const [b,bx]=mk(VW,VIEWH);drawBackdrop(bx,backdrop(r.world),0,VW,0,0,0);out['bg-'+k]=png(b);
   races.push({k,n:r.n,like:r.like,good:r.good,bad:r.bad,home:r.home,clans:rows,skills:pan.map(s=>({n:SKX[s][0],d:SKX[s][1]}))});}
  out.races=races;return out;}'''

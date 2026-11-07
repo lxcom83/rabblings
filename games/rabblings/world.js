@@ -16,7 +16,7 @@ const FALLMAX=112,TOOLS=['walk','shrug','bash','pick','dig','build'],GONE=['spla
 class World{
  constructor(def,o={}){this.def=def;this.vs=!!o.vs;this.quiet=!!o.quiet;this.classic=!!o.classic;this.diff=DIFFS[this.vs||o.diff===undefined?1:o.diff]||DIFFS[1];const TH=THEME[def.theme];this.hz=(def.haz||[]).map(h=>({...h,lava:h.water?0:(TH.lavaHaz||0)}));const sides=this.sides=o.sides||[{race:def.race||'goblin',clan:0},{race:'goblin',clan:1}];const crew=i=>{const b=def.n;return this.vs&&!def.custom&&sides[i].race==='goblin'?Math.round(b*1.2):b;};
   const T=this.T=new Terrain(def.w,def.h,def.theme,def.seed||7);T.open=!!def.open;T.gfx=def.gfx||null;T.mir=!!def.mirror;this.maxUp=def.maxUp||7;this.fallMax=def.fall||FALLMAX;const S=new Shaper(T,def.seed||7);def.build(S);
-  if(def.mirror)for(let y=0;y<T.h;y++)for(let x=0;x<T.w>>1;x++)T.m[y*T.w+T.w-1-x]=T.m[y*T.w+x];
+  if(def.mirror)for(let y=0;y<T.h;y++)for(let x=0;x<T.w>>1;x++){const v=T.m[y*T.w+x];T.m[y*T.w+T.w-1-x]=v===4?5:v===5?4:v;}
   this.hatches=[];this.doors=[];const mir=(x)=>def.w-1-x;
   def.hatch.forEach(h=>{const tm=def.free2p?h.team||0:0;this.hatches.push({...h,team:tm,left:crew(tm),next:45,open:0});if(this.vs&&!def.free2p)this.hatches.push({x:mir(h.x),y:h.y,dir:-h.dir,team:1,left:crew(1),next:45,open:0});});
   def.doors.forEach(d=>{this.doors.push({...d,team:def.free2p?d.team||0:0});if(this.vs&&!def.free2p)this.doors.push({x:mir(d.x),y:d.y,team:1});});
@@ -144,8 +144,8 @@ class World{
  dust(x,y,n,sp=1){if(this.quiet)return;const R=Math.random;for(let i=0;i<n;i++){const px=x+(R()*8-4|0),py=y+(R()*8-4|0),k=clamp(py,0,this.T.h-1)*this.T.w+clamp(px,0,this.T.w-1),c=this.T.theme.ramp[3+(R()*3|0)];this.p(px,py,(R()-.5)*50*sp,-R()*70*sp,c,18+R()*16);}}
  float(x,y,s,c){if(!this.quiet)this.floats.push({x,y,s,c,l:40});}
  spawn(h){const g={x:h.x,y:h.y,px:h.x,py:h.y,team:h.team,dir:h.dir,s:'fall',t:0,fallen:0,climber:0,flap:0,fuse:0,panic:0,bricks:0,dry:0,race:this.pl[h.team].race,id:this.gobs.length};if(g.race==='dwarf')g.hp=2;if(g.race==='fairy')g.flap=1;this.gobs.push(g);this.pl[h.team].out++;this.snd('tick');return g;}
- step(){if(this.over)return;this.tick++;if(this.time>0)this.time--;
-  for(const h of this.hatches){if(h.open<8&&this.tick>20)h.open+=.5;if(h.left>0&&this.tick>=h.next){this.spawn(h);h.left--;h.next=this.tick+this.def.rate;}}
+ step(){if(this.over)return;this.tick++;if(this.time>0&&!this.def.noTime)this.time--;
+  for(const h of this.hatches){if(h.open<8&&this.tick>20)h.open+=.5;if(h.left>0&&this.tick>=h.next){const g0=this.spawn(h);if(h.cl)g0.climber=1;if(h.fl)g0.flap=1;h.left--;h.next=this.tick+this.def.rate;}}
   this.blockers=this.gobs.filter(g=>g.s==='block');
   for(const p of this.pl)if(p.spellCd>0)p.spellCd--;this.stepTriggers();this.stepRules();this.stepTraps();this.stepMobs();this.stepNests();this.stepMood();this.stepWild();
   for(const g of this.gobs)if(g.s!=='dead')this.tickGob(g);

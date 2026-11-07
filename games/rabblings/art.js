@@ -4,7 +4,7 @@ const CLAN=[
  {name:'ASHGUT',skin:'#596a80',skinD:'#3f4752',skinL:'#6d85a3',hood:'#caa21e',hoodD:'#805a1c',tun:'#a27a26',tunD:'#66441a',boot:'#1d1e22',ui:'#e7bd17'}];
 // ---------- goblin rig ----------
 const ANIM={walk:8,panic:8,fall:4,float:4,climb:6,hoist:4,dig:6,bash:8,pick:8,build:8,block:4,shrug:4,ohno:4,home:6,splat:4,drown:4,swim:4};
-const ANKEYS=Object.keys(ANIM),CELL=24;
+const ANKEYS=Object.keys(ANIM),CELL=24,HR=2,SRC=CELL*HR;
 const HEAD=['....HHh.....','...HHhhh....','...Hhhhhh...','S..sssSSss..','Ssssllepsn..','.Ssssssssnn.','..ssSStSs...','...ssssss...'];
 const HEADOPEN=['....HHh.....','...HHhhh....','...Hhhhhh...','S..sssSSss..','Ssssllepsn..','.Ssssssssnn.','..ssxxxxs...','...ssxxss...'];
 function pose(s,f,n){const t=f/n*TAU,S=Math.sin,C=Math.cos,R=Math.round;
@@ -56,17 +56,21 @@ function drawRig(x,c,s,f,n){
  L(sx+1,sy+1,hand[0],hand[1],c.skin);P(hand[0],hand[1],c.skinL,2,2);
  if(s==='drown'||s==='swim')x.restore();
 }
-function outline(cvs,col){const x=cvs.getContext('2d'),w=cvs.width,h=cvs.height,d=x.getImageData(0,0,w,h),a=d.data,o=new Uint8ClampedArray(a);const rgb=hex2(col);
+function outline(cvs,col,th){th=th||1;const x=cvs.getContext('2d'),w=cvs.width,h=cvs.height,rgb=hex2(col);
+ for(let r=0;r<th;r++){const d=x.getImageData(0,0,w,h),a=d.data,o=new Uint8ClampedArray(a);
  for(let y=0;y<h;y++)for(let i=0;i<w;i++){const k=(y*w+i)*4;if(a[k+3])continue;const on=(i>0&&a[k-1])||(i<w-1&&a[k+7])||(y>0&&a[k-w*4+3])||(y<h-1&&a[k+w*4+3]);if(on){o[k]=rgb[0];o[k+1]=rgb[1];o[k+2]=rgb[2];o[k+3]=255;}}
- d.data.set(o);x.putImageData(d,0,0);}
+ d.data.set(o);x.putImageData(d,0,0);}}
 const ROW={};ANKEYS.forEach((k,i)=>ROW[k]=i);
-function buildSheet(c){const[sh,sx]=mk(CELL*8,CELL*ANKEYS.length*2);
- ANKEYS.forEach((s,r)=>{const n=ANIM[s];for(let f=0;f<n;f++){const[t,tx]=mk(CELL,CELL);drawRig(tx,c,s,f,n);outline(t,'#090a0c');
-  sx.drawImage(t,f*CELL,r*2*CELL);sx.save();sx.translate(f*CELL+CELL,(r*2+1)*CELL);sx.scale(-1,1);sx.drawImage(t,0,0);sx.restore();}});
+// Sheets hold SRC (=CELL*HR) pixel cells. A clan with hi:1 has a native high-detail rig (rig48); the rest draw the 24px rig at HR times scale, which looks exactly as before.
+const RIG48={};// race key -> native 48px rig(x,c,anim,frame,n); registered by art48*.js
+function buildSheet(c){const rg=c.hi&&RIG48[c.hi];const[sh,sx]=mk(SRC*8,SRC*ANKEYS.length*2);
+ ANKEYS.forEach((s,r)=>{const n=ANIM[s];for(let f=0;f<n;f++){const[t,tx]=mk(SRC,SRC);
+  if(rg){rg(tx,c,s,f,n);outline(t,'#090a0c',s==='splat'?HR:1);}else{const[t1,x1]=mk(CELL,CELL);drawRig(x1,c,s,f,n);outline(t1,'#090a0c');tx.drawImage(t1,0,0,SRC,SRC);}
+  sx.drawImage(t,f*SRC,r*2*SRC);sx.save();sx.translate(f*SRC+SRC,(r*2+1)*SRC);sx.scale(-1,1);sx.drawImage(t,0,0);sx.restore();}});
  return sh;}
 const SHEETS=CLAN.map(buildSheet);
-function sheetSprite(C,sheet,anim,frame,dir,x,y){const n=ANIM[anim],f=((frame%n)+n)%n,d=dir>0?0:1;C.drawImage(sheet,f*CELL,(ROW[anim]*2+d)*CELL,CELL,CELL,x-(d?12:11),y-22,CELL,CELL);}
-function gobSprite(C,team,anim,frame,dir,x,y){const n=ANIM[anim],f=((frame%n)+n)%n,d=dir>0?0:1;C.drawImage(SHEETS[team],f*CELL,(ROW[anim]*2+d)*CELL,CELL,CELL,x-(d?12:11),y-22,CELL,CELL);}
+function sheetSprite(C,sheet,anim,frame,dir,x,y){const n=ANIM[anim],f=((frame%n)+n)%n,d=dir>0?0:1;C.drawImage(sheet,f*SRC,(ROW[anim]*2+d)*SRC,SRC,SRC,x-(d?12:11),y-22,CELL,CELL);}
+function gobSprite(C,team,anim,frame,dir,x,y){const n=ANIM[anim],f=((frame%n)+n)%n,d=dir>0?0:1;C.drawImage(SHEETS[team],f*SRC,(ROW[anim]*2+d)*SRC,SRC,SRC,x-(d?12:11),y-22,CELL,CELL);}
 
 // ---------- props ----------
 function hut(team){const[c,x]=mk(52,46);const cl=typeof team==='object'?team:CLAN[team];team=typeof team==='object'?(cl.seed||0):team;

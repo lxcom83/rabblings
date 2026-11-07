@@ -31,7 +31,7 @@ cv.addEventListener('contextmenu',e=>e.preventDefault());
 // ---------- scene plumbing ----------
 let scene=null,fade=1,fadeDir=-1,fadeNext=null,clock=0;
 function go(fn){if(fadeNext)return;fadeNext=fn;fadeDir=1;}
-function setScene(s){scene=s;hits=[];if(s.enter)s.enter();}
+function setScene(s){scene=s;hits=[];if(s!==Play)setHud(46);if(s.enter)s.enter();}
 function button(C,x,y,w,h,label,fn,o={}){const hover=pointerX>=x&&pointerX<x+w&&pointerY>=y&&pointerY<y+h;hits.push({x,y,w,h,fn,btn:1,l:label});
  C.fillStyle='#120a18';C.fillRect(x,y,w,h);C.fillStyle=o.on||hover?'#5a3a70':'#33263f';C.fillRect(x+1,y+1,w-2,h-2);C.fillStyle=o.on||hover?'#7e5a96':'#4a3a58';C.fillRect(x+1,y+1,w-2,1);
  if(label)txt(C,label,x+w/2,y+(h-7)/2|0,o.col||'#fff',{c:1});}
