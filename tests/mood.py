@@ -15,7 +15,7 @@ async def main():
         print(json.dumps(await pg.evaluate(JS)))
         # visual: real play with deaths, speech and strike
         await pg.keyboard.press('Enter');await pg.wait_for_timeout(250);await pg.keyboard.press('Enter');await pg.wait_for_timeout(100)
-        await pg.evaluate("__GS.TitleScene.items()[1][1]()");await pg.wait_for_timeout(800);await pg.keyboard.press('Enter');await pg.wait_for_timeout(800)
+        await pg.evaluate("__GS.TitleScene.modes()[1][1]()");await pg.wait_for_timeout(800);await pg.keyboard.press('Enter');await pg.wait_for_timeout(800)
         await pg.keyboard.press('Enter');await pg.wait_for_timeout(800);await pg.keyboard.press('Enter');await pg.wait_for_timeout(900)
         await pg.evaluate("""()=>{const w=__GS.Play.world,p=w.pl[0];w.foes=0;window.F=setInterval(()=>{const a=w.gobs.filter(g=>g.s!=='dead')[0];if(a){p.camX=Math.max(0,a.x-200);p.camY=70}},40);for(let i=0;i<260;i++)w.step();p.mood=12;w.traps.push({k:'fire',x:230,y:200,rw:40,rh:32,raw:1,cd:0,live:1,off:0})}""");await pg.wait_for_timeout(2200);await pg.screenshot(path='m0.png')
         await pg.wait_for_timeout(1100);await pg.screenshot(path='m1.png');await pg.wait_for_timeout(1300);await pg.screenshot(path='m2.png')

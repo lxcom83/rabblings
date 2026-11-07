@@ -5,7 +5,7 @@ async def main():
         b=await p.chromium.launch();pg=await b.new_page(viewport={'width':960,'height':540})
         errs=[];pg.on('pageerror',lambda e:errs.append(str(e)));pg.on('console',lambda m:errs.append(m.text) if m.type=='error' else None)
         await pg.goto('file://'+__import__('os').getcwd()+'/run.html');await pg.wait_for_timeout(2600);await pg.screenshot(path='p0.png')
-        await pg.evaluate("__GS.TitleScene.items()[0][1]()");await pg.wait_for_timeout(800);await pg.keyboard.press('Enter');await pg.wait_for_timeout(800);await pg.keyboard.press('Enter');await pg.wait_for_timeout(800)
+        await pg.evaluate("__GS.TitleScene.modes()[0][1]()");await pg.wait_for_timeout(800);await pg.keyboard.press('Enter');await pg.wait_for_timeout(800);await pg.keyboard.press('Enter');await pg.wait_for_timeout(800)
         await pg.keyboard.press('KeyT');await pg.wait_for_timeout(200);await pg.screenshot(path='p1.png')
         await pg.keyboard.press('Enter');await pg.wait_for_timeout(1000)
         print(await pg.evaluate("(()=>{const w=__GS.Play.world,p=w.pl[0];return [w.def.name,w.trial,p.panel.join(),JSON.stringify(p.skills)]})()"))

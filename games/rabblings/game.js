@@ -19,19 +19,30 @@ const LOGO=(function(){const[c,x]=mk(330,100);
 // every race and clan marches across the title, in both directions
 const titleGobs=[];RK.flatMap(k=>RACES[k].clans).forEach((cl,i)=>titleGobs.push({x:(i*7%16)*33-30,team:i%3===2?1:0,o:i*3,cl}));
 const poolMana=r=>SAVE.mana[r]===undefined?2:SAVE.mana[r];
-const TitleScene={t:0,menu:0,sel:0,enter(){playSong('title');setSides();},
+const TitleScene={t:0,menu:0,sel:0,sub:null,ret:null,enter(){playSong('title');setSides();this.sub=null;if(this.ret){const r=this.ret;this.ret=null;this.open(r);}},
+ // the main menu stays short: games, settings and the rest open in their own small menus
+ open(sub){this.sub=sub;const it=this.items();this.sel=Math.max(0,it.findIndex(e=>e[1]));},
  update(dt){this.t+=dt;for(const g of titleGobs){g.x+=dt*(g.team?-26:26);if(g.x>VW+24)g.x=-24;if(g.x<-24)g.x=VW+24;}
   if(!this.menu){if(anyStart()){this.menu=1;this.sel=0;auInit();if(!AU.song)playSong('title');sfx('select');}return;}
-  const items=this.items();const d=menuDir();if(d){this.sel=(this.sel+d+items.length)%items.length;sfx('move');}if(anyStart()){items[this.sel][1]();sfx('select');}},
- items(){return[['1 PLAYER CAMPAIGN',()=>go(()=>{RaceScene.mode='camp';setScene(RaceScene);})],['COMBAT TRIALS',()=>go(()=>{RaceScene.mode='war';setScene(RaceScene);})],['2 PLAYERS SABOTAGE',()=>go(()=>{RaceScene.mode='vs';setScene(RaceScene);})],['1 PLAYER VS CPU',()=>go(()=>{RaceScene.mode='cpu';setScene(RaceScene);})],['MAP BUILDER',()=>go(()=>setScene(MapsScene))],['NEOLEMMIX LEVELS',()=>{if(BUILD==='play')location.href='../builder/#neolemmix';else go(()=>setScene(ImportScene));}],['HOW TO PLAY',()=>go(()=>{HelpScene.page=0;setScene(HelpScene);})],
-  ['MUSIC '+(SAVE.music?'ON':'OFF'),()=>{SAVE.music=SAVE.music?0:1;AU.music=!!SAVE.music;persist();playSong('title');}],['SOUND FX '+(SAVE.sfx?'ON':'OFF'),()=>{SAVE.sfx=SAVE.sfx?0:1;AU.sfx=!!SAVE.sfx;persist();}],['CRT LINES '+(SAVE.scan?'ON':'OFF'),()=>{SAVE.scan=SAVE.scan?0:1;applyScan();persist();}]].concat(window.INSTALL?[['INSTALL GAME',()=>{const p=window.INSTALL;window.INSTALL=null;this.sel=0;p.prompt();}]]:[]);},
+  if(this.sub&&goBack()){this.open(null);sfx('move');return;}
+  const items=this.items();if(!items[this.sel]||!items[this.sel][1])this.sel=Math.max(0,items.findIndex(e=>e[1]));
+  const d=menuDir();if(d){let s=this.sel;do{s=(s+d+items.length)%items.length;}while(!items[s][1]);this.sel=s;sfx('move');}if(anyStart()){items[this.sel][1]();sfx('select');}},
+ modes(){return[['CAMPAIGN',()=>go(()=>{RaceScene.mode='camp';setScene(RaceScene);})],['COMBAT TRIALS',()=>go(()=>{RaceScene.mode='war';setScene(RaceScene);})],['1 PLAYER VS CPU',()=>go(()=>{RaceScene.mode='cpu';setScene(RaceScene);})],['2 PLAYER SABOTAGE',()=>go(()=>{RaceScene.mode='vs';setScene(RaceScene);})]];},
+ items(){const back=['BACK',()=>this.open(null)],m=this.modes();
+  if(this.sub==='play')return[['MISSIONS'],m[0],m[1],['SINGLE GAME'],m[2],m[3],back];
+  if(this.sub==='set')return[['MUSIC '+(SAVE.music?'ON':'OFF'),()=>{SAVE.music=SAVE.music?0:1;AU.music=!!SAVE.music;persist();playSong('title');}],['SOUND FX '+(SAVE.sfx?'ON':'OFF'),()=>{SAVE.sfx=SAVE.sfx?0:1;AU.sfx=!!SAVE.sfx;persist();}],['CRT LINES '+(SAVE.scan?'ON':'OFF'),()=>{SAVE.scan=SAVE.scan?0:1;applyScan();persist();}],back];
+  return[['NEW GAME',()=>this.open('play')],['MAP BUILDER',()=>go(()=>setScene(MapsScene))],['NEOLEMMIX LEVELS',()=>{if(BUILD==='play')location.href='../builder/#neolemmix';else go(()=>setScene(ImportScene));}],['HOW TO PLAY',()=>go(()=>{HelpScene.page=0;setScene(HelpScene);})],['SETTINGS',()=>this.open('set')]].concat(window.INSTALL?[['INSTALL GAME',()=>{const p=window.INSTALL;window.INSTALL=null;this.sel=0;p.prompt();}]]:[]);},
  draw(){const C=ctx,b=backdrop('bog');drawBackdrop(C,b,0,VW,this.t*14,0,0);
   // foreground ridge
   const gy=x=>236+Math.sin((x+this.t*0)*.02)*3;C.fillStyle='#2d2323';for(let x=0;x<VW;x++){const y=gy(x)|0;C.fillStyle='#565d41';C.fillRect(x,y,1,3);C.fillStyle='#6f7448';C.fillRect(x,y,1,1);C.fillStyle=noise(x,y)>.5?'#2d2323':'#131011';C.fillRect(x,y+3,1,VH);}
   for(const g of titleGobs)sheetSprite(C,clanArt(g.cl).sheet,'walk',(this.t*12|0)+g.o,g.team?-1:1,g.x|0,gy(g.x)|0);
   const by=this.menu?4:Math.round(30+Math.sin(this.t*1.6)*3);C.drawImage(LOGO,(VW-330)/2|0,by);txt(C,'MARCHING ORDERS',VW/2,by+86,'#f0d16b',{c:1,s:this.menu?1:2});
   if(!this.menu){if((this.t*1.2)%1<.72||this.t<.5)txt(C,'PRESS START',VW/2,178,'#fff',{c:1,s:2});txt(C,'ENTER  /  TAP  /  PAD START',VW/2,200,'#f0c36b',{c:1});hits.length=0;hits.push({x:0,y:0,w:VW,h:VH,fn:()=>{this.menu=1;this.sel=0;if(!AU.song)playSong('title');sfx('select');},btn:1});}
-  else{hits.length=0;const it=this.items(),h=12,top=108;C.fillStyle='rgba(12,6,20,.72)';C.fillRect(VW/2-98,top-5,196,it.length*h+9);it.forEach((e,i)=>{const y=top+i*h,sel=i===this.sel;hits.push({x:VW/2-98,y:y-2,w:196,h,btn:1,fn:()=>{this.sel=i;e[1]();sfx('select');},hover:()=>{this.sel=i;}});txt(C,e[0],VW/2,y,sel?'#f0d16b':'#7b7e8e',{c:1});if(sel){gobSprite(C,0,'walk',this.t*12|0,1,VW/2-92,y+9);}});}}};
+  else{hits.length=0;const it=this.items(),h=12,top=this.sub?126:116,pop=!!this.sub;
+   if(pop){C.fillStyle='rgba(30,18,44,.92)';C.fillRect(VW/2-98,top-17,196,it.length*h+21);C.fillStyle='#7e5a96';C.fillRect(VW/2-98,top-17,196,1);C.fillRect(VW/2-98,top+it.length*h+3,196,1);C.fillRect(VW/2-98,top-17,1,it.length*h+21);C.fillRect(VW/2+97,top-17,1,it.length*h+21);txt(C,this.sub==='play'?'NEW GAME':'SETTINGS',VW/2,top-13,'#f0d16b',{c:1});}
+   else{C.fillStyle='rgba(12,6,20,.72)';C.fillRect(VW/2-98,top-5,196,it.length*h+9);}
+   it.forEach((e,i)=>{const y=top+i*h+(pop?2:0);if(!e[1]){txt(C,e[0],VW/2,y,'#c79ad8',{c:1});C.fillStyle='#6a4a80';C.fillRect(VW/2-80,y+4,22,1);C.fillRect(VW/2+58,y+4,22,1);return;}
+    const sel=i===this.sel;hits.push({x:VW/2-98,y:y-2,w:196,h,btn:1,fn:()=>{this.sel=i;e[1]();sfx('select');},hover:()=>{this.sel=i;}});txt(C,e[0],VW/2,y,sel?'#f0d16b':'#7b7e8e',{c:1});if(sel){gobSprite(C,0,'walk',this.t*12|0,1,VW/2-92,y+9);}});}}};
 function startSeries(cpu,sides){go(()=>{setSides(sides);Series={cpu,i:0,wins:[0,0],draws:0,sides,classic:!!SAVE.classic};setScene(BriefScene);});}
 let Series=null,CampaignIdx=0,CustomDef=null,CampaignRace='goblin',CampaignClan=0,CampaignSet='camp';
 const campList=()=>CampaignSet==='war'?WAR_LEVELS:RACE_LEVELS[CampaignRace],ck=i=>CampaignSet==='war'?'war'+i:CampaignRace==='goblin'?i:CampaignRace+i;

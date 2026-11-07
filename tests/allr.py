@@ -10,7 +10,7 @@ async def main():
         r=await pg.evaluate('''()=>{const G=__GS,rk=Object.keys(G.RACES),bad=[];for(const a of rk)for(const b of rk){const s=[{race:a,clan:0},{race:b,clan:1}];G.setSides(s);for(const l of G.ARENAS){const w=new G.World(l,{quiet:true,vs:true,sides:s});w.pl.forEach(p=>p.bot=l.plan);let n=0;try{while(!w.over&&n++<1500)w.step();}catch(e){bad.push([a,b,l.name,String(e)]);}}}return bad.slice(0,5)}''');print('vs errors',r)
         i=0
         for k,lv in [('fairy',0),('dwarf',1),('rat',0),('shroom',0)]:
-            await pg.evaluate("__GS.TitleScene.items()[0][1]()");await pg.wait_for_timeout(700)
+            await pg.evaluate("__GS.TitleScene.modes()[0][1]()");await pg.wait_for_timeout(700)
             await pg.evaluate("k=>{const G=__GS;G.SAVE.lock={};G.RaceScene.s[0]={i:Object.keys(G.RACES).indexOf(k),c:0}}",k);await pg.keyboard.press('Enter');await pg.wait_for_timeout(800)
             for _ in range(lv):await pg.keyboard.press('ArrowDown');await pg.wait_for_timeout(100)
             await pg.keyboard.press('Enter');await pg.wait_for_timeout(800);await pg.keyboard.press('Enter');await pg.wait_for_timeout(900)

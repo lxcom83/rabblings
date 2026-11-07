@@ -26,7 +26,7 @@ async def main():
         print(json.dumps(await pg.evaluate(JS)));print(errs[:3])
         # race cards
         for i,k in enumerate(['fairy','dwarf','rat','shroom']):
-            await pg.evaluate("__GS.TitleScene.items()[0][1]()");await pg.wait_for_timeout(700)
+            await pg.evaluate("__GS.TitleScene.modes()[0][1]()");await pg.wait_for_timeout(700)
             await pg.evaluate("k=>{const G=__GS;G.RaceScene.s[0]={i:Object.keys(G.RACES).indexOf(k),c:0}}",k);await pg.wait_for_timeout(300);await pg.screenshot(path=f'r{i}.png')
         await b.close()
 asyncio.run(main())
