@@ -47,8 +47,17 @@ class Terrain{
   for(let j=y0;j<=y1&&j<=maxY;j++)for(let i=x0;i<=x1;i++){const a=(i-cx)/rx,b=(j-cy)/ry;if(a*a+b*b<=1)n+=this.clr(i,j);}
   if(n)this.mark(x0,y0,x1-x0+1,y1-y0+1);return n;}
  plank(x,y,w,h,team,bone){const cols=team?[0xff3c6ea0>>>0,0xff2c5078>>>0]:[0xff3c78b4>>>0,0xff2a5480>>>0];let n=0;
-  for(let j=y;j<y+h;j++)for(let i=x;i<x+w;i++){if(i<0||i>=this.w||j<0||j>=this.h)continue;const k=j*this.w+i;if(this.m[k])continue;if(bone==='vine'){this.m[k]=3;this.t[k]=(i+j*3)%5?0xff3c9a4c>>>0:0xff2a6a34>>>0;n++;continue;}if(bone){this.m[k]=7;this.t[k]=boneCol(i,j);n++;continue;}this.m[k]=3;this.t[k]=(i-x===0||i-x===w-1)?cols[1]:cols[j-y?1:0];n++;}
+  for(let j=y;j<y+h;j++)for(let i=x;i<x+w;i++){if(i<0||i>=this.w||j<0||j>=this.h)continue;const k=j*this.w+i;if(this.m[k])continue;if(bone==='vine'){this.m[k]=3;const cap=j-y<2;this.t[k]=cap?(((i*7+j*3)%6===0)?0xffcce0e8>>>0:0xff2e3ac2>>>0):((i-x)%2?0xffa0c9d9>>>0:0xff7aa6b8>>>0);n++;continue;}if(bone){this.m[k]=7;this.t[k]=boneCol(i,j);n++;continue;}this.m[k]=3;this.t[k]=(i-x===0||i-x===w-1)?cols[1]:cols[j-y?1:0];n++;}
   this.mark(x,y,w,h);return n;}
+ shroomRow(x,y,w,cap,repaint,dir){for(let i=x;i<x+w;i++){if(i<0||i>=this.w||y<0||y>=this.h)continue;const k=y*this.w+i;
+   if(repaint){if(this.m[k]!==3)continue;if(i===(dir<0?x:x+w-1)){this.m[k]=0;continue;}}else{if(this.m[k])continue;this.m[k]=3;}
+   this.t[k]=cap?(((i*7+y*3)%6===0)?0xffcce0e8>>>0:0xff2e3ac2>>>0):((i-x)%2?0xff7aa6b8>>>0:0xffa0c9d9>>>0);}
+  this.mark(x,y,w,1);}
+ // spear stairs: still solid steps, painted as spears jabbed into the wall (steel head in the rock, wooden shaft sticking out, dark gaps between)
+ spearStairs(wx,gy,n,d,team){const wood=team?[0xff5a8cc0>>>0,0xff2c5078>>>0]:[0xff4a86c4>>>0,0xff2a5480>>>0],steel=[0xffd2d2c8>>>0,0xff7c8088>>>0],gap=0xff14202c>>>0;let c=0;
+  for(let o=1;o<=n*6;o++){const x=wx-d*o,k=n-Math.floor((o-1)/6),top=gy-6*k;if(x<0||x>=this.w)continue;
+   for(let y=top;y<gy;y++){if(y<0||y>=this.h)continue;const q=this.w*y+x;if(this.m[q])continue;const r=(y-top)%6;this.m[q]=3;this.t[q]=r<2?(o<=3?steel[r]:wood[r]):(o>6*(n-k)+5&&r===5?wood[1]:gap);c++;}}
+  this.mark(Math.min(wx-d*n*6,wx-d),gy-6*n,n*6+1,6*n+1);return c;}
  shade(i,j){const k=j*this.w+i,mt=this.m[k];if(!mt)return 0;const air=(a,b)=>!this.solid(a,b)&&a>=0&&a<this.w;let c=this.t[k];
   if(air(i,j-1))c=mul32(c,1.36);else if(air(i,j-2))c=mul32(c,1.14);
   if(air(i,j+1))c=mul32(c,.5);else if(air(i,j+2))c=mul32(c,.72);

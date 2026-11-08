@@ -307,7 +307,7 @@ steam:['...a..a.....','..a..a......','...a..a.....','...eeee.....','..eeeeee....
 cannon:['..........d.','.........dd.','.......eee..','.....eeeee..','...eeeeeb...','..eeeeebb...','..eee.bbbb..','.....bcccb..','.....bcccb..','......bbb...'],
 spring:['....eeee....','...e....e...','....eeee....','...e....e...','....eeee....','...e....e...','....eeee....','..cccccccc..','.cccccccccc.','............'],
 ratmine:['.....d......','......a.....','....eeee....','..eeeeeeee..','.eeeddeeeee.','.eeeddeeeee.','.eeeeeeeee..','..eeeeeeee..','....eeee....','............'],
-vine:['........f...','.......ff...','......f.ff..','.....f......','....ff......','....f.ff....','...f........','..ff........','..f.ff......','.f..........'],
+vine:['........eee.','.......eeeee','........c...','....eee.c...','...eeeee....','....c.......','.eee.c......','eeeee.......','.c..........','.c..........'],
 puff:['............','...gg.gg....','..gggggggg..','.gggggggggg.','..gggggggg..','...gggggg...','....f.ff....','.....f......','.....f......','............'],
 sword:['..........aa','.........aae','........aae.','.......aae..','......aae...','.b...aae....','.bb.aae.....','..bcae......','..cbb.......','.c..b.......'],
 bow:['....cc......','...c..a.....','..c....a....','.c......a...','.c...d...a..','bbbbbbbbbaae','.c...d...a..','.c......a...','..c....a....','...cc.a.....'],
@@ -1099,8 +1099,17 @@ class Terrain{
   for(let j=y0;j<=y1&&j<=maxY;j++)for(let i=x0;i<=x1;i++){const a=(i-cx)/rx,b=(j-cy)/ry;if(a*a+b*b<=1)n+=this.clr(i,j);}
   if(n)this.mark(x0,y0,x1-x0+1,y1-y0+1);return n;}
  plank(x,y,w,h,team,bone){const cols=team?[0xff3c6ea0>>>0,0xff2c5078>>>0]:[0xff3c78b4>>>0,0xff2a5480>>>0];let n=0;
-  for(let j=y;j<y+h;j++)for(let i=x;i<x+w;i++){if(i<0||i>=this.w||j<0||j>=this.h)continue;const k=j*this.w+i;if(this.m[k])continue;if(bone==='vine'){this.m[k]=3;this.t[k]=(i+j*3)%5?0xff3c9a4c>>>0:0xff2a6a34>>>0;n++;continue;}if(bone){this.m[k]=7;this.t[k]=boneCol(i,j);n++;continue;}this.m[k]=3;this.t[k]=(i-x===0||i-x===w-1)?cols[1]:cols[j-y?1:0];n++;}
+  for(let j=y;j<y+h;j++)for(let i=x;i<x+w;i++){if(i<0||i>=this.w||j<0||j>=this.h)continue;const k=j*this.w+i;if(this.m[k])continue;if(bone==='vine'){this.m[k]=3;const cap=j-y<2;this.t[k]=cap?(((i*7+j*3)%6===0)?0xffcce0e8>>>0:0xff2e3ac2>>>0):((i-x)%2?0xffa0c9d9>>>0:0xff7aa6b8>>>0);n++;continue;}if(bone){this.m[k]=7;this.t[k]=boneCol(i,j);n++;continue;}this.m[k]=3;this.t[k]=(i-x===0||i-x===w-1)?cols[1]:cols[j-y?1:0];n++;}
   this.mark(x,y,w,h);return n;}
+ shroomRow(x,y,w,cap,repaint,dir){for(let i=x;i<x+w;i++){if(i<0||i>=this.w||y<0||y>=this.h)continue;const k=y*this.w+i;
+   if(repaint){if(this.m[k]!==3)continue;if(i===(dir<0?x:x+w-1)){this.m[k]=0;continue;}}else{if(this.m[k])continue;this.m[k]=3;}
+   this.t[k]=cap?(((i*7+y*3)%6===0)?0xffcce0e8>>>0:0xff2e3ac2>>>0):((i-x)%2?0xff7aa6b8>>>0:0xffa0c9d9>>>0);}
+  this.mark(x,y,w,1);}
+ // spear stairs: still solid steps, painted as spears jabbed into the wall (steel head in the rock, wooden shaft sticking out, dark gaps between)
+ spearStairs(wx,gy,n,d,team){const wood=team?[0xff5a8cc0>>>0,0xff2c5078>>>0]:[0xff4a86c4>>>0,0xff2a5480>>>0],steel=[0xffd2d2c8>>>0,0xff7c8088>>>0],gap=0xff14202c>>>0;let c=0;
+  for(let o=1;o<=n*6;o++){const x=wx-d*o,k=n-Math.floor((o-1)/6),top=gy-6*k;if(x<0||x>=this.w)continue;
+   for(let y=top;y<gy;y++){if(y<0||y>=this.h)continue;const q=this.w*y+x;if(this.m[q])continue;const r=(y-top)%6;this.m[q]=3;this.t[q]=r<2?(o<=3?steel[r]:wood[r]):(o>6*(n-k)+5&&r===5?wood[1]:gap);c++;}}
+  this.mark(Math.min(wx-d*n*6,wx-d),gy-6*n,n*6+1,6*n+1);return c;}
  shade(i,j){const k=j*this.w+i,mt=this.m[k];if(!mt)return 0;const air=(a,b)=>!this.solid(a,b)&&a>=0&&a<this.w;let c=this.t[k];
   if(air(i,j-1))c=mul32(c,1.36);else if(air(i,j-2))c=mul32(c,1.14);
   if(air(i,j+1))c=mul32(c,.5);else if(air(i,j+2))c=mul32(c,.72);
@@ -1165,7 +1174,7 @@ const SKD=['Climbs any wall from now on','Glides down safely from any height','B
 const SPELLS={sleep:{n:'SLEEP',c:1,vc:3,r:56,d:'Enemies in the circle fall asleep',s:'ENEMIES SLEEP',col:'#50739b'},confuse:{n:'CONFUSE',c:1,vc:2,r:56,d:'Enemies stumble back and forth',s:'ENEMIES STUMBLE',col:'#f0d16b'},hypno:{n:'HYPNOSIS',c:2,vc:4,r:44,d:'Monsters fight for you, rivals walk to your hut',s:'ENEMIES ARE CHARMED',col:'#515d9d'},ward:{n:'WARD',c:1,vc:2,r:48,d:'Your troops survive one deadly hit',s:'SURVIVE ONE HIT',col:'#76bd5d'},rally:{n:'RALLY',c:1,r:72,d:'Lifts morale and ends sit-downs',s:'LIFTS MORALE',col:'#777d45'}},SPK=Object.keys(SPELLS),VS_SPELLS=['sleep','confuse','hypno','ward'];
 const TR=['boulder','stink','hex','mimic'],TRN=['BOULDER','STINK','HEX','MIMIC'],TRC=[2,1,2,3];
 const TRD=['Drops a rock. Crushes troops and bridges','Rivals near it panic and run the wrong way','Steals up to 3 rival troops','Fake door that eats rival troops'];
-const SKX={tongue:['TONGUE','Eats rats or zips to a wall'],spear:['SPEARS','Hammers steps up to a wall'],hop:['HOP','One big jump'],firepot:['FIREPOT','Burns wood and rats'],raise:['GRAVE WALK','Raises a troop once from a pile'],merge:['CONSTRUCT','Merges 4 into a big fighter'],bonebr:['BONE BRIDGE','Builds with a nearby pile'],glide:['GLIDE','Rides the air up and forward'],dust:['PIXIE DUST','Sends nearby enemies to sleep'],steam:['STEAM PACK','Blasts straight up'],cannon:['CANNON','Fires troops across the map'],spring:['SPRING BOOTS','Big jump. 1 scrap. Risky'],ratmine:['RAT MINE','Blasts rock. 2 scrap. Risky'],vine:['VINES','Grows a stair upward'],puff:['SPORE PUFF','Calms troops, stuns enemies'],sword:['SWORD','Fights what it meets, 2 hearts'],bow:['BOW','Stops and shoots enemies ahead'],swim:['SWIM','Crosses any water without drowning'],disarm:['DISARM','Walks past jaws, mines and presses'],walkr:['WALK','Stops what it is doing and marches']};
+const SKX={tongue:['TONGUE','Eats gorgers or zips to a wall'],spear:['SPEARS','Hammers steps up to a wall'],hop:['HOP','One big jump'],firepot:['FIREPOT','Burns wood and gorgers'],raise:['GRAVE WALK','Raises a troop once from a pile'],merge:['CONSTRUCT','Merges 4 into a big fighter'],bonebr:['BONE BRIDGE','Builds a tower that tips over, crushing all below'],glide:['GLIDE','Rides the air up and forward'],dust:['PIXIE DUST','Sends nearby enemies to sleep'],steam:['STEAM PACK','Blasts straight up'],cannon:['CANNON','Fires troops across the map'],spring:['SPRING BOOTS','Big jump. 1 scrap. Risky'],ratmine:['RAT MINE','Blasts rock. 2 scrap. Risky'],vine:['SHROOMS','Grows a stair of mushrooms'],puff:['SPORE PUFF','Calms troops, stuns enemies'],sword:['SWORD','Fights what it meets, 2 hearts'],bow:['BOW','Stops and shoots enemies ahead'],swim:['SWIM','Crosses any water without drowning'],disarm:['DISARM','Walks past jaws, mines and presses'],walkr:['WALK','Stops what it is doing and marches']};
 const DIFFS=[{k:'easy',n:'EASY',t:1.4,need:.85,mood:.7,score:.75},{k:'normal',n:'NORMAL',t:1,need:1,mood:1,score:1},{k:'hard',n:'HARD',t:.8,need:1.15,mood:1.3,score:1.5},{k:'wild',n:'WILD',t:.8,need:1.15,mood:1.3,score:2,wild:1}];
 // enemy units. Numbers are starting values to tune in play
 const FOES={rat:{n:'GUTTER GORGER',hp:1,sp:2,every:1,cd:0,r:5},skel:{n:'LEDGE STALKER',hp:2,sp:1,every:2,cd:24,r:6,patrol:1},spider:{n:'CAVE SPIDER',hp:5,sp:0,every:1,cd:20,r:12,tall:1,jump:1},arch:{n:'BOW RAIDER',hp:2,sp:0,every:1,cd:24,r:6,shoot:1,range:150,rate:70,lob:1},golem:{n:'BRUTE',hp:6,sp:1,every:3,cd:30,r:10,push:1,tall:1}};
@@ -1239,7 +1248,7 @@ class World{
    if(go){t.hit++;if(t.w!=='timer')t.r=0;this.fire(t.a);}}}
  fire(a){const[k,v]=a.split(':');const N={lowg:'LOW GRAVITY',highg:'HIGH GRAVITY',flood:'THE FLOOD IS RISING',lava:'LAVA IS RISING',dark:'THE LIGHTS GO OUT',wind:'THE WIND PICKS UP',quake:'EARTHQUAKE',fast:'DOUBLE SPEED'};
   if(k==='on'){this.rule[v]=1;this.say(N[v]+'!');this.snd('door');}else if(k==='off'){this.rule[v]=0;}
-  else if(k==='rats'){const hs=this.holes.length?this.holes:this.hatches;for(const h of hs)this.spawnRats(h,4);this.say('RATS!');this.snd('stink');}
+  else if(k==='rats'){const hs=this.holes.length?this.holes:this.hatches;for(const h of hs)this.spawnRats(h,4);this.say('GORGERS!');this.snd('stink');}
   else if(k==='debris'){this.say('ISLAND DEBRIS!');const live=this.gobs.filter(g=>this.alive(g));for(let i=0;i<5;i++){const g=live.length?live[(this.rnd()*live.length)|0]:null,tx=clamp((g?g.x:this.rnd()*this.T.w)+(this.rnd()*160-80|0)|0,8,this.T.w-9);let ty=0;while(ty<this.T.h&&!this.T.solid(tx,ty))ty++;const n=(ty+40)/8;this.ents.push({k:'meteor',rock:1,tx,ty,x:tx-n*1.4,y:-40,wait:30+i*22});}this.snd('rock');}
   else if(k==='surge'){const o=['lowg','highg','fast'].filter(q=>!this.rule[q]);if(!o.length)return;const q=o[this.rnd()*o.length|0];this.tempRule(q,200);this.surgeT=200;this.say('VORTEX SURGE! '+{lowg:'LOW GRAVITY',highg:'HIGH GRAVITY',fast:'DOUBLE SPEED'}[q]);this.shake=4;this.snd('door');}
   else if(k==='gale'){if(!this.tempRule('wind',260))return;this.tempRule('gust',260);this.gustDir=this.rnd()<.5?1:-1;this.say('A GALE BLOWS!');this.snd('door');}
@@ -1268,9 +1277,10 @@ class World{
  swims(g,lava){return lava?g.race==='imp':(g.race==='swamp'||!!g.swim);}
  doTongue(g){const T=this.T,d=g.dir,y=g.y-9;let hit=0;for(let i=8;i<=96&&!hit;i+=2){const x=g.x+d*i;for(const m of this.mobs)if(!m.dead&&Math.abs(m.x-x)<=4&&Math.abs(m.y-6-y)<=9){m.dead=1;hit=x;this.float(m.x,m.y-14,'GULP','#80a465');this.snd('chomp');break;}
    if(!hit)for(const o of this.gobs)if(this.alive(o)&&o.team!==g.team&&Math.abs(o.x-x)<=4&&Math.abs(o.y-6-y)<=9){o.x=o.px=g.x+d*12;o.y=o.py=g.y;o.dir=-o.dir;o.panic=60;if(TOOLS.includes(o.s)||o.s==='block')this.setS(o,'walk');hit=x;this.float(g.x,g.y-22,'YANK','#80a465');this.snd('hex');break;}
-   if(!hit&&T.solid(x,y)){hit=x;let t=y;while(t>y-18&&T.solid(x,t-1))t--;if(t>y-18&&!T.solid(x,t-1)){g.x=x+d*3;g.y=t;while(g.y>0&&T.solid(g.x,g.y-1))g.y--;}else{g.x=x-d*2;g.fallen=0;this.setS(g,'fall');}this.snd('door');}}
+   if(!hit&&T.solid(x,y)){hit=x;let t=y;while(t>y-18&&T.solid(x,t-1))t--;let landed=0;if(t>y-18&&!T.solid(x,t-1)){for(const o of[3,2,1,0,-1]){let nx=x+d*o,ny=t;while(ny>0&&T.solid(nx,ny-1))ny--;let clear=false;for(let k=2;k<=12;k++)if(T.solid(nx,ny-k)||T.solid(nx-d*2,ny-k)||T.solid(nx+d*2,ny-k)){clear=true;break;}if(!clear&&ny<=g.y+1&&ny>=g.y-26){g.x=nx;g.y=ny;landed=1;break;}}}if(!landed)this.float(g.x,g.y-22,'TOO HIGH','#80a465');this.snd('door');}}
   this.ents.push({k:'tongueFx',x0:g.px,y0:y,x1:hit||g.x+d*96,y1:y,l:5});}
- doSpear(g){const T=this.T,d=g.dir;let dist=0;for(let i=3;i<=62;i++)if(T.solid(g.x+d*i,g.y-3)){dist=i;break;}if(!dist){this.setS(g,'shrug');this.snd('deny');return;}const n=Math.min(10,Math.floor((dist-1)/6));if(n<1){this.setS(g,'shrug');return;}const wx=g.x+d*dist;for(let k=1;k<=n;k++){const cx=wx-d*(n-k+1)*6;T.plank(d>0?cx:cx-5,g.y-6*k,6,6*k,g.team);}this.setS(g,'shrug');this.snd('build');this.dust(wx,g.y-20,6);}
+ buried(){const T=this.T;for(const g of this.gobs)if(this.alive(g)&&(g.s==='walk'||g.s==='fall'||g.s==='shrug'||g.s==='sit'||g.s==='float')&&T.solid(g.x,g.y-1)&&T.solid(g.x,g.y-3)&&T.solid(g.x,g.y-7)&&T.solid(g.x,g.y-11)){if(g.bx===g.x&&g.by===g.y)this.kill(g,'press');else{g.bx=g.x;g.by=g.y;}}else if(g.bx!==undefined)g.bx=undefined;}
+ doSpear(g){const T=this.T,d=g.dir;let dist=0;for(let i=3;i<=62;i++)if(T.solid(g.x+d*i,g.y-3)){dist=i;break;}if(!dist){this.setS(g,'shrug');this.snd('deny');return;}const n=Math.min(10,Math.floor((dist-1)/6));if(n<1){this.setS(g,'shrug');return;}const wx=g.x+d*dist;T.spearStairs(wx,g.y,n,d,g.team);this.setS(g,'shrug');this.snd('build');this.dust(wx,g.y-20,6);this.buried();}
  potBurst(e){const T=this.T,x=e.x|0,y=e.y|0;for(let j=y-38;j<=y+38;j++)for(let i=x-42;i<=x+42;i++)if(i>=0&&j>=0&&i<T.w&&j<T.h&&(T.m[j*T.w+i]===3||T.m[j*T.w+i]===7)){T.m[j*T.w+i]=0;}T.mark(x-42,y-38,84,76);this.crush(x,y,20,e.team);this.boomFxSmall(x,y);this.snd('boom');this.shake=4;}
  boomFxSmall(x,y){if(this.quiet)return;const R=Math.random;for(let i=0;i<26;i++){const a=R()*TAU,s=20+R()*110;this.p(x,y,Math.cos(a)*s,Math.sin(a)*s-20,['#b5a64b','#db9016','#b64c1e'][R()*3|0],14+R()*16);}}
  stepTraps(){const T=this.T;for(const t of this.traps){if(t.cd>0)t.cd--;if(!t.live)continue;const ph=(this.tick+t.off)%(t.per||70);
@@ -1312,7 +1322,7 @@ class World{
  dust(x,y,n,sp=1){if(this.quiet)return;const R=Math.random;for(let i=0;i<n;i++){const px=x+(R()*8-4|0),py=y+(R()*8-4|0),k=clamp(py,0,this.T.h-1)*this.T.w+clamp(px,0,this.T.w-1),c=this.T.theme.ramp[3+(R()*3|0)];this.p(px,py,(R()-.5)*50*sp,-R()*70*sp,c,18+R()*16);}}
  float(x,y,s,c){if(!this.quiet)this.floats.push({x,y,s,c,l:40});}
  spawn(h){const g={x:h.x,y:h.y,px:h.x,py:h.y,team:h.team,dir:h.dir,s:'fall',t:0,fallen:0,climber:0,flap:0,fuse:0,panic:0,bricks:0,dry:0,race:this.pl[h.team].race,id:this.gobs.length};if(g.race==='dwarf')g.hp=2;if(g.race==='fairy')g.flap=1;this.gobs.push(g);this.pl[h.team].out++;this.snd('tick');return g;}
- step(){if(this.over)return;this.tick++;if(this.time>0&&!this.def.noTime)this.time--;
+ step(){if(this.over)return;this.tick++;if(this.tick%6===0)this.buried();if(this.time>0&&!this.def.noTime)this.time--;
   for(const h of this.hatches){if(h.open<8&&this.tick>20)h.open+=.5;if(h.left>0&&this.tick>=h.next){const g0=this.spawn(h);if(h.cl)g0.climber=1;if(h.fl)g0.flap=1;h.left--;h.next=this.tick+this.def.rate;}}
   this.blockers=this.gobs.filter(g=>g.s==='block');
   for(const p of this.pl)if(p.spellCd>0)p.spellCd--;this.stepTriggers();this.stepRules();this.stepTraps();this.stepMobs();this.stepNests();this.stepMood();this.stepWild();
@@ -1350,7 +1360,7 @@ class World{
   case'shrug':if(g.t>=12)this.setS(g,'walk');break;
   case'fly':{if(g.t>=g.flyT||T.solid(g.x,g.y-16)){g.fallen=0;this.setS(g,'fall');break;}g.y-=g.flyS;if(g.flyX&&!T.solid(g.x+g.flyX,g.y-5))g.x+=g.flyX;if(!this.quiet&&g.flyS>1)this.p(g.x,g.y,(Math.random()-.5)*20,30,'#8393a7',12);break;}
   case'gun':{if(!T.solid(g.x,g.y)&&!T.solid(g.x,g.y+1)&&!T.solid(g.x,g.y+2)){g.fallen=0;this.setS(g,'fall');break;}if(g.cd>0){g.cd--;break;}for(const o of this.gobs)if(o!==g&&o.team===g.team&&o.s==='walk'&&Math.abs(o.x-g.x)<=8&&Math.abs(o.y-g.y)<=8){o.s='fling';o.t=0;o.fx=g.x+g.dir*8;o.fy=g.y-10;o.x=g.x+g.dir*8;o.y=g.y-10;o.dir=g.dir;o.vx=g.dir*5.2;o.vy=-5.4;o.fallen=0;g.cd=8;g.shots++;this.snd('boom');this.shake=1;if(g.shots>=24)this.setS(g,'walk');break;}break;}
-  case'grow':{if(g.t%8!==7)break;const d=g.dir,x=g.vx0+d*(5+g.steps*4),y=g.vy0-(g.steps+1)*5;if(T.solid(d>0?x+6:x-6,y-8)||g.steps>=18||y<4){this.setS(g,'walk');break;}T.plank(d>0?x:x-3,y,4,5,g.team,'vine');g.steps++;this.snd('build');break;}
+  case'grow':{if(g.t%8!==7)break;const d=g.dir,x=g.vx0+d*(5+g.steps*4),y=g.vy0-(g.steps+1)*5;if(T.solid(d>0?x+6:x-6,y-8)||g.steps>=18||y<4){this.setS(g,'walk');break;}const bx=d>0?x:x-3;T.plank(bx,y,4,5,g.team,'vine');for(const o of this.gobs){if(!this.alive(o)||o===g||o.x<bx||o.x>=bx+4||o.y<=y||o.y-12>=y+5)continue;let ok=true;for(let k=1;k<=12;k++)if(T.solid(o.x,y-k)){ok=false;break;}if(ok)o.y=y;}g.steps++;this.snd('build');break;}
   case'sit':if(!T.solid(g.x,g.y)&&!T.solid(g.x,g.y+1)&&!T.solid(g.x,g.y+2)){g.fallen=0;this.setS(g,'fall');}break;
   case'fight':{const t=g.tg,mob=t&&t.max===undefined;if(!t||t.dead||(mob&&Math.abs(t.x-g.x)>12)||(!T.solid(g.x,g.y)&&!T.solid(g.x,g.y+1)&&!T.solid(g.x,g.y+2))){this.setS(g,'walk');break;}if(mob)t.hold=3;if(g.t%14===7){if(mob)this.hurtFoe(t,g.big?2:1);else this.hurtNest(t,g.big?2:1);if(t.dead)this.talk(g,'hurrah');}break;}
   case'shoot':{const t=g.tg;if(!t||t.dead||Math.abs(t.x-g.x)>150||!this.clearLine(g.x,t.x,g.y-8)||(!T.solid(g.x,g.y)&&!T.solid(g.x,g.y+1)&&!T.solid(g.x,g.y+2))){this.setS(g,'walk');break;}if(g.t%30===10){this.ents.push({k:'arrow',x:g.x+g.dir*6,y:g.y-8,vx:g.dir*5,team:g.team,l:40});this.snd('door');}break;}
@@ -1381,10 +1391,25 @@ class World{
   if(g.race!=='dwarf'&&T.hard(d>0?g.x+1:g.x-8,g.y-6,8,10,d*2)){this.snd('clank');g.dir=-d;return this.setS(g,'walk');}
   T.way=d*2;T.drill=g.race==='dwarf';T.carveEll(g.x+d*4,g.y-5,9,9,g.y+1);T.way=0;T.drill=false;this.dust(g.x+d*6,g.y,4);this.snd('pick');g.x+=d*3;g.y+=2;
   let dn=0;while(dn<6&&!T.solid(g.x,g.y+dn))dn++;if(dn>=6){g.fallen=0;return this.setS(g,'fall');}g.y+=dn;}
- build(g){const T=this.T,d=g.dir;if(g.t%10!==7)return;
+ build(g){const T=this.T,d=g.dir;if(g.boneB)return this.boneTower(g);if(g.t%10!==7)return;
   for(let h=3;h<=13;h++)if(T.solid(g.x+d*5,g.y-h)){g.dir=-d;return this.setS(g,'walk');}
   T.plank(d>0?g.x+1:g.x-9,g.y-2,9,2,g.team,g.boneB);this.snd('build');g.bricks--;g.x+=d*4;g.y-=2;
   if(g.bricks<=3&&g.bricks>0)this.float(g.x,g.y-20,String(g.bricks),'#fff');if(g.bricks<=0)this.setS(g,'shrug');}
+ plantShrooms(g){const T=this.T,d=g.dir,y0=g.y,cols=[];
+  for(let i=0;i<18;i++){const x=g.x+d*(5+i*7),tgt=y0-(i+1)*5,bx=d>0?x:x-6;if(tgt<4||bx<0||bx+7>=T.w)break;if(T.solid(d>0?bx+7:bx-1,tgt-8))break;let hit=false;for(let q=bx;q<bx+7;q++)if(T.solid(q,y0-1)){hit=true;break;}if(hit)break;cols.push({x:bx,w:7,top:y0,tgt});}
+  if(cols.length){const c=cols[cols.length-1];if(d>0){for(let k=0;k<8&&!T.solid(c.x+c.w,y0-2);k++)c.w++;}else{for(let k=0;k<8&&!T.solid(c.x-1,y0-2);k++){c.x--;c.w++;}}}
+  if(!cols.length){this.float(g.x,g.y-22,'NO ROOM','#80a465');this.snd('deny');return this.setS(g,'shrug');}
+  this.ents.push({k:'patch',cols,n:0,d,team:g.team});this.setS(g,'shrug');this.snd('build');}
+ boneTower(g){const T=this.T,d=g.dir;
+  if(g.tw===undefined){if(g.t%6!==3)return;g.tw=0;g.tx=g.x+d*4;g.ty=g.y;}
+  const bx=d>0?g.tx:g.tx-2,add=()=>{if(g.tw<12&&!T.solid(g.tx,g.ty-(g.tw+1)*4-1)){if(!g.tc)g.tc=[];for(let j=g.ty-(g.tw+1)*4;j<g.ty-g.tw*4;j++)for(let i=bx;i<bx+3;i++)if(i>=0&&i<T.w&&j>=0&&j<T.h&&!T.m[j*T.w+i])g.tc.push(j*T.w+i);T.plank(bx,g.ty-(g.tw+1)*4,3,4,g.team,1);g.tw++;return true;}return false;};
+  if(g.tw<12)for(const o of this.gobs){if(o===g||!this.alive(o)||o.team!==g.team||o.s!=='walk'||o.dir!==d)continue;const q=d*(g.tx-o.x);if(q<0||q>6||Math.abs(o.y-g.ty)>4)continue;
+   if(add()){add();o.s='dead';this.pl[o.team].lost++;this.deathFx(o,'fall');this.float(o.x,o.y-20,'BONES','#f0d16b');this.snd('build');}}
+  if(g.t%6!==3)return;
+  if(g.tw<12&&add()){this.snd('build');return;}
+  const h=g.tw*4;g.tw=undefined;g.bricks=0;g.boneB=0;this.setS(g,'shrug');if(h<8)return;
+  if(g.tc){for(const k of g.tc)if(T.m[k]===7)T.m[k]=0;T.mark(bx,g.ty-h,3,h);}g.tc=undefined;const L=h;
+  this.ents.push({k:'tip',own:g,x:g.tx,y:g.ty,d,len:Math.max(6,L),a:0,t:0,team:g.team,ex:g.tx,ey:g.ty-h});this.snd('hex');}
  explode(g){const T=this.T,x=g.x,y=g.y-6;T.carveEll(x,y,20,20);this.deathFx(g,'boom');this.leavePile(g);if(g.s!=='home'){this.pl[g.team].lost++;}g.s='dead';this.snd('boom');this.shake=8;
   if(!this.quiet){const R=Math.random;for(let i=0;i<46;i++){const a=R()*TAU,s=30+R()*150;this.p(x,y,Math.cos(a)*s,Math.sin(a)*s-30,['#b5a64b','#db9016','#b64c1e','#534842',T.theme.ramp[4]][R()*5|0],16+R()*22);}this.ents.push({k:'ring',x,y,r:2,l:12});}
   if(this.vs||this.fightMap)this.crush(x,y,17,g.team);if(this.fightMap)for(const n of this.nests)if(!n.dead&&Math.hypot(n.x-x,n.y-10-y)<34)this.hurtNest(n,4);}
@@ -1397,13 +1422,13 @@ class World{
   if(sk==='raise'||sk==='bonebr'){const q=this.nearPile(g,sk==='raise'?36:70,pl.id);if(!q){this.float(g.x,g.y-22,'NO BONES','#f0d16b');this.snd('deny');return false;}this.takePile(q);if(sk==='raise'){pl.lost=Math.max(0,pl.lost-1);this.spawn({x:q.x,y:q.y-10,team:g.team,dir:g.dir}).raised=1;this.float(q.x,q.y-20,'RISE','#96927f');this.snd('hex');}else g.boneB=1;}
   {const cost={spring:1,ratmine:2}[sk];if(cost){if(pl.scrap<cost){this.float(g.x,g.y-22,'NO SCRAP','#f0d16b');this.snd('deny');return false;}pl.scrap-=cost;}}
   if(sk==='merge'){const near=this.gobs.filter(a=>a!==g&&a.team===g.team&&a.s==='walk'&&!a.armed&&!a.bow&&Math.hypot(a.x-g.x,a.y-g.y)<=60).sort((a,b)=>Math.hypot(a.x-g.x,a.y-g.y)-Math.hypot(b.x-g.x,b.y-g.y)).slice(0,3);if(near.length<3){this.float(g.x,g.y-22,'NEED 4','#f0d16b');this.snd('deny');return false;}for(const a of near)a.s='held';g.inside=near;g.big=1;g.armed=1;g.hp=4+(pl.perk.bighp||0);this.float(g.x,g.y-30,'CONSTRUCT!','#96927f');this.snd('hex');}this.log.push({x:g.x,y:g.y,d:g.dir,s:sk,st:g.s,tk:this.tick,team:pl.id});pl.skills[sk]--;
-  switch(sk){case'climb':g.climber=1;break;case'flap':g.flap=1;break;case'swim':g.swim=1;this.snd('select');break;case'disarm':g.disarm=1;this.snd('select');break;case'walkr':g.bricks=0;this.setS(g,'walk');break;case'boom':g.fuse=125;break;case'block':this.setS(g,'block');break;case'build':g.bricks=12;this.setS(g,'build');break;
+  switch(sk){case'climb':g.climber=1;break;case'flap':g.flap=1;break;case'swim':g.swim=1;this.snd('select');break;case'disarm':g.disarm=1;this.snd('select');break;case'walkr':g.bricks=0;this.setS(g,'walk');break;case'boom':g.fuse=125;break;case'block':this.setS(g,'block');break;case'build':g.bricks=12;g.boneB=0;g.tw=undefined;g.tc=undefined;this.setS(g,'build');break;
    case'glide':g.flyT=74;g.flyS=1;g.flyX=g.dir;this.setS(g,'fly');break;case'steam':g.flyT=50;g.flyS=2;g.flyX=g.dir;this.setS(g,'fly');this.snd('stink');break;case'cannon':g.shots=0;g.cd=0;this.setS(g,'gun');break;
    case'spring':{const bad=this.rnd()<1/6;g.s='fling';g.t=0;g.fx=g.x;g.fy=g.y-1;g.vx=(bad?-g.dir:g.dir)*3.4;g.vy=-6.2;g.fallen=0;if(bad)this.float(g.x,g.y-22,'OOPS','#eb6f39');this.snd('door');break;}
    case'ratmine':{const bad=this.rnd()<1/6;this.ents.push({k:'rmine',x:g.x+(bad?0:g.dir*8),y:g.y,t:bad?12:75,team:g.team});if(bad)this.float(g.x,g.y-22,'OOPS','#eb6f39');break;}
    case'dust':case'puff':{const r=sk==='dust'?64:56;for(const m of this.mobs)if(!m.dead&&Math.hypot(m.x-g.x,m.y-g.y)<r)m.sleep=sk==='dust'?250:125;if(sk==='puff'){pl.mood=Math.min(100,pl.mood+10);for(const o of this.gobs)if(o.team===g.team&&o.s==='sit'&&Math.hypot(o.x-g.x,o.y-g.y)<80)this.setS(o,'walk');}this.ents.push({k:'cloud',x:g.x,y:g.y-10,l:30,team:g.team,col:sk});this.setS(g,'shrug');this.snd('hex');break;}
-   case'vine':g.vx0=g.x;g.vy0=g.y;g.steps=0;this.setS(g,'grow');break;
-   case'raise':break;case'merge':break;case'bonebr':g.bricks=12;this.setS(g,'build');break;case'sword':g.armed=1;g.hp=2;break;case'bow':g.bow=1;break;case'tongue':this.setS(g,'tongue');break;case'spear':this.doSpear(g);break;
+   case'vine':this.plantShrooms(g);break;
+   case'raise':break;case'merge':break;case'bonebr':g.bricks=12;g.tw=undefined;g.tc=undefined;this.setS(g,'build');break;case'sword':g.armed=1;g.hp=2;break;case'bow':g.bow=1;break;case'tongue':this.setS(g,'tongue');break;case'spear':this.doSpear(g);break;
    case'hop':{const q=pl.perk.hop||1;g.s='fling';g.t=0;g.fx=g.x;g.fy=g.y-1;g.vx=g.dir*3.2*q;g.vy=-4.2;g.fallen=0;this.snd('door');break;}
    case'firepot':this.ents.push({k:'pot',x:g.x+g.dir*4,y:g.y-10,vx:g.dir*4.4,vy:-1.6,team:g.team});this.setS(g,'shrug');this.snd('door');break;
    default:this.setS(g,sk);}
@@ -1420,6 +1445,21 @@ class World{
   if(vs)p.grog-=cost;else p.mana-=cost;p.spellCd=vs?500:250;this.ents.push({k:'ring',x,y:y-6,r:8,l:16});this.float(x,y-14,S.n+'!',S.col);this.snd('select');if(this.onSpend)this.onSpend(p);return true;}
  tickEnt(e){const T=this.T;
   if(e.k==='ring'){e.r+=3;return--e.l>0;}
+  if(e.k==='patch'){if(++e.n%6)return true;let live=false;
+   for(const c of e.cols){if(c.top<=c.tgt||c.dead)continue;let free=true;for(let i=c.x;i<c.x+c.w;i++)if(T.solid(i,c.top-1)){free=false;break;}
+    if(!free){c.dead=1;continue;}
+    const nt=c.top-1;
+    for(const o of this.gobs)if(this.alive(o)&&o.x>=c.x&&o.x<c.x+c.w&&o.y===c.top&&(o.s==='walk'||o.s==='sit'||o.s==='shrug'||o.s==='block'||o.s==='build'||o.s==='dig'||o.s==='bash')){let ok=true;for(let k=1;k<=12;k++)if(T.solid(o.x,nt-k)){ok=false;break;}if(ok)o.y=nt;}
+    T.shroomRow(c.x,nt,c.w,true);T.shroomRow(c.x,nt+3,c.w,false,true,e.d);c.top=nt;live=true;}
+   if(live&&e.n%9===0)this.snd('build');return live||e.cols.some(c=>!c.dead&&c.top>c.tgt);}
+  if(e.k==='tip'){e.t++;if(e.own&&e.own.s==='shrug')e.own.t=0;const f=Math.min(1,e.t/38);let a=Math.PI/2*f*f,rest=false;if(e.t>3)for(let q=e.len*.5;q<=e.len;q+=2){if(T.solid(Math.round(e.x+e.d*q*Math.sin(a)),Math.round(e.y-q*Math.cos(a))-2)){a=e.a||0;rest=true;break;}}e.a=a;const len=e.len,d=e.d;e.ex=e.x+d*len*Math.sin(a);e.ey=e.y-len*Math.cos(a);
+   const hit=(ux,uy)=>{for(let q=0;q<=len;q+=3){const px=e.x+d*q*Math.sin(a),py=e.y-q*Math.cos(a);if(d*(ux-e.x)>=1&&Math.abs(ux-px)<4&&Math.abs(uy-py)<5)return true;}return false;};
+   const land=rest||e.t>=38;
+   for(const o of this.gobs)if(this.alive(o)&&o!==e.own&&o.s!=='home'&&(hit(o.x,o.y-6)||(land&&o.x>=Math.min(e.x,e.x+d*len)&&o.x<=Math.max(e.x,e.x+d*len)&&o.y>=e.y&&o.y-12<=e.y+2))){this.splat(o);this.deathFx(o,'fall');}
+   for(const m of this.mobs)if(!m.dead&&hit(m.x,m.y-6))this.hurtFoe(m,3);
+   if(land){if(rest){let lip=0;const fx=Math.round(e.ex+d*3);for(let k=3;k<=16;k++){if(T.solid(fx,Math.round(e.ey)-k))lip++;else break;}
+    if(a<.78||lip>3){const R=Math.random;if(!this.quiet)for(let i=0;i<14;i++)this.p(e.ex,e.ey,(R()-.5)*90,-R()*70,['#d8d2b8','#a9a48c','#7c7866'][R()*3|0],20+R()*16);this.float(e.ex,e.ey-14,'SNAP','#f0d16b');this.snd('deny');return false;}}
+   if(a>1.55)T.plank(d>0?e.x:e.x-len,e.y,len,3,e.team,1);else for(let q=0;q<=len+4;q+=.5)T.plank(Math.round(e.x+d*q*Math.sin(a)),Math.round(e.y-q*Math.cos(a)),1,3,e.team,1);this.shake=Math.max(this.shake||0,5);this.snd('boom');return false;}return true;}
   if(e.k==='tongueFx')return--e.l>0;
   if(e.k==='rmine'){if(--e.t>0)return true;T.carveEll(e.x,e.y-6,26,22,e.y-1);for(const g of this.gobs)if(this.alive(g)&&Math.hypot(g.x-e.x,g.y-6-e.y+6)<20)this.kill(g,'boom');for(const m of this.mobs)if(!m.dead&&Math.hypot(m.x-e.x,m.y-e.y)<30)this.hurtFoe(m,4);for(const n of this.nests)if(!n.dead&&Math.hypot(n.x-e.x,n.y-e.y)<38)this.hurtNest(n,5);this.boomFx(e.x,e.y-6);this.snd('boom');this.shake=7;return false;}
   if(e.k==='meteor'){if(e.wait>0){e.wait--;return true;}e.vy=Math.min((e.vy||3)+.5,9);e.y+=e.vy;e.x+=1.4;if(e.y<e.ty)return true;const x=e.tx,y=e.ty;if(y<T.h){T.carveEll(x,y,24,20);this.dust(x,y,18,1.5);}for(const g of this.gobs)if(this.alive(g)&&Math.hypot(g.x-x,g.y-y)<27)this.kill(g,'boom');for(const m of this.mobs)if(!m.dead&&Math.hypot(m.x-x,m.y-y)<27)this.hurtFoe(m,3);for(const n of this.nests)if(!n.dead&&Math.hypot(n.x-x,n.y-y)<34)this.hurtNest(n,3);this.boomFx(x,y-6);this.snd('boom');this.shake=8;return false;}
@@ -1489,7 +1529,7 @@ const LEVELS=[
  hatch:[{x:80,y:130,dir:1}],doors:[{x:720,y:200}],rules:['dark'],traps:[{k:'jaws',x:330,y:204},{k:'jaws',x:346,y:204}],
  build(S){S.wavy(0,300,204,3,30,2);S.box(290,204,90,96);S.wavy(370,820,204,3,30,1);S.rock(520,70,44,150,3);S.box(0,0,820,66);},
  plan:[{x:304,d:1,s:'build',tol:1},{x:506,d:1,s:'bash',tol:3,wait:120}]},
-{name:'Rat Pit',theme:'frost',w:860,h:320,n:24,need:12,rate:30,time:220,hint:'The rats are hungry and the rocks are early. Chain two BRIDGES over the pit.',skills:{build:6},
+{name:'Rat Pit',theme:'frost',w:860,h:320,n:24,need:12,rate:30,time:220,hint:'The gorgers are hungry and the rocks are early. Chain two BRIDGES over the pit.',skills:{build:6},
  hatch:[{x:90,y:120,dir:1}],doors:[{x:740,y:190}],holes:[{x:340,y:230,awake:1}],trig:[{w:'timer',n:30,who:0,a:'boulders',r:0}],
  build(S){S.wavy(0,300,190,4,40,1);S.box(290,250,100,70);S.wavy(380,860,190,4,40,3);},
  plan:[{x:290,d:1,s:'build',tol:1},{st:'shrug',s:'build',n:1}]},
@@ -1543,7 +1583,7 @@ const RACE_LEVELS={goblin:LEVELS,
   hatch:[{x:90,y:110,dir:1}],doors:[{x:690,y:146}],haz:[{x0:240,x1:505,y:206}],
   build(S){S.wavy(0,246,190,4,40,1);S.box(236,262,300,38);S.ramp(430,256,520,190);S.box(520,190,60,110);S.land(574,780,146,2);},
   plan:[{x:532,d:1,s:'spear',tol:1}]},
- {race:'swamp',name:'Second Breakfast',theme:'marsh',w:720,h:300,n:20,need:12,rate:34,time:200,hint:'The rats think you are lunch. Show them the TONGUE first.',skills:{tongue:6},
+ {race:'swamp',name:'Second Breakfast',theme:'marsh',w:720,h:300,n:20,need:12,rate:34,time:200,hint:'The gorgers think you are lunch. Show them the TONGUE first.',skills:{tongue:6},
   hatch:[{x:90,y:110,dir:1}],doors:[{x:640,y:196}],holes:[{x:430,y:190,awake:1}],
   build(S){S.wavy(0,720,196,3,40,2);S.box(0,0,720,40);S.iron(20,40,12,156);},
   plan:[{s:'tongue',rat:6,n:6}]},
@@ -1571,7 +1611,7 @@ const RACE_LEVELS={goblin:LEVELS,
  {race:'bone',name:'Graveyard Shift',theme:'crypts',w:900,h:300,n:24,need:6,rate:22,time:240,goal:'both',hint:'Spend one to cross, merge four to fight, and send the rest home.',skills:{boom:2,bonebr:2,merge:2},
   hatch:[{x:70,y:165,dir:1}],doors:[{x:850,y:230}],nests:[{x:690,y:230,kind:'skel',per:300,hp:8,cap:1}],
   build(S){S.iron(0,230,320,70);S.iron(366,230,534,70);},
-  plan:[{s:'boom',x:176,tol:1},{s:'bonebr',x:316,tol:2,d:1},{s:'merge',x:430,tol:10,n:2}]}],
+  plan:[{s:'boom',x:176,tol:1},{s:'bonebr',x:316,tol:2,d:1},{s:'merge',x:430,tol:40,n:2}]}],
  fairy:[
  {race:'fairy',name:'Mind the Breeze',theme:'garden',w:900,h:300,n:20,need:12,rate:34,time:200,rules:['gust'],hint:'Fairies flutter over small gaps. GLIDE over the wall and the gate will open.',skills:{glide:3},
   hatch:[{x:90,y:150,dir:1}],doors:[{x:830,y:220}],gates:[{x:520,y:190,w:14,h:30}],zones:[{id:1,x:544,y:170,w:90,h:52}],trig:[{w:'zone',n:1,who:0,a:'open',r:0}],
@@ -1603,9 +1643,9 @@ const RACE_LEVELS={goblin:LEVELS,
   hatch:[{x:90,y:150,dir:1}],doors:[{x:810,y:216}],traps:[{k:'belt',x:580,y:216,w:100,dir:-1}],
   build(S){S.box(0,216,300,104);S.box(300,262,260,58);S.ramp(262,216,332,262);S.ramp(490,262,560,216);S.box(560,216,320,104);S.rock(420,180,20,90,1);},plan:[{x:415,tol:3,d:1,s:'ratmine',n:1}]}],
  shroom:[
- {race:'shroom',name:'Slow Growth',theme:'caves',w:800,h:300,n:18,need:12,rate:40,time:240,hint:'Plant VINES well back from the cliff, and let them grow.',skills:{vine:3},
+ {race:'shroom',name:'Slow Growth',theme:'caves',w:800,h:300,n:18,need:12,rate:40,time:240,hint:'Grow a MUSHROOM stair well back from the cliff.',skills:{vine:3},
   hatch:[{x:90,y:150,dir:1}],doors:[{x:720,y:150}],
-  build(S){S.box(0,230,800,70);S.box(420,150,380,150);},plan:[{x:350,d:1,s:'vine',tol:2}]},
+  build(S){S.box(0,230,800,70);S.box(420,150,380,150);},plan:[{x:295,d:1,s:'vine',tol:2}]},
  {race:'shroom',name:'It Grows Back',theme:'caves',w:760,h:340,n:18,need:8,rate:34,time:220,rules:['regrow'],hint:'This cave heals itself. DIG, and get everyone through before the hole closes.',skills:{dig:4},
   hatch:[{x:90,y:90,dir:1}],doors:[{x:640,y:290}],
   build(S){S.box(0,0,760,20);S.box(0,160,760,50);S.box(0,290,760,50);S.box(0,20,16,270);S.box(744,20,16,270);},plan:[{x:300,d:1,s:'dig',tol:2},{x:300,tol:2,s:'dig',wait:360},{x:300,tol:2,s:'dig',wait:720}]},
@@ -1621,7 +1661,7 @@ const RACE_LEVELS={goblin:LEVELS,
   hatch:[{x:90,y:130,dir:1}],doors:[{x:660,y:208}],gates:[{x:300,y:186,w:14,h:26}],zones:[{id:1,x:326,y:170,w:60,h:44}],trig:[{w:'zone',n:1,who:0,a:'open',r:0}],traps:[{k:'jet',x:470,y:208,per:70},{k:'jet',x:530,y:208,per:70}],
   build(S){S.wavy(0,760,210,2,40,1);S.iron(20,120,12,92);},
   plan:[{x:262,d:1,s:'hop',tol:1}]},
- {race:'imp',name:'Bonfire Night',theme:'forge',w:800,h:300,n:20,need:10,rate:34,time:200,hint:'Fire jets tickle Imps and roast rats. Burn the fences and walk through.',skills:{firepot:6},
+ {race:'imp',name:'Bonfire Night',theme:'forge',w:800,h:300,n:20,need:10,rate:34,time:200,hint:'Fire jets tickle Imps and roast gorgers. Burn the fences and walk through.',skills:{firepot:6},
   hatch:[{x:90,y:110,dir:1}],doors:[{x:720,y:196}],holes:[{x:470,y:190,awake:1}],traps:[{k:'jet',x:220,y:196,per:70},{k:'jet',x:424,y:196,per:40},{k:'jet',x:540,y:196,per:40}],
   build(S){S.wavy(0,800,196,3,40,2);S.box(0,0,800,40);S.box(380,40,20,160,3);S.box(600,40,20,160,3);S.box(376,196,28,12,1);S.box(596,196,28,12,1);},
   plan:[{x:340,d:1,s:'firepot',tol:2},{x:562,d:1,s:'firepot',tol:2,wait:120}]},
@@ -1636,7 +1676,7 @@ RACE_LEVELS.swamp.push(
   hatch:[{x:90,y:110,dir:1}],doors:[{x:980,y:108}],haz:[{x0:240,x1:505,y:206}],
   build(S){S.wavy(0,246,190,4,40,1);S.box(236,262,300,38);S.ramp(430,256,520,190);S.box(520,190,60,110);S.land(574,780,146,2);S.land(780,1040,108,2);},
   plan:[{x:532,d:1,s:'spear',tol:1},{x:732,d:1,s:'spear',tol:1,wait:60}]},
- {race:'swamp',name:'Rat Run Rumble',theme:'marsh',w:1160,h:300,n:28,need:14,rate:26,time:260,hint:'Three rat holes, all awake. Keep the TONGUE busy and the line moving.',skills:{tongue:14},
+ {race:'swamp',name:'Rat Run Rumble',theme:'marsh',w:1160,h:300,n:28,need:14,rate:26,time:260,hint:'Three gorger holes, all awake. Keep the TONGUE busy and the line moving.',skills:{tongue:14},
   hatch:[{x:90,y:110,dir:1}],doors:[{x:1090,y:196}],holes:[{x:330,y:190,awake:1},{x:620,y:190},{x:900,y:190}],
   build(S){S.wavy(0,1160,196,3,40,2);S.box(0,0,1160,40);S.iron(20,40,12,156);},
   plan:[{s:'tongue',rat:6,n:14}]}
@@ -1649,7 +1689,7 @@ RACE_LEVELS.bone.push(
  {race:'bone',name:'The Long Dark',theme:'crypts',w:1160,h:300,n:28,need:10,rate:24,time:320,goal:'both',hint:'A long road, a gap and a nest at the end. Bridge it, merge the strong, send the rest home.',skills:{boom:3,bonebr:3,merge:3},
   hatch:[{x:70,y:165,dir:1}],doors:[{x:1090,y:230}],nests:[{x:800,y:230,kind:'skel',per:300,hp:8,cap:1}],
   build(S){S.iron(0,230,420,70);S.iron(466,230,694,70);},
-  plan:[{s:'boom',x:280,tol:1},{s:'bonebr',x:416,tol:2,d:1},{s:'merge',x:500,tol:10,n:2}]}
+  plan:[{s:'boom',x:280,tol:1},{s:'bonebr',x:416,tol:2,d:1},{s:'merge',x:500,tol:40,n:2}]}
 );
 RACE_LEVELS.fairy.push(
  {race:'fairy',name:'Iron Garden',theme:'garden',w:1000,h:300,n:24,need:11,rate:32,time:260,hint:'Iron everywhere. BRIDGE over each plate before it zaps them.',skills:{build:8},
@@ -1685,9 +1725,9 @@ RACE_LEVELS.rat.push(
   build(S){S.box(0,216,300,104);S.box(300,262,260,58);S.ramp(262,216,332,262);S.ramp(490,262,560,216);S.box(560,216,640,104);S.rock(420,180,20,90,1);S.rock(900,130,20,90,1);},plan:[{x:415,tol:3,d:1,s:'ratmine',n:1},{x:890,tol:3,d:1,s:'ratmine',n:1,wait:80}],seed:2}
 );
 RACE_LEVELS.shroom.push(
- {race:'shroom',name:'Overgrown',theme:'caves',w:1000,h:300,n:20,need:12,rate:36,time:280,hint:'Two cliffs, two crops. Plant VINES back from each one and let them grow.',skills:{vine:6},
+ {race:'shroom',name:'Overgrown',theme:'caves',w:1000,h:300,n:20,need:12,rate:36,time:280,hint:'Two cliffs, two crops. Grow a MUSHROOM stair back from each one.',skills:{vine:6},
   hatch:[{x:90,y:150,dir:1}],doors:[{x:930,y:90}],
-  build(S){S.box(0,230,1000,70);S.box(420,150,580,150);S.box(720,90,280,210);},plan:[{x:350,d:1,s:'vine',tol:2},{x:650,d:1,s:'vine',tol:2,wait:200}]},
+  build(S){S.box(0,230,1000,70);S.box(420,150,580,150);S.box(720,90,280,210);},plan:[{x:295,d:1,s:'vine',tol:2},{x:625,d:1,s:'vine',tol:2,wait:200}]},
  {race:'shroom',name:'Three Floors Down',theme:'caves',w:900,h:420,n:20,need:8,rate:32,time:400,rules:['regrow'],hint:'Three floors and a cave that heals. DIG down fast and get everyone through.',skills:{dig:10},
   hatch:[{x:90,y:90,dir:1}],doors:[{x:740,y:350}],
   build(S){S.box(0,0,900,20);S.box(0,160,900,30);S.box(0,260,900,30);S.box(0,350,900,70);S.box(0,20,16,330);S.box(884,20,16,330);},plan:[{x:300,tol:3,s:'dig',y:160,ytol:15},{x:300,tol:3,s:'dig',y:160,ytol:15,wait:360},{x:300,tol:10,s:'dig',y:260,ytol:15,wait:450},{x:300,tol:10,s:'dig',y:260,ytol:15,wait:650},{x:300,tol:10,s:'dig',y:260,ytol:15,wait:850},{x:300,tol:10,s:'dig',y:260,ytol:15,wait:1050},{x:300,tol:10,s:'dig',y:260,ytol:15,wait:1250},{x:300,tol:10,s:'dig',y:260,ytol:15,wait:1450}]},
@@ -1706,9 +1746,9 @@ RACE_LEVELS.imp.push(
 
 // everything the builder needs to know about Rabblings. A future game supplies its own profile
 const RULES=[['lowg','LOW GRAVITY'],['highg','HIGH GRAVITY'],['flood','SLOW FLOOD'],['lava','RISING LAVA'],['dark','DARKNESS'],['wind','STRONG WIND'],['quake','EARTHQUAKE'],['fast','DOUBLE SPEED'],['gust','WIND GUSTS'],['tide','TIDES'],['regrow','REGROWING LAND']];
-const ACTIONS=[['on:flood','FLOOD STARTS'],['off:flood','FLOOD STOPS'],['on:lava','LAVA RISES'],['off:lava','LAVA STOPS'],['on:lowg','LOW GRAVITY ON'],['off:lowg','LOW GRAVITY OFF'],['on:highg','HIGH GRAVITY ON'],['off:highg','HIGH GRAVITY OFF'],['on:dark','LIGHTS OUT'],['off:dark','LIGHTS ON'],['on:wind','WIND STARTS'],['off:wind','WIND STOPS'],['on:quake','QUAKE STARTS'],['off:quake','QUAKE STOPS'],['on:fast','SPEED UP'],['off:fast','SLOW DOWN'],['rats','RELEASE RATS'],['meteors','METEOR STRIKE'],['spider','CAVE SPIDER'],['swoop','GALE RAPTOR'],['lurker','MIRE LURKER'],['bigquake','BIG QUAKE'],['open','OPEN GATES'],['close','CLOSE GATES'],['boulders','DROP BOULDERS']];
+const ACTIONS=[['on:flood','FLOOD STARTS'],['off:flood','FLOOD STOPS'],['on:lava','LAVA RISES'],['off:lava','LAVA STOPS'],['on:lowg','LOW GRAVITY ON'],['off:lowg','LOW GRAVITY OFF'],['on:highg','HIGH GRAVITY ON'],['off:highg','HIGH GRAVITY OFF'],['on:dark','LIGHTS OUT'],['off:dark','LIGHTS ON'],['on:wind','WIND STARTS'],['off:wind','WIND STOPS'],['on:quake','QUAKE STARTS'],['off:quake','QUAKE STOPS'],['on:fast','SPEED UP'],['off:fast','SLOW DOWN'],['rats','RELEASE GORGERS'],['meteors','METEOR STRIKE'],['spider','CAVE SPIDER'],['swoop','GALE RAPTOR'],['lurker','MIRE LURKER'],['bigquake','BIG QUAKE'],['open','OPEN GATES'],['close','CLOSE GATES'],['boulders','DROP BOULDERS']];
 const WHEN=[['timer','TIMER'],['deaths','DEATHS'],['home','HOME'],['zone','ZONE']];
-const OBJ=[['hatch','HATCH'],['door','HUT'],['pool','POOL'],['gate','GATE'],['zone','ZONE'],['hole','RATS'],['jaws','JAWS'],['mine','MINE'],['jet','JET'],['press','PRESS'],['catapult','LAUNCH'],['warp','WARP'],['nest','NEST'],['foe','ENEMY'],['spring','SPRING'],['belt','BELT'],['keg','KEG'],['scrap','SCRAP']];
+const OBJ=[['hatch','HATCH'],['door','HUT'],['pool','POOL'],['gate','GATE'],['zone','ZONE'],['hole','GORGERS'],['jaws','JAWS'],['mine','MINE'],['jet','JET'],['press','PRESS'],['catapult','LAUNCH'],['warp','WARP'],['nest','NEST'],['foe','ENEMY'],['spring','SPRING'],['belt','BELT'],['keg','KEG'],['scrap','SCRAP']];
 const GOALS=[['home','GET HOME'],['clear','CLEAR MAP'],['both','CLEAR + HOME']],FOE_KINDS=['skel','arch','golem','rat'];
 const MAPDEF={v:1,fmt:2,game:'rabblings',gen:1,mana:2,name:'NEW MAP',hint:'A custom map.',theme:'bog',setting:'auto',style:'puzzle',mode:'solo',by:'',goal:'home',swap:null,morale:1,wild:0,w:800,h:300,n:20,need:12,rate:32,time:240,noTricks:0,sep:0,skills:{climb:3,flap:3,boom:3,block:3,build:5,bash:3,pick:3,dig:3},skills2:null,ops:[],objs:[],rules:[],trig:[],floodRate:10,plan:null,proof:null};
 // routes steer the generator: where start and end go, what shows up on the way, and which land suits them
@@ -1721,8 +1761,8 @@ const GEN_KINDS={pts:['hatch','door'],trp:['jaws','jet','press','mine'],mch:['wa
 const GEN_VERSION=1;
 const MENU_GROUPS=[['terrain','TERRAIN'],['shapes','SHAPES'],['pieces','BLOCKS'],['points','START + END',['hatch','door','warp']],['traps','TRAPS',['jaws','mine','jet','press','pool']],['foes','ENEMIES',['foe','nest','hole']],['machines','MACHINES',['catapult','spring','belt','gate']],['items','ITEMS + ZONES',['keg','scrap','zone']],['decor','DECOR']];
 const PROFILE={id:'rabblings',name:'Rabblings',genVersion:GEN_VERSION,materials:[[1,'DIRT'],[2,'IRON'],[3,'WOOD']],rules:RULES,actions:ACTIONS,when:WHEN,objects:OBJ,goals:GOALS,foeKinds:FOE_KINDS,routes:TPL,genKinds:GEN_KINDS,menu:MENU_GROUPS,
- hints:{hatch:'Troops drop in here.',door:'Troops walk in here to get home.',warp:'Place two stones. Troops step from one to the other.',jaws:'Snaps shut on anyone who walks in.',mine:'Blows up when stepped on.',jet:'Fires flame on a timer.',press:'Crushes on a timer.',pool:'Drag sideways to set the width of the water or lava.',foe:'One enemy, placed where you click.',nest:'Spawns enemies until it is destroyed.',hole:'Rats pour out, at the start or from a trigger.',catapult:'Launches troops across the map.',spring:'Bounces troops into the air.',belt:'Carries troops along.',gate:'Drag out a gate. Triggers open and close it.',keg:'Dwarves drink here to lift morale.',scrap:'Ratfolk collect this for gadgets.',zone:'Drag out an area for triggers to watch.'},
- tips:{DIRT:'Soft ground that troops can dig through.',IRON:'Tough metal that stops most digging.',WOOD:'Planks that burn and can be chewed.','G:TERRAIN':'Brushes and materials.','G:SHAPES':'Ready-made terrain shapes.','G:START + END':'Hatches, huts and warp stones.','G:TRAPS':'Things that hurt troops.','G:ENEMIES':'Enemies, nests and rats.','G:MACHINES':'Launchers, springs, belts and gates.','G:ITEMS + ZONES':'Pickups and trigger zones.','G:DECOR':'Art to dress up your map.','LOW GRAVITY':'Troops fall slowly.','HIGH GRAVITY':'Troops fall hard.','SLOW FLOOD':'Water rises through the mission.','RISING LAVA':'Lava rises through the mission.',DARKNESS:'Only a small area can be seen.','STRONG WIND':'Wind pushes falling troops.',EARTHQUAKE:'The ground shakes and crumbles.','DOUBLE SPEED':'Everything runs twice as fast.','WIND GUSTS':'Wind comes and goes.',TIDES:'Water rises and falls.','REGROWING LAND':'Dug ground slowly grows back.'}};
+ hints:{hatch:'Troops drop in here.',door:'Troops walk in here to get home.',warp:'Place two stones. Troops step from one to the other.',jaws:'Snaps shut on anyone who walks in.',mine:'Blows up when stepped on.',jet:'Fires flame on a timer.',press:'Crushes on a timer.',pool:'Drag sideways to set the width of the water or lava.',foe:'One enemy, placed where you click.',nest:'Spawns enemies until it is destroyed.',hole:'Gorgers pour out, at the start or from a trigger.',catapult:'Launches troops across the map.',spring:'Bounces troops into the air.',belt:'Carries troops along.',gate:'Drag out a gate. Triggers open and close it.',keg:'Dwarves drink here to lift morale.',scrap:'Ratfolk collect this for gadgets.',zone:'Drag out an area for triggers to watch.'},
+ tips:{DIRT:'Soft ground that troops can dig through.',IRON:'Tough metal that stops most digging.',WOOD:'Planks that burn and can be chewed.','G:TERRAIN':'Brushes and materials.','G:SHAPES':'Ready-made terrain shapes.','G:START + END':'Hatches, huts and warp stones.','G:TRAPS':'Things that hurt troops.','G:ENEMIES':'Enemies, nests and gorgers.','G:MACHINES':'Launchers, springs, belts and gates.','G:ITEMS + ZONES':'Pickups and trigger zones.','G:DECOR':'Art to dress up your map.','LOW GRAVITY':'Troops fall slowly.','HIGH GRAVITY':'Troops fall hard.','SLOW FLOOD':'Water rises through the mission.','RISING LAVA':'Lava rises through the mission.',DARKNESS:'Only a small area can be seen.','STRONG WIND':'Wind pushes falling troops.',EARTHQUAKE:'The ground shakes and crumbles.','DOUBLE SPEED':'Everything runs twice as fast.','WIND GUSTS':'Wind comes and goes.',TIDES:'Water rises and falls.','REGROWING LAND':'Dug ground slowly grows back.'}};
 
 // Rabblings map rules: blank maps, the proof fingerprint, map checks and what the engine loads
 // the player name saved by a signed-in player on rabblings.com, or ''
@@ -2340,7 +2380,7 @@ const RACES={
  bone:{n:'SKELETONS',play:1,world:'crypts',home:'THE CRYPTS',like:'WILL NOT STAY DEAD',good:'BONE PILES, CANNOT DROWN',bad:'FIRE DESTROYS THEM',mana:'BONE DUST',loss:.25,pitch:125,chat:{refuse:['Bone idle!','Rattle off!'],grumble:['Need bones!','Where is Steve?'],last:['Use me!','Keep me femur!']},say:['Every last one. How dull.','Good enough. Some of us are still attached.','The Bonelord is not cross. He is disappointed. And hollow.'],swap:{flap:'raise',climb:'merge',build:'bonebr'},clans:[
   clan({name:'GREYBONE',glow:'#ff4a2a',skin:'#d8d2b8',skinD:'#8a846e',skinL:'#f0ead4',hood:'#313236',hoodD:'#1e1f23',tun:'#27282c',tunD:'#18191c',boot:'#1c1d1f',ui:'#96927f',hi:1,head:SKULL,headO:SKULLO,perk:{skill:'bonebr'},perkT:'+1 BONE BRIDGE PER MAP',seed:6}),
   clan({name:'HOLLOWRIB',glow:'#ff4a2a',skin:'#c0c4c4',skinD:'#6e7880',skinL:'#e8ecec',hood:'#312224',hoodD:'#1d1415',tun:'#24191b',tunD:'#170f10',boot:'#17181a',ui:'#5f7899',hi:1,head:SKULL,headO:SKULLO,perk:{bighp:1},perkT:'CONSTRUCT GETS +1 HEART',seed:7})]},
- shroom:{n:'MUSHROOM FOLK',play:1,world:'caves',home:'GLOWING CAVES',like:'ROTTING FUNGUS FOLK',good:'GROW VINES, CALM WITH SPORES',bad:'BURN EASILY, SLOW IN THE HEAT',mana:'SPORES',loss:.9,pitch:175,chat:{refuse:['Not ripe yet.','Mmm. No.'],grumble:['Too dry.','Very damp feelings.'],last:['Compost me.','I shall return.']},say:['Every last one. It is all connected.','Good enough for fungus work.','The Mycelium is not cross. It is disappointed. And everywhere.'],swap:{bash:'vine',boom:'puff'},clans:[
+ shroom:{n:'MUSHROOM FOLK',play:1,world:'caves',home:'GLOWING CAVES',like:'ROTTING FUNGUS FOLK',good:'GROW MUSHROOM STAIRS, CALM WITH SPORES',bad:'BURN EASILY, SLOW IN THE HEAT',mana:'SPORES',loss:.9,pitch:175,chat:{refuse:['Not ripe yet.','Mmm. No.'],grumble:['Too dry.','Very damp feelings.'],last:['Compost me.','I shall return.']},say:['Every last one. It is all connected.','Good enough for fungus work.','The Mycelium is not cross. It is disappointed. And everywhere.'],swap:{bash:'vine',boom:'puff'},clans:[
   clan({name:'REDCAP',glow:'#c8d07a',skin:'#e3d4b2',skinD:'#9a8966',skinL:'#f9eac7',hood:'#a33b2d',hoodD:'#66231b',tun:'#c9b991',tunD:'#7e715a',boot:'#524736',ui:'#ec5a3a',head:SHROOM,headO:SHROOMO,perk:{skill:'puff'},perkT:'+1 SPORE PUFF PER MAP',seed:14}),
   clan({name:'BLACKSPORE',glow:'#c8d07a',skin:'#7e818e',skinD:'#5d5f64',skinL:'#8b90a3',hood:'#2e3038',hoodD:'#1b1d23',tun:'#53565f',tunD:'#383a41',boot:'#25262b',ui:'#5f6b99',head:SHROOM,headO:SHROOMO,perk:{heal:1.1},perkT:'BUNCHED MORALE HEALS 10% MORE',seed:15})]}};
 const RK=Object.keys(RACES);for(const k of RK)for(const cl of RACES[k].clans)cl.hi=k;// selects RIG48[k] when a native 48px rig exists
@@ -2459,17 +2499,22 @@ const TRY_SKILLS=[null,'sword','bow','climb','flap','boom','block','build','bash
 const BriefScene={t:0,trial:null,pickTry(d){const i=(TRY_SKILLS.indexOf(this.trial)+d+TRY_SKILLS.length)%TRY_SKILLS.length;this.trial=TRY_SKILLS[i];sfx('move');},hard(){SAVE.diff=(SAVE.diff+1)%DIFFS.length;persist();sfx('move');},flip(){SAVE.classic=SAVE.classic?0:1;persist();sfx('move');},enter(){this.t=0;this.def=Series?(Series.custom||ARENAS[Series.i%ARENAS.length]):(CustomDef||campList()[CampaignIdx]);this.trial=null;if(Series&&Series.custom&&!Series.sides){const r=this.def.race||'goblin';setSides([{race:r,clan:0},{race:r,clan:1}]);}this.prev=null;playSong(null);AU.song=null;},
  build(){if(this.prev)return;const d=this.def,w=new World(d,{vs:!!Series,quiet:true});const[c,x]=mk(220,84),im=x.createImageData(220,84),T=w.T,th=THEME[d.theme],r=hex2(th.cap[1]);
   for(let j=0;j<84;j++)for(let i=0;i<220;i++){const k=T.m[(j/84*T.h|0)*T.w+(i/220*T.w|0)],o=(j*220+i)*4;const col=k===2?[120,130,150]:k?r:[24,16,34];im.data.set([...col,255],o);}x.putImageData(im,0,0);
-  x.fillStyle='#fff';for(const h of w.hatches){x.fillStyle=CLAN[h.team].ui;x.fillRect(h.x/T.w*220-2,h.y/T.h*84-2,5,3);}for(const h of w.doors){x.fillStyle=CLAN[h.team].ui;x.fillRect(h.x/T.w*220-2,h.y/T.h*84-6,5,6);}this.prev=c;},
+  x.fillStyle='#fff';for(const h of w.hatches){x.fillStyle=CLAN[h.team].ui;x.fillRect(h.x/T.w*220-2,h.y/T.h*84-2,5,3);}for(const h of w.doors){x.fillStyle=CLAN[h.team].ui;x.fillRect(h.x/T.w*220-2,h.y/T.h*84-6,5,6);}this.prev=c;this.w=w;},
  update(dt){this.t+=dt;this.build();if(press.KeyC&&!modeLocked())this.flip();if(press.KeyV&&!Series)this.hard();if(press.KeyT&&!Series)this.pickTry(1);if((anyStart()||this.tap)&&this.t>.3){this.tap=0;sfx('select');go(()=>{Play.begin(this.def,Series);setScene(Play);});}if(goBack())go(()=>CustomDef||(Series&&Series.custom)?setScene(PackRun?PackPlay:MapsScene):Series?(TitleScene.menu=1,setScene(TitleScene)):setScene(LevelScene));},
  draw(){const C=ctx,d=this.def;drawBackdrop(C,backdrop(d.theme,isUnder(d.theme,d.under)),0,VW,this.t*8,0,0);C.fillStyle='rgba(10,6,18,.7)';C.fillRect(0,0,VW,VH);hits.length=0;hits.push({x:0,y:0,w:VW,h:VH,fn:()=>{this.tap=1;},btn:1});
   if(Series){txt(C,Series.custom?'CUSTOM MATCH':`ROUND ${Series.i+1}  -  FIRST TO 2`,VW/2,12,'#f0d16b',{c:1});txt(C,d.name,VW/2,26,'#fff',{c:1,s:2});txt(C,CLAN[0].name+' '+Series.wins[0],120,50,CLAN[0].ui,{c:1});txt(C,CLAN[1].name+' '+Series.wins[1],360,50,CLAN[1].ui,{c:1});}
   else{txt(C,CustomDef?'CUSTOM MAP':`LEVEL ${CampaignIdx+1}`,VW/2,12,'#f0d16b',{c:1});txt(C,d.name,VW/2,26,'#fff',{c:1,s:2});txt(C,`${d.goal&&d.goal!=='home'?goalText(d):`SAVE ${dNeed(d)} OF ${dTotal(d)} ${RACES[d.race||(CustomDef?'goblin':CampaignRace)].n}`}  -  ${d.noTime?'NO TIME LIMIT':Math.floor(d.time*DIFFS[SAVE.diff].t/60)+':'+String(Math.round(d.time*DIFFS[SAVE.diff].t)%60).padStart(2,'0')}`,VW/2,42,'#777d45',{c:1});}
   txt(C,'MAP BY '+(d.by||(d.custom?'UNKNOWN':'RABBLINGS TEAM')),VW/2,53,'#f0c36b',{c:1});
   if(this.prev){C.fillStyle='#090a0c';C.fillRect(14,66,224,88);C.drawImage(this.prev,16,68);}
-  {const x0=250,race=Series?((Series.sides&&Series.sides[0].race)||d.race||'goblin'):(d.race||(CustomDef?'goblin':CampaignRace)),src=d.skills||{},panel=SK.map(k=>(d.swap&&d.swap[k])||RACES[race].swap[k]||k);txt(C,'ALLOWED SKILLS',x0,66,'#f0d16b');panel.forEach((k,i)=>{const n=(src[k]!==undefined?src[k]:src[SK[i]])||0,x=x0+(i%4)*54,y=78+(i>>2)*15;C.globalAlpha=n?1:.3;C.drawImage(ICON[k],x,y);txt(C,n,x+16,y+2,n?'#fff':'#48494e');C.globalAlpha=1;});
-   if(!Series){txt(C,'TRY A SKILL',x0,112,'#f0d16b');button(C,x0+70,110,12,12,'<',()=>this.pickTry(-1));txt(C,this.trial?skName(this.trial)+' X2':'NONE',x0+128,112,this.trial?'#777d45':'#fff',{c:1});button(C,x0+176,110,12,12,'>',()=>this.pickTry(1));if(this.trial)txt(C,'PRACTICE RUN: NO SCORE OR PROGRESS',x0,125,'#eb6f39');}
-   if(Series)txt(C,'SPELLS COST '+RACES[race].mana+' IN 2 PLAYER',x0,138,'#515d9d');else if(isClassic())txt(C,'NO SPELLS IN CLASSIC MODE',x0,138,'#48494e');else if(this.trial)txt(C,'NO SPELLS IN A PRACTICE RUN',x0,138,'#48494e');else{const have=d.custom?(d.mana===undefined?2:d.mana):poolMana(race);txt(C,RACES[race].mana+' '+have,x0,134,'#515d9d');txt(C,'PICK 2',x0+150,134,'#62646e',{r:1});if(have)SPK.forEach((k,i)=>{const on=SAVE.spellPick.includes(k),x=x0+i*30;button(C,x,143,28,14,'',()=>{const L=SAVE.spellPick;if(on)L.splice(L.indexOf(k),1);else{if(L.length>=2)L.shift();L.push(k);}persist();sfx('move');},{on});hits[hits.length-1].sp=k;C.globalAlpha=on?1:.55;C.drawImage(ICON[k],x+8,145);C.globalAlpha=1;});const hv=hitAt(pointerX,pointerY);if(hv&&hv.sp)txt(C,SPELLS[hv.sp].n+' '+SPELLS[hv.sp].c+': '+SPELLS[hv.sp].d,VW/2,184,'#515d9d',{c:1});}}
-  const t=d.hint.length>58?[d.hint.slice(0,d.hint.lastIndexOf(' ',58)),d.hint.slice(d.hint.lastIndexOf(' ',58)+1)]:[d.hint];if(d.pre&&d.pre.length&&!Series)d.pre.forEach((s,i)=>txt(C,s,VW/2,158+i*9,'#fff',{c:1}));else t.forEach((s,i)=>txt(C,s,VW/2,160+i*11,'#fff',{c:1}));if((d.rules||[]).length)txt(C,'RULES: '+d.rules.map(r=>(RULES.find(a=>a[0]===r)||['',r])[1]).join(', ').slice(0,66),VW/2,d.pre&&d.pre.length&&!Series?(158+d.pre.length*9+2):184,'#62646e',{c:1});
+  {const x0=250,race=Series?((Series.sides&&Series.sides[0].race)||d.race||'goblin'):(d.race||(CustomDef?'goblin':CampaignRace)),src=d.skills||{},panel=SK.map(k=>(d.swap&&d.swap[k])||RACES[race].swap[k]||k);txt(C,'SKILLS IN THIS MISSION',x0,66,'#f0d16b');const use=[];panel.forEach((k,i)=>{const n=(src[k]!==undefined?src[k]:src[SK[i]])||0;if(n)use.push([k,n]);});const rows=Math.max(1,Math.ceil(use.length/2));use.forEach(([k,n],i)=>{const x=x0+(i%2)*112,y=78+(i>>1)*11;C.drawImage(ICON[k],x,y);txt(C,skName(k)+' X'+n,x+16,y+1,'#fff');});if(!use.length)txt(C,'NONE. USE WHAT YOU FIND.',x0,78,'#62646e');const ty=78+rows*11+4;
+   if(!Series){txt(C,'TRY A SKILL',x0,ty+2,'#f0d16b');button(C,x0+70,ty,12,12,'<',()=>this.pickTry(-1));txt(C,this.trial?skName(this.trial)+' X2':'NONE',x0+128,ty+2,this.trial?'#777d45':'#fff',{c:1});button(C,x0+176,ty,12,12,'>',()=>this.pickTry(1));if(this.trial)txt(C,'PRACTICE RUN: NO SCORE OR PROGRESS',x0,ty+13,'#eb6f39');}
+   if(Series)txt(C,'SPELLS COST '+RACES[race].mana+' IN 2 PLAYER',x0,ty+26,'#515d9d');else if(isClassic())txt(C,'NO SPELLS IN CLASSIC MODE',x0,ty+26,'#48494e');else if(this.trial)txt(C,'NO SPELLS IN A PRACTICE RUN',x0,ty+26,'#48494e');else{const have=d.custom?(d.mana===undefined?2:d.mana):poolMana(race);txt(C,RACES[race].mana+' '+have,x0,ty+22,'#515d9d');txt(C,'PICK 2',x0+150,ty+22,'#62646e',{r:1});if(have)SPK.forEach((k,i)=>{const on=SAVE.spellPick.includes(k),x=x0+i*30;button(C,x,ty+31,28,14,'',()=>{const L=SAVE.spellPick;if(on)L.splice(L.indexOf(k),1);else{if(L.length>=2)L.shift();L.push(k);}persist();sfx('move');},{on});hits[hits.length-1].sp=k;C.globalAlpha=on?1:.55;C.drawImage(ICON[k],x+8,ty+33);C.globalAlpha=1;});const hv=hitAt(pointerX,pointerY);if(hv&&hv.sp)this.tip=SPELLS[hv.sp].n+' '+SPELLS[hv.sp].c+': '+SPELLS[hv.sp].d;}}
+  {const t=d.hint.length>58?[d.hint.slice(0,d.hint.lastIndexOf(' ',58)),d.hint.slice(d.hint.lastIndexOf(' ',58)+1)]:[d.hint],hy=Series?160:213;if(d.pre&&d.pre.length&&!Series)d.pre.forEach((s,i)=>txt(C,s,VW/2,hy-2+i*9,'#fff',{c:1}));else t.forEach((s,i)=>txt(C,s,VW/2,hy+i*10,'#fff',{c:1}));
+   if(!Series&&this.w){const w=this.w,gd=d.goal,cl=gd==='clear'||gd==='both',L=[],fm={};w.mobs.forEach(m=>{fm[m.kind]=(fm[m.kind]||0)+1;});const fs=Object.keys(fm).map(k=>fm[k]+' '+(FOES[k]?FOES[k].n:k));
+    L.push(goalText(d));if(fs.length)L.push((cl?'DEFEAT ':'ENEMIES: ')+fs.join(', '));if(w.nests.length)L.push(cl?'DESTROY '+w.nests.length+' NEST'+(w.nests.length>1?'S':''):w.nests.length+' NEST'+(w.nests.length>1?'S':'')+' KEEP BREEDING ENEMIES');
+    const tk=[...new Set(w.traps.map(q=>q.k))];if(tk.length)L.push('TRAPS: '+tk.join(', ').toUpperCase());if(w.hz&&w.hz.length)L.push(w.hz.some(h=>h.lava)?'LAVA ON THE MAP':'WATER ON THE MAP');
+    (d.rules||[]).forEach(r=>L.push('RULE: '+(RULES.find(a=>a[0]===r)||['',r])[1]));if(DIFFS[SAVE.diff].n==='WILD')L.push('WILD CARDS: SURPRISE EVENTS');
+    if(this.tip){txt(C,this.tip.slice(0,64),VW/2,160,'#515d9d',{c:1});this.tip=null;}else{txt(C,'THE JOB',16,158,'#f0d16b');L.slice(0,5).forEach((s,i)=>txt(C,(i?'- ':'')+s.slice(0,36),16,169+i*9,i?'#c9c9d3':'#fff'));if(L.length>5)txt(C,'+'+(L.length-5)+' MORE',16,169+5*9,'#62646e');}}}
   if(Series&&!Series.cpu){[0,1].forEach(i=>txt(C,ctlHelp(i),VW/2,196+i*12,CLAN[i].ui,{c:1}));}
   if(!Series)button(C,VW/2-152,VH-20,140,15,'DIFFICULTY: '+DIFFS[SAVE.diff].n,()=>this.hard(),{col:SAVE.diff>1?'#e97721':'#f0d16b'});if(modeLocked())txt(C,'MODE: '+modeName(isClassic())+' (LOCKED)',VW/2+82,VH-16,'#62646e',{c:1});else button(C,VW/2+12,VH-20,140,15,'MODE: '+modeName(isClassic()),()=>this.flip(),{col:isClassic()?'#777d45':'#f0d16b'});
   if((this.t*2|0)%2===0)txt(C,'PRESS START',VW/2,232,'#f0d16b',{c:1,s:1});}};
@@ -2563,6 +2608,7 @@ for(const e of w.ents)if(e.k==='meteor'&&!e.rock){const tx=e.tx-ox|0,ty=e.ty-oy|
   for(const e of w.ents)if(e.k==='arrow'){const x=e.x-ox|0,y=e.y-oy|0;C.fillStyle=e.team<0?'#eb6f39':'#f7e5ac';C.fillRect(x-4,y,8,1);C.fillStyle='#575c62';C.fillRect(e.vx>0?x+3:x-4,y-1,1,3);}
   for(const e of w.ents){if(e.k==='boulder'){const x=e.x-ox|0,y=e.y-oy|0;C.fillStyle='#090a0c';C.fillRect(x-8,y-6,16,13);C.fillRect(x-6,y-8,12,17);C.fillStyle='#525559';C.fillRect(x-7,y-5,14,11);C.fillRect(x-5,y-7,10,15);C.fillStyle='#6a6f77';C.fillRect(x-5,y-6,6,3);C.fillStyle='#3b3d40';C.fillRect(x-1+Math.round(Math.cos(e.a)*3),y+Math.round(Math.sin(e.a)*3),3,2);C.fillRect(x-4,y+4,8,2);}
    if(e.k==='tongueFx'){C.strokeStyle='#822b39';C.lineWidth=2;C.beginPath();C.moveTo(e.x0-ox,e.y0-oy);C.lineTo(e.x1-ox,e.y1-oy);C.stroke();}if(e.k==='pot'){C.fillStyle='#090a0c';C.fillRect((e.x-ox|0)-3,(e.y-oy|0)-3,6,6);C.fillStyle='#db9016';C.fillRect((e.x-ox|0)-2,(e.y-oy|0)-2,4,4);}
+   if(e.k==='tip'){C.strokeStyle='#14181c';C.lineWidth=5;C.beginPath();C.moveTo(e.x-ox,e.y-oy);C.lineTo(e.ex-ox,e.ey-oy);C.stroke();C.strokeStyle='#d8d2b8';C.lineWidth=3;C.beginPath();C.moveTo(e.x-ox,e.y-oy);C.lineTo(e.ex-ox,e.ey-oy);C.stroke();}
    if(e.k==='ring'){C.strokeStyle=e.l>6?'#b5a64b':'#b64c1e';C.lineWidth=2;C.beginPath();C.arc(e.x-ox,e.y-oy,e.r,0,TAU);C.stroke();}}
   for(const q of w.parts){C.fillStyle=q.c;C.fillRect(q.x-ox|0,q.y-oy|0,q.l>10?2:1,q.l>10?2:1);}
   C.globalCompositeOperation='lighter';for(const h of w.hz){if(THEME[w.def.theme].lavaHaz&&!h.water){for(let x=h.x0;x<h.x1;x+=38)C.drawImage(glow(th.glow),x-ox-32,h.y-oy-40,64,64);}}C.globalCompositeOperation='source-over';
@@ -2639,7 +2685,7 @@ for(const e of w.ents)if(e.k==='meteor'&&!e.rock){const tx=e.tx-ox|0,ty=e.ty-oy|
  draw(){const C=ctx,w=this.world;hits.length=0;this.views.forEach((v,i)=>{if(v.w>0)this.drawView(i);});if(w.vs&&this.views[1].w>0){C.fillStyle='#090a0c';C.fillRect(239,0,2,VIEWH);}this.drawHud();
   if(!w.vs&&w.tick<90){const t=w.def.name;txt(C,t,VW/2,14,'#f0d16b',{c:1,s:2});txt(C,w.def.hint,VW/2,32,'#fff',{c:1});}
   if(w.vs&&w.tick<110&&!this.test){txt(C,'SABOTAGE!',VW/2,22,'#f0d16b',{c:1,s:3});}
-  if(w.bannerT>0){const b=w.banner,bw=b.length*12+20;C.fillStyle='rgba(10,6,18,.8)';C.fillRect((VW-bw)/2|0,40,bw,24);txt(C,b,VW/2,45,'#f0d16b',{c:1,s:2});}
+  if(w.bannerT>0&&!this.paused){const b=w.banner,bw=b.length*12+20;C.fillStyle='rgba(10,6,18,.8)';C.fillRect((VW-bw)/2|0,40,bw,24);txt(C,b,VW/2,45,'#f0d16b',{c:1,s:2});}
   if(this.rwAnim)this.rwDraw(C);
   if(this.test&&!this.paused)txt(C,'TEST PLAY - ESC TO RETURN',VW/2,VIEWH-11,'#f0d16b',{c:1});
   if(this.quitT>.15){const q=clamp(this.quitT/1.5,0,1);C.fillStyle='rgba(10,6,18,.86)';C.fillRect(VW/2-72,62,144,22);txt(C,'KEEP HOLDING TO QUIT',VW/2,66,'#f0d16b',{c:1});C.fillStyle='#e94121';C.fillRect(VW/2-66,77,132*q,3);}
@@ -2671,7 +2717,7 @@ function frame(now){const dt=Math.min(.05,(now-lastT)/1000);lastT=now;clock+=dt;
  if(fade>0){const lv=Math.ceil(fade*7)/7;ctx.fillStyle=`rgba(0,0,0,${lv})`;ctx.fillRect(0,0,VW,VH);}
  requestAnimationFrame(frame);}
 // test hook
-window.__GS={CTL,ctlList,get PAD(){return PAD;},get PackRun(){return PackRun;},StoreDB,PACK_MAX,packToFileZ,packData,importPackData,fetchLinkText,normLink,get Result(){return Result;},get Series(){return Series;},PackStore,importPackFile,packToFile,mapSig,packMap,unpackMap,cleanMap,mapsToFile,genMap,toDef,Store,SAVE,DIFFS,runScore,WAR_LEVELS,ImpArt,toDef,Store,LEVELS,RACE_LEVELS,RACES,ARENAS,World,Play,TitleScene,go,setScene,setSides,simulate(def,vs,botTeams){const w=new World(def,{vs,quiet:true});w.pl.forEach(p=>{if(botTeams===undefined||botTeams.includes(p.id))p.bot=def.plan;});let n=0;while(!w.over&&n++<20000)w.step();return{name:def.name,saved:w.pl.map(p=>p.saved),lost:w.pl.map(p=>p.lost),need:def.need,ticks:n};}};
+window.__GS={showBrief(d,race){if(race)CampaignRace=race;CustomDef=d;setScene(BriefScene);},CTL,ctlList,get PAD(){return PAD;},get PackRun(){return PackRun;},StoreDB,PACK_MAX,packToFileZ,packData,importPackData,fetchLinkText,normLink,get Result(){return Result;},get Series(){return Series;},PackStore,importPackFile,packToFile,mapSig,packMap,unpackMap,cleanMap,mapsToFile,genMap,toDef,Store,SAVE,DIFFS,runScore,WAR_LEVELS,ImpArt,toDef,Store,LEVELS,RACE_LEVELS,RACES,ARENAS,World,Play,TitleScene,go,setScene,setSides,simulate(def,vs,botTeams){const w=new World(def,{vs,quiet:true});w.pl.forEach(p=>{if(botTeams===undefined||botTeams.includes(p.id))p.bot=def.plan;});let n=0;while(!w.over&&n++<20000)w.step();return{name:def.name,saved:w.pl.map(p=>p.saved),lost:w.pl.map(p=>p.lost),need:def.need,ticks:n};}};
 
 // shared pop-up box for names, codes and files
 const dlg={el:document.getElementById('dlg'),title:document.getElementById('dlg-title'),a:document.getElementById('dlg-a'),b:document.getElementById('dlg-b'),la:document.getElementById('dlg-la'),lb:document.getElementById('dlg-lb'),note:document.getElementById('dlg-note'),ok:document.getElementById('dlg-ok'),x:document.getElementById('dlg-x'),alt:document.getElementById('dlg-alt'),file:document.getElementById('dlg-file'),pickBox:document.getElementById('dlg-pick'),picks:document.getElementById('dlg-files'),dir:document.getElementById('dlg-dir'),

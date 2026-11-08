@@ -5,7 +5,7 @@ const SKD=['Climbs any wall from now on','Glides down safely from any height','B
 const SPELLS={sleep:{n:'SLEEP',c:1,vc:3,r:56,d:'Enemies in the circle fall asleep',s:'ENEMIES SLEEP',col:'#50739b'},confuse:{n:'CONFUSE',c:1,vc:2,r:56,d:'Enemies stumble back and forth',s:'ENEMIES STUMBLE',col:'#f0d16b'},hypno:{n:'HYPNOSIS',c:2,vc:4,r:44,d:'Monsters fight for you, rivals walk to your hut',s:'ENEMIES ARE CHARMED',col:'#515d9d'},ward:{n:'WARD',c:1,vc:2,r:48,d:'Your troops survive one deadly hit',s:'SURVIVE ONE HIT',col:'#76bd5d'},rally:{n:'RALLY',c:1,r:72,d:'Lifts morale and ends sit-downs',s:'LIFTS MORALE',col:'#777d45'}},SPK=Object.keys(SPELLS),VS_SPELLS=['sleep','confuse','hypno','ward'];
 const TR=['boulder','stink','hex','mimic'],TRN=['BOULDER','STINK','HEX','MIMIC'],TRC=[2,1,2,3];
 const TRD=['Drops a rock. Crushes troops and bridges','Rivals near it panic and run the wrong way','Steals up to 3 rival troops','Fake door that eats rival troops'];
-const SKX={tongue:['TONGUE','Eats rats or zips to a wall'],spear:['SPEARS','Hammers steps up to a wall'],hop:['HOP','One big jump'],firepot:['FIREPOT','Burns wood and rats'],raise:['GRAVE WALK','Raises a troop once from a pile'],merge:['CONSTRUCT','Merges 4 into a big fighter'],bonebr:['BONE BRIDGE','Builds with a nearby pile'],glide:['GLIDE','Rides the air up and forward'],dust:['PIXIE DUST','Sends nearby enemies to sleep'],steam:['STEAM PACK','Blasts straight up'],cannon:['CANNON','Fires troops across the map'],spring:['SPRING BOOTS','Big jump. 1 scrap. Risky'],ratmine:['RAT MINE','Blasts rock. 2 scrap. Risky'],vine:['VINES','Grows a stair upward'],puff:['SPORE PUFF','Calms troops, stuns enemies'],sword:['SWORD','Fights what it meets, 2 hearts'],bow:['BOW','Stops and shoots enemies ahead'],swim:['SWIM','Crosses any water without drowning'],disarm:['DISARM','Walks past jaws, mines and presses'],walkr:['WALK','Stops what it is doing and marches']};
+const SKX={tongue:['TONGUE','Eats gorgers or zips to a wall'],spear:['SPEARS','Hammers steps up to a wall'],hop:['HOP','One big jump'],firepot:['FIREPOT','Burns wood and gorgers'],raise:['GRAVE WALK','Raises a troop once from a pile'],merge:['CONSTRUCT','Merges 4 into a big fighter'],bonebr:['BONE BRIDGE','Builds a tower that tips over, crushing all below'],glide:['GLIDE','Rides the air up and forward'],dust:['PIXIE DUST','Sends nearby enemies to sleep'],steam:['STEAM PACK','Blasts straight up'],cannon:['CANNON','Fires troops across the map'],spring:['SPRING BOOTS','Big jump. 1 scrap. Risky'],ratmine:['RAT MINE','Blasts rock. 2 scrap. Risky'],vine:['SHROOMS','Grows a stair of mushrooms'],puff:['SPORE PUFF','Calms troops, stuns enemies'],sword:['SWORD','Fights what it meets, 2 hearts'],bow:['BOW','Stops and shoots enemies ahead'],swim:['SWIM','Crosses any water without drowning'],disarm:['DISARM','Walks past jaws, mines and presses'],walkr:['WALK','Stops what it is doing and marches']};
 const DIFFS=[{k:'easy',n:'EASY',t:1.4,need:.85,mood:.7,score:.75},{k:'normal',n:'NORMAL',t:1,need:1,mood:1,score:1},{k:'hard',n:'HARD',t:.8,need:1.15,mood:1.3,score:1.5},{k:'wild',n:'WILD',t:.8,need:1.15,mood:1.3,score:2,wild:1}];
 // enemy units. Numbers are starting values to tune in play
 const FOES={rat:{n:'GUTTER GORGER',hp:1,sp:2,every:1,cd:0,r:5},skel:{n:'LEDGE STALKER',hp:2,sp:1,every:2,cd:24,r:6,patrol:1},spider:{n:'CAVE SPIDER',hp:5,sp:0,every:1,cd:20,r:12,tall:1,jump:1},arch:{n:'BOW RAIDER',hp:2,sp:0,every:1,cd:24,r:6,shoot:1,range:150,rate:70,lob:1},golem:{n:'BRUTE',hp:6,sp:1,every:3,cd:30,r:10,push:1,tall:1}};
@@ -79,7 +79,7 @@ class World{
    if(go){t.hit++;if(t.w!=='timer')t.r=0;this.fire(t.a);}}}
  fire(a){const[k,v]=a.split(':');const N={lowg:'LOW GRAVITY',highg:'HIGH GRAVITY',flood:'THE FLOOD IS RISING',lava:'LAVA IS RISING',dark:'THE LIGHTS GO OUT',wind:'THE WIND PICKS UP',quake:'EARTHQUAKE',fast:'DOUBLE SPEED'};
   if(k==='on'){this.rule[v]=1;this.say(N[v]+'!');this.snd('door');}else if(k==='off'){this.rule[v]=0;}
-  else if(k==='rats'){const hs=this.holes.length?this.holes:this.hatches;for(const h of hs)this.spawnRats(h,4);this.say('RATS!');this.snd('stink');}
+  else if(k==='rats'){const hs=this.holes.length?this.holes:this.hatches;for(const h of hs)this.spawnRats(h,4);this.say('GORGERS!');this.snd('stink');}
   else if(k==='debris'){this.say('ISLAND DEBRIS!');const live=this.gobs.filter(g=>this.alive(g));for(let i=0;i<5;i++){const g=live.length?live[(this.rnd()*live.length)|0]:null,tx=clamp((g?g.x:this.rnd()*this.T.w)+(this.rnd()*160-80|0)|0,8,this.T.w-9);let ty=0;while(ty<this.T.h&&!this.T.solid(tx,ty))ty++;const n=(ty+40)/8;this.ents.push({k:'meteor',rock:1,tx,ty,x:tx-n*1.4,y:-40,wait:30+i*22});}this.snd('rock');}
   else if(k==='surge'){const o=['lowg','highg','fast'].filter(q=>!this.rule[q]);if(!o.length)return;const q=o[this.rnd()*o.length|0];this.tempRule(q,200);this.surgeT=200;this.say('VORTEX SURGE! '+{lowg:'LOW GRAVITY',highg:'HIGH GRAVITY',fast:'DOUBLE SPEED'}[q]);this.shake=4;this.snd('door');}
   else if(k==='gale'){if(!this.tempRule('wind',260))return;this.tempRule('gust',260);this.gustDir=this.rnd()<.5?1:-1;this.say('A GALE BLOWS!');this.snd('door');}
@@ -108,9 +108,10 @@ class World{
  swims(g,lava){return lava?g.race==='imp':(g.race==='swamp'||!!g.swim);}
  doTongue(g){const T=this.T,d=g.dir,y=g.y-9;let hit=0;for(let i=8;i<=96&&!hit;i+=2){const x=g.x+d*i;for(const m of this.mobs)if(!m.dead&&Math.abs(m.x-x)<=4&&Math.abs(m.y-6-y)<=9){m.dead=1;hit=x;this.float(m.x,m.y-14,'GULP','#80a465');this.snd('chomp');break;}
    if(!hit)for(const o of this.gobs)if(this.alive(o)&&o.team!==g.team&&Math.abs(o.x-x)<=4&&Math.abs(o.y-6-y)<=9){o.x=o.px=g.x+d*12;o.y=o.py=g.y;o.dir=-o.dir;o.panic=60;if(TOOLS.includes(o.s)||o.s==='block')this.setS(o,'walk');hit=x;this.float(g.x,g.y-22,'YANK','#80a465');this.snd('hex');break;}
-   if(!hit&&T.solid(x,y)){hit=x;let t=y;while(t>y-18&&T.solid(x,t-1))t--;if(t>y-18&&!T.solid(x,t-1)){g.x=x+d*3;g.y=t;while(g.y>0&&T.solid(g.x,g.y-1))g.y--;}else{g.x=x-d*2;g.fallen=0;this.setS(g,'fall');}this.snd('door');}}
+   if(!hit&&T.solid(x,y)){hit=x;let t=y;while(t>y-18&&T.solid(x,t-1))t--;let landed=0;if(t>y-18&&!T.solid(x,t-1)){for(const o of[3,2,1,0,-1]){let nx=x+d*o,ny=t;while(ny>0&&T.solid(nx,ny-1))ny--;let clear=false;for(let k=2;k<=12;k++)if(T.solid(nx,ny-k)||T.solid(nx-d*2,ny-k)||T.solid(nx+d*2,ny-k)){clear=true;break;}if(!clear&&ny<=g.y+1&&ny>=g.y-26){g.x=nx;g.y=ny;landed=1;break;}}}if(!landed)this.float(g.x,g.y-22,'TOO HIGH','#80a465');this.snd('door');}}
   this.ents.push({k:'tongueFx',x0:g.px,y0:y,x1:hit||g.x+d*96,y1:y,l:5});}
- doSpear(g){const T=this.T,d=g.dir;let dist=0;for(let i=3;i<=62;i++)if(T.solid(g.x+d*i,g.y-3)){dist=i;break;}if(!dist){this.setS(g,'shrug');this.snd('deny');return;}const n=Math.min(10,Math.floor((dist-1)/6));if(n<1){this.setS(g,'shrug');return;}const wx=g.x+d*dist;for(let k=1;k<=n;k++){const cx=wx-d*(n-k+1)*6;T.plank(d>0?cx:cx-5,g.y-6*k,6,6*k,g.team);}this.setS(g,'shrug');this.snd('build');this.dust(wx,g.y-20,6);}
+ buried(){const T=this.T;for(const g of this.gobs)if(this.alive(g)&&(g.s==='walk'||g.s==='fall'||g.s==='shrug'||g.s==='sit'||g.s==='float')&&T.solid(g.x,g.y-1)&&T.solid(g.x,g.y-3)&&T.solid(g.x,g.y-7)&&T.solid(g.x,g.y-11)){if(g.bx===g.x&&g.by===g.y)this.kill(g,'press');else{g.bx=g.x;g.by=g.y;}}else if(g.bx!==undefined)g.bx=undefined;}
+ doSpear(g){const T=this.T,d=g.dir;let dist=0;for(let i=3;i<=62;i++)if(T.solid(g.x+d*i,g.y-3)){dist=i;break;}if(!dist){this.setS(g,'shrug');this.snd('deny');return;}const n=Math.min(10,Math.floor((dist-1)/6));if(n<1){this.setS(g,'shrug');return;}const wx=g.x+d*dist;T.spearStairs(wx,g.y,n,d,g.team);this.setS(g,'shrug');this.snd('build');this.dust(wx,g.y-20,6);this.buried();}
  potBurst(e){const T=this.T,x=e.x|0,y=e.y|0;for(let j=y-38;j<=y+38;j++)for(let i=x-42;i<=x+42;i++)if(i>=0&&j>=0&&i<T.w&&j<T.h&&(T.m[j*T.w+i]===3||T.m[j*T.w+i]===7)){T.m[j*T.w+i]=0;}T.mark(x-42,y-38,84,76);this.crush(x,y,20,e.team);this.boomFxSmall(x,y);this.snd('boom');this.shake=4;}
  boomFxSmall(x,y){if(this.quiet)return;const R=Math.random;for(let i=0;i<26;i++){const a=R()*TAU,s=20+R()*110;this.p(x,y,Math.cos(a)*s,Math.sin(a)*s-20,['#b5a64b','#db9016','#b64c1e'][R()*3|0],14+R()*16);}}
  stepTraps(){const T=this.T;for(const t of this.traps){if(t.cd>0)t.cd--;if(!t.live)continue;const ph=(this.tick+t.off)%(t.per||70);
@@ -152,7 +153,7 @@ class World{
  dust(x,y,n,sp=1){if(this.quiet)return;const R=Math.random;for(let i=0;i<n;i++){const px=x+(R()*8-4|0),py=y+(R()*8-4|0),k=clamp(py,0,this.T.h-1)*this.T.w+clamp(px,0,this.T.w-1),c=this.T.theme.ramp[3+(R()*3|0)];this.p(px,py,(R()-.5)*50*sp,-R()*70*sp,c,18+R()*16);}}
  float(x,y,s,c){if(!this.quiet)this.floats.push({x,y,s,c,l:40});}
  spawn(h){const g={x:h.x,y:h.y,px:h.x,py:h.y,team:h.team,dir:h.dir,s:'fall',t:0,fallen:0,climber:0,flap:0,fuse:0,panic:0,bricks:0,dry:0,race:this.pl[h.team].race,id:this.gobs.length};if(g.race==='dwarf')g.hp=2;if(g.race==='fairy')g.flap=1;this.gobs.push(g);this.pl[h.team].out++;this.snd('tick');return g;}
- step(){if(this.over)return;this.tick++;if(this.time>0&&!this.def.noTime)this.time--;
+ step(){if(this.over)return;this.tick++;if(this.tick%6===0)this.buried();if(this.time>0&&!this.def.noTime)this.time--;
   for(const h of this.hatches){if(h.open<8&&this.tick>20)h.open+=.5;if(h.left>0&&this.tick>=h.next){const g0=this.spawn(h);if(h.cl)g0.climber=1;if(h.fl)g0.flap=1;h.left--;h.next=this.tick+this.def.rate;}}
   this.blockers=this.gobs.filter(g=>g.s==='block');
   for(const p of this.pl)if(p.spellCd>0)p.spellCd--;this.stepTriggers();this.stepRules();this.stepTraps();this.stepMobs();this.stepNests();this.stepMood();this.stepWild();
@@ -190,7 +191,7 @@ class World{
   case'shrug':if(g.t>=12)this.setS(g,'walk');break;
   case'fly':{if(g.t>=g.flyT||T.solid(g.x,g.y-16)){g.fallen=0;this.setS(g,'fall');break;}g.y-=g.flyS;if(g.flyX&&!T.solid(g.x+g.flyX,g.y-5))g.x+=g.flyX;if(!this.quiet&&g.flyS>1)this.p(g.x,g.y,(Math.random()-.5)*20,30,'#8393a7',12);break;}
   case'gun':{if(!T.solid(g.x,g.y)&&!T.solid(g.x,g.y+1)&&!T.solid(g.x,g.y+2)){g.fallen=0;this.setS(g,'fall');break;}if(g.cd>0){g.cd--;break;}for(const o of this.gobs)if(o!==g&&o.team===g.team&&o.s==='walk'&&Math.abs(o.x-g.x)<=8&&Math.abs(o.y-g.y)<=8){o.s='fling';o.t=0;o.fx=g.x+g.dir*8;o.fy=g.y-10;o.x=g.x+g.dir*8;o.y=g.y-10;o.dir=g.dir;o.vx=g.dir*5.2;o.vy=-5.4;o.fallen=0;g.cd=8;g.shots++;this.snd('boom');this.shake=1;if(g.shots>=24)this.setS(g,'walk');break;}break;}
-  case'grow':{if(g.t%8!==7)break;const d=g.dir,x=g.vx0+d*(5+g.steps*4),y=g.vy0-(g.steps+1)*5;if(T.solid(d>0?x+6:x-6,y-8)||g.steps>=18||y<4){this.setS(g,'walk');break;}T.plank(d>0?x:x-3,y,4,5,g.team,'vine');g.steps++;this.snd('build');break;}
+  case'grow':{if(g.t%8!==7)break;const d=g.dir,x=g.vx0+d*(5+g.steps*4),y=g.vy0-(g.steps+1)*5;if(T.solid(d>0?x+6:x-6,y-8)||g.steps>=18||y<4){this.setS(g,'walk');break;}const bx=d>0?x:x-3;T.plank(bx,y,4,5,g.team,'vine');for(const o of this.gobs){if(!this.alive(o)||o===g||o.x<bx||o.x>=bx+4||o.y<=y||o.y-12>=y+5)continue;let ok=true;for(let k=1;k<=12;k++)if(T.solid(o.x,y-k)){ok=false;break;}if(ok)o.y=y;}g.steps++;this.snd('build');break;}
   case'sit':if(!T.solid(g.x,g.y)&&!T.solid(g.x,g.y+1)&&!T.solid(g.x,g.y+2)){g.fallen=0;this.setS(g,'fall');}break;
   case'fight':{const t=g.tg,mob=t&&t.max===undefined;if(!t||t.dead||(mob&&Math.abs(t.x-g.x)>12)||(!T.solid(g.x,g.y)&&!T.solid(g.x,g.y+1)&&!T.solid(g.x,g.y+2))){this.setS(g,'walk');break;}if(mob)t.hold=3;if(g.t%14===7){if(mob)this.hurtFoe(t,g.big?2:1);else this.hurtNest(t,g.big?2:1);if(t.dead)this.talk(g,'hurrah');}break;}
   case'shoot':{const t=g.tg;if(!t||t.dead||Math.abs(t.x-g.x)>150||!this.clearLine(g.x,t.x,g.y-8)||(!T.solid(g.x,g.y)&&!T.solid(g.x,g.y+1)&&!T.solid(g.x,g.y+2))){this.setS(g,'walk');break;}if(g.t%30===10){this.ents.push({k:'arrow',x:g.x+g.dir*6,y:g.y-8,vx:g.dir*5,team:g.team,l:40});this.snd('door');}break;}
@@ -221,10 +222,25 @@ class World{
   if(g.race!=='dwarf'&&T.hard(d>0?g.x+1:g.x-8,g.y-6,8,10,d*2)){this.snd('clank');g.dir=-d;return this.setS(g,'walk');}
   T.way=d*2;T.drill=g.race==='dwarf';T.carveEll(g.x+d*4,g.y-5,9,9,g.y+1);T.way=0;T.drill=false;this.dust(g.x+d*6,g.y,4);this.snd('pick');g.x+=d*3;g.y+=2;
   let dn=0;while(dn<6&&!T.solid(g.x,g.y+dn))dn++;if(dn>=6){g.fallen=0;return this.setS(g,'fall');}g.y+=dn;}
- build(g){const T=this.T,d=g.dir;if(g.t%10!==7)return;
+ build(g){const T=this.T,d=g.dir;if(g.boneB)return this.boneTower(g);if(g.t%10!==7)return;
   for(let h=3;h<=13;h++)if(T.solid(g.x+d*5,g.y-h)){g.dir=-d;return this.setS(g,'walk');}
   T.plank(d>0?g.x+1:g.x-9,g.y-2,9,2,g.team,g.boneB);this.snd('build');g.bricks--;g.x+=d*4;g.y-=2;
   if(g.bricks<=3&&g.bricks>0)this.float(g.x,g.y-20,String(g.bricks),'#fff');if(g.bricks<=0)this.setS(g,'shrug');}
+ plantShrooms(g){const T=this.T,d=g.dir,y0=g.y,cols=[];
+  for(let i=0;i<18;i++){const x=g.x+d*(5+i*7),tgt=y0-(i+1)*5,bx=d>0?x:x-6;if(tgt<4||bx<0||bx+7>=T.w)break;if(T.solid(d>0?bx+7:bx-1,tgt-8))break;let hit=false;for(let q=bx;q<bx+7;q++)if(T.solid(q,y0-1)){hit=true;break;}if(hit)break;cols.push({x:bx,w:7,top:y0,tgt});}
+  if(cols.length){const c=cols[cols.length-1];if(d>0){for(let k=0;k<8&&!T.solid(c.x+c.w,y0-2);k++)c.w++;}else{for(let k=0;k<8&&!T.solid(c.x-1,y0-2);k++){c.x--;c.w++;}}}
+  if(!cols.length){this.float(g.x,g.y-22,'NO ROOM','#80a465');this.snd('deny');return this.setS(g,'shrug');}
+  this.ents.push({k:'patch',cols,n:0,d,team:g.team});this.setS(g,'shrug');this.snd('build');}
+ boneTower(g){const T=this.T,d=g.dir;
+  if(g.tw===undefined){if(g.t%6!==3)return;g.tw=0;g.tx=g.x+d*4;g.ty=g.y;}
+  const bx=d>0?g.tx:g.tx-2,add=()=>{if(g.tw<12&&!T.solid(g.tx,g.ty-(g.tw+1)*4-1)){if(!g.tc)g.tc=[];for(let j=g.ty-(g.tw+1)*4;j<g.ty-g.tw*4;j++)for(let i=bx;i<bx+3;i++)if(i>=0&&i<T.w&&j>=0&&j<T.h&&!T.m[j*T.w+i])g.tc.push(j*T.w+i);T.plank(bx,g.ty-(g.tw+1)*4,3,4,g.team,1);g.tw++;return true;}return false;};
+  if(g.tw<12)for(const o of this.gobs){if(o===g||!this.alive(o)||o.team!==g.team||o.s!=='walk'||o.dir!==d)continue;const q=d*(g.tx-o.x);if(q<0||q>6||Math.abs(o.y-g.ty)>4)continue;
+   if(add()){add();o.s='dead';this.pl[o.team].lost++;this.deathFx(o,'fall');this.float(o.x,o.y-20,'BONES','#f0d16b');this.snd('build');}}
+  if(g.t%6!==3)return;
+  if(g.tw<12&&add()){this.snd('build');return;}
+  const h=g.tw*4;g.tw=undefined;g.bricks=0;g.boneB=0;this.setS(g,'shrug');if(h<8)return;
+  if(g.tc){for(const k of g.tc)if(T.m[k]===7)T.m[k]=0;T.mark(bx,g.ty-h,3,h);}g.tc=undefined;const L=h;
+  this.ents.push({k:'tip',own:g,x:g.tx,y:g.ty,d,len:Math.max(6,L),a:0,t:0,team:g.team,ex:g.tx,ey:g.ty-h});this.snd('hex');}
  explode(g){const T=this.T,x=g.x,y=g.y-6;T.carveEll(x,y,20,20);this.deathFx(g,'boom');this.leavePile(g);if(g.s!=='home'){this.pl[g.team].lost++;}g.s='dead';this.snd('boom');this.shake=8;
   if(!this.quiet){const R=Math.random;for(let i=0;i<46;i++){const a=R()*TAU,s=30+R()*150;this.p(x,y,Math.cos(a)*s,Math.sin(a)*s-30,['#b5a64b','#db9016','#b64c1e','#534842',T.theme.ramp[4]][R()*5|0],16+R()*22);}this.ents.push({k:'ring',x,y,r:2,l:12});}
   if(this.vs||this.fightMap)this.crush(x,y,17,g.team);if(this.fightMap)for(const n of this.nests)if(!n.dead&&Math.hypot(n.x-x,n.y-10-y)<34)this.hurtNest(n,4);}
@@ -237,13 +253,13 @@ class World{
   if(sk==='raise'||sk==='bonebr'){const q=this.nearPile(g,sk==='raise'?36:70,pl.id);if(!q){this.float(g.x,g.y-22,'NO BONES','#f0d16b');this.snd('deny');return false;}this.takePile(q);if(sk==='raise'){pl.lost=Math.max(0,pl.lost-1);this.spawn({x:q.x,y:q.y-10,team:g.team,dir:g.dir}).raised=1;this.float(q.x,q.y-20,'RISE','#96927f');this.snd('hex');}else g.boneB=1;}
   {const cost={spring:1,ratmine:2}[sk];if(cost){if(pl.scrap<cost){this.float(g.x,g.y-22,'NO SCRAP','#f0d16b');this.snd('deny');return false;}pl.scrap-=cost;}}
   if(sk==='merge'){const near=this.gobs.filter(a=>a!==g&&a.team===g.team&&a.s==='walk'&&!a.armed&&!a.bow&&Math.hypot(a.x-g.x,a.y-g.y)<=60).sort((a,b)=>Math.hypot(a.x-g.x,a.y-g.y)-Math.hypot(b.x-g.x,b.y-g.y)).slice(0,3);if(near.length<3){this.float(g.x,g.y-22,'NEED 4','#f0d16b');this.snd('deny');return false;}for(const a of near)a.s='held';g.inside=near;g.big=1;g.armed=1;g.hp=4+(pl.perk.bighp||0);this.float(g.x,g.y-30,'CONSTRUCT!','#96927f');this.snd('hex');}this.log.push({x:g.x,y:g.y,d:g.dir,s:sk,st:g.s,tk:this.tick,team:pl.id});pl.skills[sk]--;
-  switch(sk){case'climb':g.climber=1;break;case'flap':g.flap=1;break;case'swim':g.swim=1;this.snd('select');break;case'disarm':g.disarm=1;this.snd('select');break;case'walkr':g.bricks=0;this.setS(g,'walk');break;case'boom':g.fuse=125;break;case'block':this.setS(g,'block');break;case'build':g.bricks=12;this.setS(g,'build');break;
+  switch(sk){case'climb':g.climber=1;break;case'flap':g.flap=1;break;case'swim':g.swim=1;this.snd('select');break;case'disarm':g.disarm=1;this.snd('select');break;case'walkr':g.bricks=0;this.setS(g,'walk');break;case'boom':g.fuse=125;break;case'block':this.setS(g,'block');break;case'build':g.bricks=12;g.boneB=0;g.tw=undefined;g.tc=undefined;this.setS(g,'build');break;
    case'glide':g.flyT=74;g.flyS=1;g.flyX=g.dir;this.setS(g,'fly');break;case'steam':g.flyT=50;g.flyS=2;g.flyX=g.dir;this.setS(g,'fly');this.snd('stink');break;case'cannon':g.shots=0;g.cd=0;this.setS(g,'gun');break;
    case'spring':{const bad=this.rnd()<1/6;g.s='fling';g.t=0;g.fx=g.x;g.fy=g.y-1;g.vx=(bad?-g.dir:g.dir)*3.4;g.vy=-6.2;g.fallen=0;if(bad)this.float(g.x,g.y-22,'OOPS','#eb6f39');this.snd('door');break;}
    case'ratmine':{const bad=this.rnd()<1/6;this.ents.push({k:'rmine',x:g.x+(bad?0:g.dir*8),y:g.y,t:bad?12:75,team:g.team});if(bad)this.float(g.x,g.y-22,'OOPS','#eb6f39');break;}
    case'dust':case'puff':{const r=sk==='dust'?64:56;for(const m of this.mobs)if(!m.dead&&Math.hypot(m.x-g.x,m.y-g.y)<r)m.sleep=sk==='dust'?250:125;if(sk==='puff'){pl.mood=Math.min(100,pl.mood+10);for(const o of this.gobs)if(o.team===g.team&&o.s==='sit'&&Math.hypot(o.x-g.x,o.y-g.y)<80)this.setS(o,'walk');}this.ents.push({k:'cloud',x:g.x,y:g.y-10,l:30,team:g.team,col:sk});this.setS(g,'shrug');this.snd('hex');break;}
-   case'vine':g.vx0=g.x;g.vy0=g.y;g.steps=0;this.setS(g,'grow');break;
-   case'raise':break;case'merge':break;case'bonebr':g.bricks=12;this.setS(g,'build');break;case'sword':g.armed=1;g.hp=2;break;case'bow':g.bow=1;break;case'tongue':this.setS(g,'tongue');break;case'spear':this.doSpear(g);break;
+   case'vine':this.plantShrooms(g);break;
+   case'raise':break;case'merge':break;case'bonebr':g.bricks=12;g.tw=undefined;g.tc=undefined;this.setS(g,'build');break;case'sword':g.armed=1;g.hp=2;break;case'bow':g.bow=1;break;case'tongue':this.setS(g,'tongue');break;case'spear':this.doSpear(g);break;
    case'hop':{const q=pl.perk.hop||1;g.s='fling';g.t=0;g.fx=g.x;g.fy=g.y-1;g.vx=g.dir*3.2*q;g.vy=-4.2;g.fallen=0;this.snd('door');break;}
    case'firepot':this.ents.push({k:'pot',x:g.x+g.dir*4,y:g.y-10,vx:g.dir*4.4,vy:-1.6,team:g.team});this.setS(g,'shrug');this.snd('door');break;
    default:this.setS(g,sk);}
@@ -260,6 +276,21 @@ class World{
   if(vs)p.grog-=cost;else p.mana-=cost;p.spellCd=vs?500:250;this.ents.push({k:'ring',x,y:y-6,r:8,l:16});this.float(x,y-14,S.n+'!',S.col);this.snd('select');if(this.onSpend)this.onSpend(p);return true;}
  tickEnt(e){const T=this.T;
   if(e.k==='ring'){e.r+=3;return--e.l>0;}
+  if(e.k==='patch'){if(++e.n%6)return true;let live=false;
+   for(const c of e.cols){if(c.top<=c.tgt||c.dead)continue;let free=true;for(let i=c.x;i<c.x+c.w;i++)if(T.solid(i,c.top-1)){free=false;break;}
+    if(!free){c.dead=1;continue;}
+    const nt=c.top-1;
+    for(const o of this.gobs)if(this.alive(o)&&o.x>=c.x&&o.x<c.x+c.w&&o.y===c.top&&(o.s==='walk'||o.s==='sit'||o.s==='shrug'||o.s==='block'||o.s==='build'||o.s==='dig'||o.s==='bash')){let ok=true;for(let k=1;k<=12;k++)if(T.solid(o.x,nt-k)){ok=false;break;}if(ok)o.y=nt;}
+    T.shroomRow(c.x,nt,c.w,true);T.shroomRow(c.x,nt+3,c.w,false,true,e.d);c.top=nt;live=true;}
+   if(live&&e.n%9===0)this.snd('build');return live||e.cols.some(c=>!c.dead&&c.top>c.tgt);}
+  if(e.k==='tip'){e.t++;if(e.own&&e.own.s==='shrug')e.own.t=0;const f=Math.min(1,e.t/38);let a=Math.PI/2*f*f,rest=false;if(e.t>3)for(let q=e.len*.5;q<=e.len;q+=2){if(T.solid(Math.round(e.x+e.d*q*Math.sin(a)),Math.round(e.y-q*Math.cos(a))-2)){a=e.a||0;rest=true;break;}}e.a=a;const len=e.len,d=e.d;e.ex=e.x+d*len*Math.sin(a);e.ey=e.y-len*Math.cos(a);
+   const hit=(ux,uy)=>{for(let q=0;q<=len;q+=3){const px=e.x+d*q*Math.sin(a),py=e.y-q*Math.cos(a);if(d*(ux-e.x)>=1&&Math.abs(ux-px)<4&&Math.abs(uy-py)<5)return true;}return false;};
+   const land=rest||e.t>=38;
+   for(const o of this.gobs)if(this.alive(o)&&o!==e.own&&o.s!=='home'&&(hit(o.x,o.y-6)||(land&&o.x>=Math.min(e.x,e.x+d*len)&&o.x<=Math.max(e.x,e.x+d*len)&&o.y>=e.y&&o.y-12<=e.y+2))){this.splat(o);this.deathFx(o,'fall');}
+   for(const m of this.mobs)if(!m.dead&&hit(m.x,m.y-6))this.hurtFoe(m,3);
+   if(land){if(rest){let lip=0;const fx=Math.round(e.ex+d*3);for(let k=3;k<=16;k++){if(T.solid(fx,Math.round(e.ey)-k))lip++;else break;}
+    if(a<.78||lip>3){const R=Math.random;if(!this.quiet)for(let i=0;i<14;i++)this.p(e.ex,e.ey,(R()-.5)*90,-R()*70,['#d8d2b8','#a9a48c','#7c7866'][R()*3|0],20+R()*16);this.float(e.ex,e.ey-14,'SNAP','#f0d16b');this.snd('deny');return false;}}
+   if(a>1.55)T.plank(d>0?e.x:e.x-len,e.y,len,3,e.team,1);else for(let q=0;q<=len+4;q+=.5)T.plank(Math.round(e.x+d*q*Math.sin(a)),Math.round(e.y-q*Math.cos(a)),1,3,e.team,1);this.shake=Math.max(this.shake||0,5);this.snd('boom');return false;}return true;}
   if(e.k==='tongueFx')return--e.l>0;
   if(e.k==='rmine'){if(--e.t>0)return true;T.carveEll(e.x,e.y-6,26,22,e.y-1);for(const g of this.gobs)if(this.alive(g)&&Math.hypot(g.x-e.x,g.y-6-e.y+6)<20)this.kill(g,'boom');for(const m of this.mobs)if(!m.dead&&Math.hypot(m.x-e.x,m.y-e.y)<30)this.hurtFoe(m,4);for(const n of this.nests)if(!n.dead&&Math.hypot(n.x-e.x,n.y-e.y)<38)this.hurtNest(n,5);this.boomFx(e.x,e.y-6);this.snd('boom');this.shake=7;return false;}
   if(e.k==='meteor'){if(e.wait>0){e.wait--;return true;}e.vy=Math.min((e.vy||3)+.5,9);e.y+=e.vy;e.x+=1.4;if(e.y<e.ty)return true;const x=e.tx,y=e.ty;if(y<T.h){T.carveEll(x,y,24,20);this.dust(x,y,18,1.5);}for(const g of this.gobs)if(this.alive(g)&&Math.hypot(g.x-x,g.y-y)<27)this.kill(g,'boom');for(const m of this.mobs)if(!m.dead&&Math.hypot(m.x-x,m.y-y)<27)this.hurtFoe(m,3);for(const n of this.nests)if(!n.dead&&Math.hypot(n.x-x,n.y-y)<34)this.hurtNest(n,3);this.boomFx(x,y-6);this.snd('boom');this.shake=8;return false;}

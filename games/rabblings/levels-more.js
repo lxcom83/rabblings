@@ -4,7 +4,7 @@ RACE_LEVELS.swamp.push(
   hatch:[{x:90,y:110,dir:1}],doors:[{x:980,y:108}],haz:[{x0:240,x1:505,y:206}],
   build(S){S.wavy(0,246,190,4,40,1);S.box(236,262,300,38);S.ramp(430,256,520,190);S.box(520,190,60,110);S.land(574,780,146,2);S.land(780,1040,108,2);},
   plan:[{x:532,d:1,s:'spear',tol:1},{x:732,d:1,s:'spear',tol:1,wait:60}]},
- {race:'swamp',name:'Rat Run Rumble',theme:'marsh',w:1160,h:300,n:28,need:14,rate:26,time:260,hint:'Three rat holes, all awake. Keep the TONGUE busy and the line moving.',skills:{tongue:14},
+ {race:'swamp',name:'Rat Run Rumble',theme:'marsh',w:1160,h:300,n:28,need:14,rate:26,time:260,hint:'Three gorger holes, all awake. Keep the TONGUE busy and the line moving.',skills:{tongue:14},
   hatch:[{x:90,y:110,dir:1}],doors:[{x:1090,y:196}],holes:[{x:330,y:190,awake:1},{x:620,y:190},{x:900,y:190}],
   build(S){S.wavy(0,1160,196,3,40,2);S.box(0,0,1160,40);S.iron(20,40,12,156);},
   plan:[{s:'tongue',rat:6,n:14}]}
@@ -17,7 +17,7 @@ RACE_LEVELS.bone.push(
  {race:'bone',name:'The Long Dark',theme:'crypts',w:1160,h:300,n:28,need:10,rate:24,time:320,goal:'both',hint:'A long road, a gap and a nest at the end. Bridge it, merge the strong, send the rest home.',skills:{boom:3,bonebr:3,merge:3},
   hatch:[{x:70,y:165,dir:1}],doors:[{x:1090,y:230}],nests:[{x:800,y:230,kind:'skel',per:300,hp:8,cap:1}],
   build(S){S.iron(0,230,420,70);S.iron(466,230,694,70);},
-  plan:[{s:'boom',x:280,tol:1},{s:'bonebr',x:416,tol:2,d:1},{s:'merge',x:500,tol:10,n:2}]}
+  plan:[{s:'boom',x:280,tol:1},{s:'bonebr',x:416,tol:2,d:1},{s:'merge',x:500,tol:40,n:2}]}
 );
 RACE_LEVELS.fairy.push(
  {race:'fairy',name:'Iron Garden',theme:'garden',w:1000,h:300,n:24,need:11,rate:32,time:260,hint:'Iron everywhere. BRIDGE over each plate before it zaps them.',skills:{build:8},
@@ -53,9 +53,9 @@ RACE_LEVELS.rat.push(
   build(S){S.box(0,216,300,104);S.box(300,262,260,58);S.ramp(262,216,332,262);S.ramp(490,262,560,216);S.box(560,216,640,104);S.rock(420,180,20,90,1);S.rock(900,130,20,90,1);},plan:[{x:415,tol:3,d:1,s:'ratmine',n:1},{x:890,tol:3,d:1,s:'ratmine',n:1,wait:80}],seed:2}
 );
 RACE_LEVELS.shroom.push(
- {race:'shroom',name:'Overgrown',theme:'caves',w:1000,h:300,n:20,need:12,rate:36,time:280,hint:'Two cliffs, two crops. Plant VINES back from each one and let them grow.',skills:{vine:6},
+ {race:'shroom',name:'Overgrown',theme:'caves',w:1000,h:300,n:20,need:12,rate:36,time:280,hint:'Two cliffs, two crops. Grow a MUSHROOM stair back from each one.',skills:{vine:6},
   hatch:[{x:90,y:150,dir:1}],doors:[{x:930,y:90}],
-  build(S){S.box(0,230,1000,70);S.box(420,150,580,150);S.box(720,90,280,210);},plan:[{x:350,d:1,s:'vine',tol:2},{x:650,d:1,s:'vine',tol:2,wait:200}]},
+  build(S){S.box(0,230,1000,70);S.box(420,150,580,150);S.box(720,90,280,210);},plan:[{x:295,d:1,s:'vine',tol:2},{x:625,d:1,s:'vine',tol:2,wait:200}]},
  {race:'shroom',name:'Three Floors Down',theme:'caves',w:900,h:420,n:20,need:8,rate:32,time:400,rules:['regrow'],hint:'Three floors and a cave that heals. DIG down fast and get everyone through.',skills:{dig:10},
   hatch:[{x:90,y:90,dir:1}],doors:[{x:740,y:350}],
   build(S){S.box(0,0,900,20);S.box(0,160,900,30);S.box(0,260,900,30);S.box(0,350,900,70);S.box(0,20,16,330);S.box(884,20,16,330);},plan:[{x:300,tol:3,s:'dig',y:160,ytol:15},{x:300,tol:3,s:'dig',y:160,ytol:15,wait:360},{x:300,tol:10,s:'dig',y:260,ytol:15,wait:450},{x:300,tol:10,s:'dig',y:260,ytol:15,wait:650},{x:300,tol:10,s:'dig',y:260,ytol:15,wait:850},{x:300,tol:10,s:'dig',y:260,ytol:15,wait:1050},{x:300,tol:10,s:'dig',y:260,ytol:15,wait:1250},{x:300,tol:10,s:'dig',y:260,ytol:15,wait:1450}]},
