@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Packs the outlines and object rules of namida's own NeoLemmix styles into maps/namida-data.js.
-Used so her levels play without the player's style files. Only outlines (no colours), sizes and effect rules are kept.
+Used so her levels play without the player's style files. Only outlines, one average colour per piece, sizes and effect rules are kept.
 Usage: python3 tools/namida_styles.py <folder holding the namida_* style folders>
 Left out on purpose: namida_special and namida_systemtest (joke and test pieces), and every style by another author."""
 import sys, os, re, json, zlib, base64, glob
@@ -52,5 +52,5 @@ for sd in sorted(glob.glob(os.path.join(src, 'namida_*'))):
 raw = json.dumps(out, separators=(',', ':')).encode()
 c = zlib.compressobj(9, zlib.DEFLATED, -15); z = c.compress(raw) + c.flush()
 b = base64.b64encode(z).decode()
-open('maps/namida-data.js', 'w').write("// namida's own NeoLemmix styles: outlines and object rules only (no colours). Made by tools/namida_styles.py\nconst NAMIDA_Z='%s';\n" % b)
+open('maps/namida-data.js', 'w').write("// namida's own NeoLemmix styles: outlines, one average colour per piece, sizes and object rules. Made by tools/namida_styles.py\nconst NAMIDA_Z='%s';\n" % b)
 print(len(out), 'styles', sum(len(v['t']) for v in out.values()), 'terrain pieces', sum(len(v['o']) for v in out.values()), 'objects', len(raw) // 1024, 'KB json', len(b) // 1024, 'KB packed')
