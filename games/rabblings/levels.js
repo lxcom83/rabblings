@@ -67,7 +67,7 @@ const WAR_LEVELS=[
 {name:'Sword Drill',theme:'mine',w:780,h:300,n:15,need:8,rate:40,time:180,swap:WAR_S,hint:'Skeletons bite. Arm your front troops with SWORDS before they meet.',skills:{sword:6},
  hatch:[{x:70,y:165,dir:1}],doors:[{x:725,y:230}],foes:[{kind:'skel',x:340,y:225,dir:-1},{kind:'skel',x:450,y:225,dir:-1},{kind:'skel',x:560,y:225,dir:-1}],
  build(S){S.box(0,230,780,70);},plan:[{s:'sword',x:130,tol:2,n:6}]},
-{name:'Arrow Alley',theme:'halls',w:860,h:300,n:15,need:1,rate:44,time:180,goal:'clear',swap:WAR_B,hint:'Clear the map. A BOW reaches further than their arrows, if it fires first.',skills:{bow:5,block:1},
+{name:'Arrow Alley',theme:'halls',w:860,h:300,n:15,need:1,rate:44,time:180,goal:'clear',swap:WAR_B,hint:'Clear the map. Their bowmen lob volleys onto your troops. Shelter, or get in close.',skills:{bow:5,block:1},
  hatch:[{x:70,y:165,dir:1}],doors:[],foes:[{kind:'arch',x:430,y:225,dir:-1},{kind:'arch',x:560,y:225,dir:-1},{kind:'arch',x:690,y:225,dir:-1}],
  build(S){S.box(0,230,860,70);},plan:[{s:'bow',x:130,tol:2,n:5}]},
 {name:'Bridge to the Nest',theme:'marsh',w:900,h:300,n:24,need:1,rate:36,time:240,goal:'clear',swap:WAR_S,hint:'The nest keeps breeding. BRIDGE the water and take SWORDS to it.',skills:{sword:10,build:3},

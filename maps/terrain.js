@@ -1,5 +1,35 @@
 // ---------- terrain: 0 air, 1 dirt, 2 iron, 3 plank, 4-6 one-way, 7 bone ----------
 const boneCol=(x,y)=>{const q=noise(x*3,y*3);return q>.62?rgb32(236,230,206):q>.34?rgb32(204,198,174):rgb32(150,144,126);};
+// ---------- material skins: our own looks for imported terrain when the player's art is not used. 0 keeps the theme dirt ----------
+// 1 stone, 2 brick, 3 sand, 4 snow, 5 moss, 6 ash, 7 crystal, 8 rust, 9 marble, 10 wood, 11 flesh
+const SKIN_NAMES=['','STONE','BRICK','SAND','SNOW','MOSS','ASH','CRYSTAL','RUST','MARBLE','WOOD','FLESH'];
+const SKIN_RAMP=[null,
+ [[58,60,66],[84,86,92],[108,110,114],[132,132,134],[156,154,150]],
+ [[70,32,26],[104,50,38],[132,66,48],[156,86,60],[44,24,22]],
+ [[150,122,74],[176,148,92],[198,170,112],[214,190,134],[120,96,58]],
+ [[150,168,190],[184,200,218],[214,226,238],[236,242,248],[110,128,156]],
+ [[30,48,24],[46,72,34],[64,96,40],[88,118,50],[24,36,22]],
+ [[24,22,26],[38,36,40],[54,50,54],[72,64,64],[150,62,30]],
+ [[44,34,86],[70,54,128],[104,86,170],[150,134,210],[34,70,96]],
+ [[60,38,26],[92,52,30],[128,68,32],[162,88,38],[40,34,34]],
+ [[150,148,140],[178,176,166],[204,200,188],[226,222,208],[98,96,94]],
+ [[62,40,24],[88,58,32],[112,76,42],[136,94,54],[44,28,18]],
+ [[96,34,44],[128,50,58],[158,74,76],[186,100,96],[66,24,34]]];
+const SKIN32=SKIN_RAMP.map(r=>r&&r.map(c=>rgb32(c[0],c[1],c[2])));
+function skinCol(id,x,y){const R=SKIN32[id];if(!R)return 0;const n=noise(x,y)*.6+noise(x*3,y*3)*.4;let q=n,e=0;
+ switch(id){
+  case 2:{const row=(y/6)|0,bx=(x+(row&1)*8)%16,my=y%6;if(my===5||bx===0)return R[4];q=n*.7+((row*5+((x+(row&1)*8)/16|0)*3)%7)/14;e=my===0?.2:0;break;}
+  case 3:q=.5+Math.sin(y*.5+noise(x>>3,y>>1)*5)*.28+(n-.5)*.4;break;
+  case 4:q=.55+(n-.5)*.7+(noise(x>>2,y>>2)>.8?-.25:0);break;
+  case 5:q=n*1.05+(noise(x>>1,(y>>1)+40)>.82?.35:0);break;
+  case 6:{if(noise(x*2+5,y*2+9)>.965)return R[4];q=n*.9;break;}
+  case 7:{const f=((x+y*2)%14)/14;q=.25+f*.45+(n-.5)*.35;if((x+y*2)%14===0)q=1;break;}
+  case 8:{if(noise(x*2+11,y*2+3)>.9)return R[3];q=n*.95;break;}
+  case 9:{const v=Math.abs(Math.sin((x*.5+y*.9)*.35+noise(x>>2,y>>2)*6));if(v<.06)return R[4];q=.55+(n-.5)*.5;break;}
+  case 10:{q=.5+Math.sin(x*1.3+noise(x>>1,y>>3)*6)*.28+(n-.5)*.3;if(y%14===0)return R[4];break;}
+  case 11:{const v=Math.abs(Math.sin((x*.7-y*.5)*.4+noise(x>>2,y>>2)*5));if(v<.07)return R[4];q=n*.9;break;}
+  default:q=n;}
+ const i=clamp(q*R.length*.999+bayer(x,y)*.8-.4,0,R.length-1.01)|0;let c=R[i>3?3:i];return e?mul32(c,1+e):c;}
 class Terrain{
  constructor(w,h,theme,seed){Object.assign(this,{w,h,theme:THEME[theme],seed});this.m=new Uint8Array(w*h);this.t=new Uint32Array(w*h);this.dirty=[];
   [this.cv,this.cx]=mk(w,h);[this.deco,this.dx]=mk(w,h);this.decos=[];this.pcs=[];this.mir=false;this.img=this.cx.createImageData(w,h);this.b=new Uint32Array(this.img.data.buffer);}
@@ -28,10 +58,10 @@ class Terrain{
    this.cx.putImageData(this.img,0,0,x,y,X-x,Y-y);this.dx.clearRect(x-1,y-12,X-x+2,Y-y+14);}d.length=0;}
  texCols(x0,x1){const{w,h,m,t,theme:T}=this,R=T.r32;
   for(let y=0;y<h;y++)for(let x=x0;x<x1;x++){const k=y*w+x,v=m[k];if(!v)continue;
-   if(v===7)t[k]=boneCol(x,y);else if(v===1||v>=4){const n=noise(x,y)*.7+noise(x*3,y*3)*.3,st=Math.sin(y*.16+noise(x>>1,y>>2)*7)*.5+.5;let q=(n-.25)*1.6*.7+st*.3;q=clamp(q*R.length+bayer(x,y)-.5,0,R.length-1)|0;let c=R[q];
-    const pb=noise((x>>1)*7+90,(y>>1)*5+40)+noise(x>>2,(y>>2)+60)*.25;if(pb>.92)c=T.p32;else if(pb>.895)c=mul32(T.p32,.62);if(v>=4){const a=x&15,b=y&15,e=v===6?Math.abs(a-8)+(15-b):v===4?Math.abs(b-8)+a:Math.abs(b-8)+(15-a);c=mul32(c,e===8||e===9?1.75:.86);}t[k]=c;}
+   if(v===7)t[k]=boneCol(x,y);else if(v===1||v>=4){const n=noise(x,y)*.7+noise(x*3,y*3)*.3,st=Math.sin(y*.16+noise(x>>1,y>>2)*7)*.5+.5;let q=(n-.25)*1.6*.7+st*.3;q=clamp(q*R.length+bayer(x,y)-.5,0,R.length-1)|0;let c=R[q];const sk=(this.skin&&!this.gfx)?this.skin[k]:0;if(sk)c=skinCol(sk,x,y);
+    const pb=sk?0:noise((x>>1)*7+90,(y>>1)*5+40)+noise(x>>2,(y>>2)+60)*.25;if(pb>.92)c=T.p32;else if(pb>.895)c=mul32(T.p32,.62);if(v>=4){const a=x&15,b=y&15,e=v===6?Math.abs(a-8)+(15-b):v===4?Math.abs(b-8)+a:Math.abs(b-8)+(15-a);c=mul32(c,e===8||e===9?1.75:.86);}t[k]=c;}
    else if(v===2)t[k]=this.ironTex(x,y);else{const q=((y>>2)&1)?(x+8)%16:x%16,c=q===0||(y&3)===3?0xff2a5480:0xff3c78b4;t[k]=c>>>0;}}
-  for(let x=x0;x<x1;x++){let d=-1;for(let y=0;y<h;y++){const k=y*w+x;if(m[k]===0){d=0;continue;}if(d<0)continue;if(m[k]===1){const lim=T.capD+((noise(x*3,17)*6)|0);if(d<lim){const q=clamp(((d/lim)*T.c32.length+bayer(x,y)*.8)|0,0,T.c32.length-1);t[k]=T.c32[q];}}d++;if(d>30)d=30;}}
+  for(let x=x0;x<x1;x++){let d=-1;for(let y=0;y<h;y++){const k=y*w+x;if(m[k]===0){d=0;continue;}if(d<0)continue;if(m[k]===1&&!(this.skin&&!this.gfx&&this.skin[k]&&this.skin[k]!==5)){const lim=T.capD+((noise(x*3,17)*6)|0);if(d<lim){const q=clamp(((d/lim)*T.c32.length+bayer(x,y)*.8)|0,0,T.c32.length-1);t[k]=T.c32[q];}}d++;if(d>30)d=30;}}
   if(this.gfx){const G=this.gfx,px=(i,j)=>i>=0&&j>=0&&i<G.w&&j<G.h?G.d[j*G.w+i]:0;for(let y=0;y<h;y++)for(let x=x0;x<x1;x++){const k=y*w+x,v=m[k];if(!v||v===3||v===7)continue;const a=(x-G.ox)/G.s|0,b=(y-G.oy)/G.s|0;let c=px(a,b)||px(a+1,b)||px(a-1,b)||px(a,b+1)||px(a,b-1);if(!c)continue;if(v>=4){const p=x&15,q=y&15,e=v===6?Math.abs(p-8)+(15-q):v===4?Math.abs(q-8)+p:Math.abs(q-8)+(15-p);c=mul32(c,e===8||e===9?1.75:.86);}t[k]=c;}}
   if(this.decos.length)this.applyDecor(x0,x1);if(this.pcs.length)this.applyPieces(x0,x1);}
  paint(){this.texCols(0,this.w);this.flushAll();if(!this.gfx)this.decorate(rng(this.seed));}

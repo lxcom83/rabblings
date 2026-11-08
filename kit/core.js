@@ -73,6 +73,9 @@ const SONGS={
  win:{once:1,bpm:170,chords:['c3','f2','g2','c3'],kind:[1,1,1,1],lead:mel(`c5 e5 g5 c6 a5 f5 c5 a5 g5 b5 d6 g5 c6 . c6 .`)},
  lose:{once:1,bpm:92,chords:['a2','f2','e2','a1'],kind:[0,1,2,0],lead:mel(`e5 d5 c5 a4 c5 a4 f4 - e4 g#4 b4 d5 a4 . . .`)}
 };
+// stop all sound when the page is hidden, closed to the background or frozen; resume when it comes back
+(function(){const off=()=>{try{if(AU.ctx&&AU.ctx.state==='running')AU.ctx.suspend();}catch(e){}},on=()=>{try{if(AU.ctx&&AU.ctx.state==='suspended'&&!document.hidden)AU.ctx.resume();}catch(e){}};
+document.addEventListener('visibilitychange',()=>document.hidden?off():on());addEventListener('pagehide',off);addEventListener('pageshow',on);addEventListener('freeze',off);addEventListener('resume',on);})();
 function playSong(n){AU.want=n;if(!AU.ctx)return;const s=SONGS[n];AU.song=n&&AU.music?s:null;AU.step=0;AU.next=AU.ctx.currentTime+.06;AU.bpm=s?s.bpm:120;AU.boost=1;}
 function auPump(){const a=AU.ctx;if(!a||!AU.song)return;const s=AU.song,sp=60/(AU.bpm*(AU.boost||1))/4;
   while(AU.next<a.currentTime+.16){const st=AU.step,t=AU.next,len=s.chords.length*16;
@@ -96,6 +99,7 @@ function sfx(n){if(!AU.ctx||!AU.sfx)return;const a=AU.ctx,t=a.currentTime,now=pe
   case'move':blip(660,.03,.07);break;case'select':blip(880,.05,.1);fm(t+.05,1320,.06,{ratio:2,idx:1,dec:.06,vol:.08},S);break;
   case'assign':blip(520,.05,.13,3);fm(t+.04,780,.06,{ratio:3,idx:1,dec:.05,vol:.1},S);break;
   case'deny':blip(120,.1,.14,1.5);break;
+  case'nope':fm(t,196,.1,{ratio:1.5,idx:2.2,dec:.09,vol:.16,hold:.5},S);fm(t+.11,131,.2,{ratio:1.5,idx:2.6,dec:.16,vol:.17,hold:.6},S);nz(t+.11,.12,.06,300,'bandpass',S);break;
   case'dig':nz(t,.06,.1,700,'bandpass',S);break;case'bash':nz(t,.07,.14,380,'bandpass',S);blip(90,.05,.12,1.4);break;case'pick':blip(1900,.03,.05,5);nz(t,.05,.08,1200,'bandpass',S);break;
   case'build':blip(330,.04,.1,5);break;case'clank':blip(2300,.07,.1,3.3);break;
   case'home':blip(990,.05,.09);fm(t+.06,1320,.08,{ratio:2,idx:1,dec:.06,vol:.08},S);break;
