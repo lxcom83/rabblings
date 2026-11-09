@@ -69,5 +69,9 @@ RACE_LEVELS.imp.push(
   build(S){S.wavy(0,1000,196,3,40,2);S.box(0,0,1000,40);S.box(380,40,20,160,3);S.box(620,40,20,160,3);S.box(820,40,20,160,3);S.box(376,196,28,12,1);S.box(616,196,28,12,1);S.box(816,196,28,12,1);},plan:[{x:340,d:1,s:'firepot',tol:2},{x:580,d:1,s:'firepot',tol:2,wait:120},{x:780,d:1,s:'firepot',tol:2,wait:120}]},
  {race:'imp',name:'Heat Wave',theme:'cinder',w:1200,h:300,n:24,need:12,rate:30,time:300,hint:'Lava, gates and jets. HOP what you must, burn what you can.',skills:{firepot:4,hop:4},
   hatch:[{x:90,y:130,dir:1}],doors:[{x:1130,y:208}],gates:[{x:300,y:186,w:14,h:26}],zones:[{id:1,x:326,y:170,w:60,h:44}],trig:[{w:'zone',n:1,who:0,a:'open',r:0}],traps:[{k:'jet',x:470,y:208,per:70},{k:'jet',x:530,y:208,per:70},{k:'jet',x:900,y:208,per:50}],
-  build(S){S.wavy(0,1200,210,2,40,1);S.iron(20,120,12,92);S.box(700,60,20,150,3);},plan:[{x:262,d:1,s:'hop',tol:1},{x:660,d:1,s:'firepot',tol:2,wait:120}]}
+  build(S){S.wavy(0,1200,210,2,40,1);S.iron(20,120,12,92);S.box(700,60,20,150,3);},plan:[{x:262,d:1,s:'hop',tol:1},{x:660,d:1,s:'firepot',tol:2,wait:120}]},
+ {race:'imp',name:'Tinderbox',theme:'canopy',w:800,h:300,n:20,need:14,rate:34,time:200,hint:'A thicket of vines and leaves blocks the way. One FIRE POT and the whole lot goes up. Imps do not mind.',skills:{firepot:1},rules:['spread'],
+  hatch:[{x:90,y:130,dir:1}],doors:[{x:720,y:206}],
+  build(S){S.wavy(0,800,206,3,40,1);S.box(0,0,800,40);S.box(330,40,120,166,11);S.box(350,120,90,40,12);},
+  plan:[{x:300,d:1,s:'firepot',tol:3}]}
 );

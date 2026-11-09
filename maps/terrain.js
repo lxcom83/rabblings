@@ -1,4 +1,4 @@
-// ---------- terrain: 0 air, 1 dirt, 2 iron, 3 plank, 4-6 one-way, 7 bone ----------
+// ---------- terrain: 0 air, 1 dirt, 2 iron, 3 plank, 4-6 one-way, 7 bone, 8 ice, 9 thin ice, 10 sand ----------
 const boneCol=(x,y)=>{const q=noise(x*3,y*3);return q>.62?rgb32(236,230,206):q>.34?rgb32(204,198,174):rgb32(150,144,126);};
 // ---------- material skins: our own looks for imported terrain when the player's art is not used. 0 keeps the theme dirt ----------
 // 1 stone, 2 brick, 3 sand, 4 snow, 5 moss, 6 ash, 7 crystal, 8 rust, 9 marble, 10 wood, 11 flesh
@@ -16,6 +16,18 @@ const SKIN_RAMP=[null,
  [[62,40,24],[88,58,32],[112,76,42],[136,94,54],[44,28,18]],
  [[96,34,44],[128,50,58],[158,74,76],[186,100,96],[66,24,34]]];
 const SKIN32=SKIN_RAMP.map(r=>r&&r.map(c=>rgb32(c[0],c[1],c[2])));
+// ice: slippery, melts near fire. Thin ice is paler and cracks under a crowd or a builder
+const ICE32=[[96,140,176],[120,170,205],[150,196,226],[182,220,242],[214,238,252]].map(c=>rgb32(c[0],c[1],c[2])),THIN32=[[130,176,208],[160,204,230],[190,226,244],[218,240,252],[84,120,160]].map(c=>rgb32(c[0],c[1],c[2]));
+const SAND32=[[168,128,70],[190,150,86],[212,172,104],[230,194,126],[244,214,150]].map(c=>rgb32(c[0],c[1],c[2]));
+function sandCol(x,y){const n=noise(x>>1,y>>1)*.5+noise(x*3,y*3)*.25,r=Math.sin((x*.11)+(y*.7)+noise(x>>3,y>>2)*6)*.5+.5;let q=Math.floor((n*.7+r*.45)*4.4);if(q<0)q=0;if(q>4)q=4;return SAND32[q];}
+const VINE32=[[34,72,30],[48,98,40],[66,124,50],[92,150,62],[28,54,28]].map(c=>rgb32(c[0],c[1],c[2])),LEAF32=[[52,124,56],[70,150,66],[96,176,84],[128,200,104],[36,92,44]].map(c=>rgb32(c[0],c[1],c[2])),FLAME32=[[255,214,92],[250,160,40],[226,98,24],[160,52,20]].map(c=>rgb32(c[0],c[1],c[2]));
+function vineCol(x,y){const n=noise(x>>1,y>>2),s=Math.sin(x*1.3+Math.sin(y*.09)*2)*.5+.5;let q=Math.floor((n*.5+s*.6)*4.2);q=q<0?0:q>4?4:q;return VINE32[q];}
+function leafCol(x,y){const v=Math.abs(((x+y*.5)%9)-4.5)<.7||Math.abs((y%11)-5)<.5,n=noise(x>>1,y>>1);return v?LEAF32[4]:LEAF32[Math.min(3,Math.floor(n*4.4))];}
+const RIFT32=[[88,40,150],[120,60,190],[160,90,224],[200,140,246],[60,24,110]].map(c=>rgb32(c[0],c[1],c[2])),CRUMB32=[[96,78,66],[120,98,82],[146,120,98],[172,146,120],[52,40,34]].map(c=>rgb32(c[0],c[1],c[2]));
+function riftCol(x,y,ghost){const n=noise(x>>1,y>>1),s=Math.sin(x*.5+y*.35+n*5)*.5+.5;const q=Math.min(3,Math.floor((n*.5+s*.7)*3.4));const c=RIFT32[q];return ghost?(((c&0x00ffffff)|0x58000000)>>>0):c;}
+function crumbCol(x,y){const n=noise(x,y)*.5+noise(x*3,y*3)*.25;const cr=Math.abs(((x*7+y*3)%23)-11)<1||Math.abs(((y*5-x*2)%29)-14)<1;return cr?CRUMB32[4]:CRUMB32[Math.min(3,Math.floor(n*4.6))];}
+function iceCol(x,y,thin){const R=thin?THIN32:ICE32,n=noise(x,y)*.5+noise(x*3,y*3)*.2;if(thin){const v=Math.abs(Math.sin((x*.9-y*1.3)*.28+noise(x>>3,y>>3)*6));if(v<.05)return R[4];}
+ let q=.5+Math.sin((x*.7+y*.4)*.5+noise(x>>2,y>>2)*4)*.22+(n-.35)*.5;if(!thin&&noise(x>>1,(y>>1)+70)>.9)q=.05;const i=clamp(q*R.length+bayer(x,y)*.8-.4,0,R.length-1.01)|0;return R[i];}
 function skinCol(id,x,y){const R=SKIN32[id];if(!R)return 0;const n=noise(x,y)*.6+noise(x*3,y*3)*.4;let q=n,e=0;
  switch(id){
   case 2:{const row=(y/6)|0,bx=(x+(row&1)*8)%16,my=y%6;if(my===5||bx===0)return R[4];q=n*.7+((row*5+((x+(row&1)*8)/16|0)*3)%7)/14;e=my===0?.2:0;break;}
@@ -33,15 +45,15 @@ function skinCol(id,x,y){const R=SKIN32[id];if(!R)return 0;const n=noise(x,y)*.6
 class Terrain{
  constructor(w,h,theme,seed){Object.assign(this,{w,h,theme:THEME[theme],seed});this.m=new Uint8Array(w*h);this.t=new Uint32Array(w*h);this.dirty=[];
   [this.cv,this.cx]=mk(w,h);[this.deco,this.dx]=mk(w,h);this.decos=[];this.pcs=[];this.mir=false;this.img=this.cx.createImageData(w,h);this.b=new Uint32Array(this.img.data.buffer);}
- solid(x,y){if(x<0||x>=this.w)return !this.open;if(y<0||y>=this.h)return false;return this.m[y*this.w+x]!==0;}
+ solid(x,y){if(x<0||x>=this.w)return !this.open;if(y<0||y>=this.h)return false;{const v=this.m[y*this.w+x];return v!==0&&v!==15;}}
  iron(x,y){return x>=0&&x<this.w&&y>=0&&y<this.h&&this.m[y*this.w+x]===2;}
  hasIron(x,y,w,h){for(let j=y;j<y+h;j++)for(let i=x;i<x+w;i++)if(this.iron(i,j))return true;return false;}
  count(x,y,w,h){let n=0;for(let j=y;j<y+h;j++)for(let i=x;i<x+w;i++)if(i>=0&&i<this.w&&j>=0&&j<this.h&&this.m[j*this.w+i])n++;return n;}
- clr(i,j){if(i<0||j<0||i>=this.w||j>=this.h)return 0;const k=j*this.w+i,v=this.m[k];if(v===1||v===3||v===7||(v===2&&this.drill)||(v>=4&&v<7&&this.wayOk(v))){this.m[k]=0;if(this.grow)this.grow.push([k,v,this.now||0]);return 1;}return 0;}
+ clr(i,j){if(i<0||j<0||i>=this.w||j>=this.h)return 0;const k=j*this.w+i,v=this.m[k];if(v===1||v===3||v===7||v===8||v===9||v===10||v===11||v===12||v===14||v===16||(v===2&&this.drill)||(v>=4&&v<7&&this.wayOk(v))){this.m[k]=0;if(this.grow)this.grow.push([k,v,this.now||0]);return 1;}return 0;}
  // one-way walls: 4 left, 5 right, 6 down. way is 0 for digging and blasts, +-1 for bashing, +-2 for picking
  wayOk(v){const w=this.way||0;if(!w)return true;return v===4?w<0:v===5?w>0:Math.abs(w)===2;}
  hard(x,y,w,h,way){this.way=way;for(let j=y;j<y+h;j++)for(let i=x;i<x+w;i++)if(i>=0&&j>=0&&i<this.w&&j<this.h){const v=this.m[j*this.w+i];if(v===2||(v>=4&&v<7&&!this.wayOk(v))){this.way=0;return true;}}this.way=0;return false;}
- mark(x,y,w,h){this.dirty.push(x,y,w,h);}
+ mark(x,y,w,h){this.dirty.push(x,y,w,h);if(this.sandOn){const q=this.sw;if(q){if(x<q[0])q[0]=x;if(y<q[1])q[1]=y;if(x+w>q[2])q[2]=x+w;if(y+h>q[3])q[3]=y+h;}else this.sw=[x,y,x+w,y+h];}}
  carve(x,y,w,h){let n=0;for(let j=y;j<y+h;j++)for(let i=x;i<x+w;i++)n+=this.clr(i,j);if(n)this.mark(x,y,w,h);return n;}
  carveEll(cx,cy,rx,ry,maxY=1e9){let n=0;const x0=Math.floor(cx-rx),x1=Math.ceil(cx+rx),y0=Math.floor(cy-ry),y1=Math.ceil(cy+ry);
   for(let j=y0;j<=y1&&j<=maxY;j++)for(let i=x0;i<=x1;i++){const a=(i-cx)/rx,b=(j-cy)/ry;if(a*a+b*b<=1)n+=this.clr(i,j);}
@@ -67,11 +79,11 @@ class Terrain{
    this.cx.putImageData(this.img,0,0,x,y,X-x,Y-y);this.dx.clearRect(x-1,y-12,X-x+2,Y-y+14);}d.length=0;}
  texCols(x0,x1){const{w,h,m,t,theme:T}=this,R=T.r32;
   for(let y=0;y<h;y++)for(let x=x0;x<x1;x++){const k=y*w+x,v=m[k];if(!v)continue;
-   if(v===7)t[k]=boneCol(x,y);else if(v===1||v>=4){const n=noise(x,y)*.7+noise(x*3,y*3)*.3,st=Math.sin(y*.16+noise(x>>1,y>>2)*7)*.5+.5;let q=(n-.25)*1.6*.7+st*.3;q=clamp(q*R.length+bayer(x,y)-.5,0,R.length-1)|0;let c=R[q];const sk=(this.skin&&!this.gfx)?this.skin[k]:0;if(sk)c=skinCol(sk,x,y);
+   if(v===7)t[k]=boneCol(x,y);else if(v===8||v===9)t[k]=iceCol(x,y,v===9);else if(v===10)t[k]=sandCol(x,y);else if(v===11)t[k]=vineCol(x,y);else if(v===12)t[k]=leafCol(x,y);else if(v===13)t[k]=FLAME32[(x+y)&3];else if(v===14||v===15)t[k]=riftCol(x,y,v===15);else if(v===16)t[k]=crumbCol(x,y);else if(v===1||v>=4){const n=noise(x,y)*.7+noise(x*3,y*3)*.3,st=Math.sin(y*.16+noise(x>>1,y>>2)*7)*.5+.5;let q=(n-.25)*1.6*.7+st*.3;q=clamp(q*R.length+bayer(x,y)-.5,0,R.length-1)|0;let c=R[q];const sk=(this.skin&&!this.gfx)?this.skin[k]:0;if(sk)c=skinCol(sk,x,y);
     const pb=sk?0:noise((x>>1)*7+90,(y>>1)*5+40)+noise(x>>2,(y>>2)+60)*.25;if(pb>.92)c=T.p32;else if(pb>.895)c=mul32(T.p32,.62);if(v>=4){const a=x&15,b=y&15,e=v===6?Math.abs(a-8)+(15-b):v===4?Math.abs(b-8)+a:Math.abs(b-8)+(15-a);c=mul32(c,e===8||e===9?1.75:.86);}t[k]=c;}
    else if(v===2)t[k]=this.ironTex(x,y);else{const q=((y>>2)&1)?(x+8)%16:x%16,c=q===0||(y&3)===3?0xff2a5480:0xff3c78b4;t[k]=c>>>0;}}
   for(let x=x0;x<x1;x++){let d=-1;for(let y=0;y<h;y++){const k=y*w+x;if(m[k]===0){d=0;continue;}if(d<0)continue;if(m[k]===1&&!(this.skin&&!this.gfx&&this.skin[k]&&this.skin[k]!==5)){const lim=T.capD+((noise(x*3,17)*6)|0);if(d<lim){const q=clamp(((d/lim)*T.c32.length+bayer(x,y)*.8)|0,0,T.c32.length-1);t[k]=T.c32[q];}}d++;if(d>30)d=30;}}
-  if(this.gfx){const G=this.gfx,px=(i,j)=>i>=0&&j>=0&&i<G.w&&j<G.h?G.d[j*G.w+i]:0;for(let y=0;y<h;y++)for(let x=x0;x<x1;x++){const k=y*w+x,v=m[k];if(!v||v===3||v===7)continue;const a=(x-G.ox)/G.s|0,b=(y-G.oy)/G.s|0;let c=px(a,b)||px(a+1,b)||px(a-1,b)||px(a,b+1)||px(a,b-1);if(!c)continue;if(v>=4){const p=x&15,q=y&15,e=v===6?Math.abs(p-8)+(15-q):v===4?Math.abs(q-8)+p:Math.abs(q-8)+(15-p);c=mul32(c,e===8||e===9?1.75:.86);}t[k]=c;}}
+  if(this.gfx){const G=this.gfx,px=(i,j)=>i>=0&&j>=0&&i<G.w&&j<G.h?G.d[j*G.w+i]:0;for(let y=0;y<h;y++)for(let x=x0;x<x1;x++){const k=y*w+x,v=m[k];if(!v||v===3||v===7||v>=8)continue;const a=(x-G.ox)/G.s|0,b=(y-G.oy)/G.s|0;let c=px(a,b)||px(a+1,b)||px(a-1,b)||px(a,b+1)||px(a,b-1);if(!c)continue;if(v>=4){const p=x&15,q=y&15,e=v===6?Math.abs(p-8)+(15-q):v===4?Math.abs(q-8)+p:Math.abs(q-8)+(15-p);c=mul32(c,e===8||e===9?1.75:.86);}t[k]=c;}}
   if(this.decos.length)this.applyDecor(x0,x1);if(this.pcs.length)this.applyPieces(x0,x1);}
  paint(){this.texCols(0,this.w);this.flushAll();if(!this.gfx)this.decorate(rng(this.seed));}
  repaint(x0,x1){x0=clamp(x0-3|0,0,this.w);x1=clamp(x1+3|0,0,this.w);if(x1<=x0)return;this.texCols(x0,x1);for(let j=0;j<this.h;j++)for(let i=x0;i<x1;i++)this.b[j*this.w+i]=this.shade(i,j);this.cx.putImageData(this.img,0,0,x0,0,x1-x0,this.h);}
@@ -79,12 +91,12 @@ class Terrain{
  flushAll(){for(let j=0;j<this.h;j++)for(let i=0;i<this.w;i++)this.b[j*this.w+i]=this.shade(i,j);this.cx.putImageData(this.img,0,0);this.dirty.length=0;}
  decorate(r){const{w,h,m,dx:x,theme:T}=this;const name=T.deco||Object.keys(THEME).find(k=>THEME[k]===T);
   for(let i=2;i<w-2;i++)for(let j=1;j<h-1;j++){const s=m[j*w+i],a=m[(j-1)*w+i],b=j<h-2?m[(j+1)*w+i]:1;
-   if(s===1&&a===0){const p=r();
+   if((s===1||s===8)&&a===0){const p=r();
     if(name==='bog'){if(p<.34){x.fillStyle=T.cap[(r()*3)|0];x.fillRect(i,j-1-(r()*3|0),1,3);}else if(p<.012+.34){x.fillStyle='#dad1ac';x.fillRect(i,j-4,2,4);x.fillStyle='#a33b2d';x.fillRect(i-2,j-6,6,2);x.fillRect(i-1,j-7,4,1);x.fillStyle='#fff';x.fillRect(i,j-6,1,1);}}
     else if(name==='frost'){if(p<.05){x.fillStyle='#7493b7';x.fillRect(i,j-1,2,1);}}
     else if(name==='forge'){if(p<.03){x.fillStyle='#dd5d16';x.fillRect(i,j,1,1);}}
     else if(p<.008){x.fillStyle='#4c5f71';x.fillRect(i,j-5,2,5);x.fillRect(i+2,j-3,2,3);x.fillStyle='#6f95b5';x.fillRect(i,j-5,1,3);}else if(p<.018){x.fillStyle='#96927f';x.fillRect(i,j-2,4,2);x.fillStyle='#6d6b63';x.fillRect(i+1,j-1,1,1);}}
-   if(s===1&&b===0&&r()<.07){const l=3+r()*9|0;for(let k=0;k<l;k++){x.fillStyle=name==='frost'?(k<l-2?'#6883a1':'#fff'):name==='forge'?(k>l-3?'#e56917':'#331f23'):name==='bog'?'#414937':'#201d1d';x.fillRect(i,j+1+k,k<l/2?2:1,1);}}}}
+   if((s===1||s===8)&&b===0&&r()<.07){const l=3+r()*9|0;for(let k=0;k<l;k++){x.fillStyle=name==='frost'?(k<l-2?'#6883a1':'#fff'):name==='forge'?(k>l-3?'#e56917':'#331f23'):name==='bog'?'#414937':'#201d1d';x.fillRect(i,j+1+k,k<l/2?2:1,1);}}}}
 }
 class Shaper{constructor(T,seed){this.T=T;this.s=seed;}
  n(x,f=.04,o=0){const v=noise(Math.floor(x*f*8+o*37),o*31&255);return (v-.5)*2.2;}

@@ -143,6 +143,9 @@ const THEME={
  forge:{ramp:['#0a0808','#0e0b0c','#140f10','#331f23','#422829','#53322f','#643d35'],cap:['#e57a17','#95462e','#5f2b26','#381d1f'],capD:3,peb:'#dd4e16',iron:[67,71,82],sky:['#070405','#10090a','#431516','#7c2a1b','#b5571f'],haz:['#b5a64b','#db9016','#b64c1e','#812818'],amb:'#e89217',glow:'rgba(255,140,40,.6)'},
  frost:{ramp:['#1d2127','#272c33','#323741','#3e444f','#4a525e','#556272','#617389'],cap:['#ffffff','#7493b7','#6883a1','#5a6d84'],capD:5,peb:'#6f91b5',iron:[88,98,110],sky:['#0d0f15','#1a1f28','#262f3a','#39444e','#6c8f61'],haz:['#698fb2','#4e667f','#3a4757','#283240'],amb:'#ffffff',glow:'rgba(150,230,255,.5)'}};
 Object.assign(THEME.forge,{hot:1,lavaHaz:1});
+Object.assign(THEME,{vortex:{ramp:['#120d1e','#1b1430','#261c42','#33265a','#42317a','#563f98','#6f55b8'],cap:['#d9b8ff','#a77de8','#7a52c0','#4e3388'],capD:4,peb:'#8c6bd0',iron:[84,76,110],sky:['#07040f','#150a2a','#2c1250','#5a2a8c','#b86bd4'],haz:['#c18cff','#8a4fd6','#522a96','#2f1760'],amb:'#e6c8ff',glow:'rgba(200,150,255,.6)'},shatter:{ramp:['#17131a','#221b24','#2e2530','#3b3040','#4a3c50','#5c4b62','#705c76'],cap:['#c8b6a0','#a08c78','#7a6a5c','#4c423a'],capD:4,peb:'#9a8672',iron:[96,88,86],sky:['#14101a','#2a1d2e','#5a3340','#a85a48','#e8a060'],haz:['#e8a04a','#c05a2a','#7a2e1e','#40160f'],amb:'#f0c8a0',glow:'rgba(255,170,110,.5)'}});
+Object.assign(THEME,{canopy:{ramp:['#0f1a12','#16261a','#1e3422','#27432b','#325436','#42683f','#587f4b'],cap:['#9fd16a','#6fae4e','#4b8a3d','#2f5f2c'],capD:4,peb:'#7a9f5a',iron:[70,84,78],sky:['#0b1f1c','#14382f','#1f5a45','#4f8a54','#a6c46a'],haz:['#78b14a','#4f7e34','#2f4e24','#1c3016'],amb:'#d4f08a',glow:'rgba(190,255,120,.5)'}});
+Object.assign(THEME,{dunes:{ramp:['#2a1d14','#3a281a','#4d3320','#614227','#78532f','#946a3a','#b0864a'],cap:['#f3d58f','#d9b36a','#b58d4d','#8a6a38'],capD:4,peb:'#c79b58',iron:[96,84,72],sky:['#2a3f6b','#5d7fa8','#c9a98a','#f0b868','#fbe3a0'],haz:['#e9a23b','#b8661f','#7e3b14','#4a2210'],amb:'#f5dca0',glow:'rgba(255,200,110,.5)'}});
 Object.assign(THEME,{
  marsh:{deco:'bog',ramp:['#121411','#181b17','#21241f','#2b2e28','#353832','#41443b','#4d4f44'],cap:['#9aac64','#697e56','#44573d','#2e3b29'],capD:6,peb:'#94966a',iron:[70,84,81],sky:['#101317','#1b2024','#3c4736','#6b6c54','#a3965d'],haz:['#74a35d','#475e40','#252f36','#171d22'],amb:'#a9c065',glow:'rgba(150,240,170,.5)'},
  cinder:{deco:'forge',hot:1,lavaHaz:1,ramp:['#08090a','#0d0e10','#121317','#171112','#1e1617','#261b1d','#2f2224'],cap:['#e9a223','#c24823','#682a34','#191113'],capD:3,peb:'#e46a17',iron:[61,58,77],sky:['#060709','#0f1015','#1c0f12','#672421','#b65025'],haz:['#b5a64b','#db8516','#b3411f','#762217'],amb:'#e87a17',glow:'rgba(255,120,40,.6)'},
@@ -176,6 +179,27 @@ function buildBackdrop(name){const T=THEME[name],[sky,sx]=ditherSky(VW,VH,T.sky)
   layer(.12,x=>ridge(x,180,30,4,'#5a1e17'));
   layer(.28,x=>{ridge(x,206,14,5,'#3a1413');for(let i=0;i<7;i++){const a=r()*LW|0,w=14+r()*14|0,h=50+r()*70|0;x.fillStyle='#2b0e11';x.fillRect(a,206-h,w,h+80);x.fillRect(a-3,206-h,w+6,6);x.fillStyle='#e89217';for(let k=0;k<3;k++)x.fillRect(a+3,206-h+12+k*14,w-6,3);}});
   layer(.5,x=>{ridge(x,232,12,6,'#1c0b0e','#4f1b16');for(let i=0;i<3;i++){const a=70+i*170,b=170;x.fillStyle='#e89217';x.fillRect(a,0,10,b+70);x.fillStyle='#b5a64b';x.fillRect(a+3,0,4,b+70);x.fillStyle='#a54222';x.fillRect(a+9,0,2,b+70);}});
+ }else if(name==='vortex'){
+  for(let i=0;i<90;i++){sx.globalAlpha=.3+r()*.5;sx.fillStyle='#fff';sx.fillRect(r()*VW,r()*150,1,1);}sx.globalAlpha=1;
+  for(let a=0;a<5;a++){sx.strokeStyle=['#7a3fd0','#b86bd4','#e0a8ff','#5a2a8c','#9a5ae0'][a];sx.globalAlpha=.55-a*.07;sx.lineWidth=3-a*.4;sx.beginPath();for(let q=0;q<80;q++){const t2=q/80*5.5+a*.4,rr=8+q*1.3;const px=380+Math.cos(t2)*rr*1.6,py=90+Math.sin(t2)*rr*.7;q?sx.lineTo(px,py):sx.moveTo(px,py);}sx.stroke();}sx.globalAlpha=1;sx.fillStyle='#fff';sx.beginPath();sx.arc(380,90,6,0,TAU);sx.fill();
+  layer(.12,x=>ridge(x,196,26,1.1,'#1d1236'));
+  layer(.28,x=>{ridge(x,214,16,2.6,'#170e2b','#6f55b8');for(let i=0;i<6;i++){const a=r()*LW|0,h=30+r()*60|0;x.fillStyle='#8c6bd0';x.beginPath();x.moveTo(a,214);x.lineTo(a+5,214-h);x.lineTo(a+10,214);x.fill();x.fillStyle='#e6c8ff';x.fillRect(a+4,214-h+4,2,h*.4);}});
+  layer(.5,x=>{ridge(x,238,12,3.8,'#0f0820','#42317a');});
+ }else if(name==='shatter'){
+  sx.fillStyle='#ffd9a0';sx.beginPath();sx.arc(110,100,28,0,TAU);sx.fill();sx.globalAlpha=.25;sx.beginPath();sx.arc(110,100,46,0,TAU);sx.fill();sx.globalAlpha=1;
+  layer(.1,x=>{ridge(x,190,22,1.7,'#3a2a3c');});
+  layer(.24,x=>{for(let i=0;i<9;i++){const a=r()*LW|0,y=60+r()*110|0,w=20+r()*40|0,h=8+r()*14|0;x.fillStyle='#4a3a4e';x.beginPath();x.moveTo(a,y);x.lineTo(a+w,y+2);x.lineTo(a+w*.6,y+h*1.6);x.lineTo(a+w*.2,y+h);x.fill();x.fillStyle='#7a6478';x.fillRect(a,y,w,2);}ridge(x,226,14,2.9,'#2a1f2c');});
+  layer(.5,x=>{ridge(x,240,12,4.2,'#1c1420','#5a4658');for(let i=0;i<5;i++){const a=30+i*100+r()*30,h=24+r()*30;x.fillStyle='#2c2230';x.fillRect(a,240-h,8,h);x.fillRect(a-6,240-h,22,4);}});
+ }else if(name==='canopy'){
+  for(let b=0;b<5;b++){sx.globalAlpha=.16;sx.fillStyle='#e8f7a0';sx.beginPath();const a=60+b*90;sx.moveTo(a,0);sx.lineTo(a+30,0);sx.lineTo(a+90,270);sx.lineTo(a+40,270);sx.fill();}sx.globalAlpha=1;
+  layer(.1,x=>{for(let i=0;i<9;i++){const a=i*60+r()*20,w=14+r()*10;x.fillStyle='#14281a';x.fillRect(a,0,w,270);x.fillStyle='#1c3a25';x.fillRect(a,0,3,270);}});
+  layer(.26,x=>{for(let i=0;i<5;i++){const a=i*110+r()*30,w=26+r()*14;x.fillStyle='#1b3322';x.fillRect(a,0,w,270);x.fillStyle='#27492f';x.fillRect(a,0,4,270);x.fillStyle='#16291c';x.fillRect(a+w-5,0,5,270);for(let k=0;k<4;k++){x.fillStyle='#2f5d36';x.fillRect(a-14,60+k*45,w+28,5);}}ridge(x,246,8,2.2,'#1a3020');});
+  layer(.5,x=>{ridge(x,240,10,3.3,'#122217','#3f7a43');for(let i=0;i<10;i++){const a=r()*LW|0,h=14+r()*26|0;x.fillStyle='#2f6a3a';x.beginPath();x.ellipse(a,240-h,9,h/2,0,0,TAU);x.fill();x.fillStyle='#8bd16a';x.fillRect(a-1,240-h,2,h);}});
+ }else if(name==='dunes'){
+  sx.fillStyle='#fff6cf';sx.beginPath();sx.arc(380,70,34,0,TAU);sx.fill();sx.globalAlpha=.25;sx.beginPath();sx.arc(380,70,52,0,TAU);sx.fill();sx.globalAlpha=1;
+  layer(.1,x=>{for(let i=0;i<6;i++){const a=i*92+r()*30,w=36+r()*30,h=34+r()*36;x.fillStyle='#a8745a';x.fillRect(a,200-h,w,h+80);x.fillStyle='#c48b66';x.fillRect(a,200-h,w,4);x.fillStyle='#8a5c48';x.fillRect(a+w*.62,200-h,w*.38,h+80);}ridge(x,214,10,1.3,'#b0805a');});
+  layer(.24,x=>ridge(x,208,22,2.4,'#c99a5e','#e8c586'));
+  layer(.45,x=>{ridge(x,228,16,4.1,'#a87c45','#d9b36a');for(let i=0;i<4;i++){const a=40+i*130+r()*30,h=18+r()*14;x.fillStyle='#4e6b3a';x.fillRect(a,232-h,5,h);x.fillRect(a-6,232-h*.7,6,3);x.fillRect(a-6,232-h*.7-6,3,6);x.fillRect(a+5,232-h*.5,6,3);x.fillRect(a+8,232-h*.5-6,3,6);}});
  }else if(name==='frost'){
   sx.globalAlpha=.5;for(let i=0;i<70;i++){sx.fillStyle='#fff';sx.fillRect(r()*VW,r()*120,1,1);}sx.globalAlpha=1;
   for(let b=0;b<3;b++)for(let i=0;i<VW;i+=2){const y=30+b*22+Math.sin(i*.012+b*2)*16+Math.sin(i*.03+b)*7,h=14+Math.sin(i*.05+b)*8;for(let j=0;j<h;j++){if(bayer(i,j)>1-j/h)continue;sx.fillStyle=['#619748','#496073','#515d89'][b];sx.fillRect(i,y+j,2,1);}}
