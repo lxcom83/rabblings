@@ -25,6 +25,8 @@ function vineCol(x,y){const n=noise(x>>1,y>>2),s=Math.sin(x*1.3+Math.sin(y*.09)*
 function leafCol(x,y){const v=Math.abs(((x+y*.5)%9)-4.5)<.7||Math.abs((y%11)-5)<.5,n=noise(x>>1,y>>1);return v?LEAF32[4]:LEAF32[Math.min(3,Math.floor(n*4.4))];}
 const RIFT32=[[88,40,150],[120,60,190],[160,90,224],[200,140,246],[60,24,110]].map(c=>rgb32(c[0],c[1],c[2])),CRUMB32=[[96,78,66],[120,98,82],[146,120,98],[172,146,120],[52,40,34]].map(c=>rgb32(c[0],c[1],c[2]));
 function riftCol(x,y,ghost){const n=noise(x>>1,y>>1),s=Math.sin(x*.5+y*.35+n*5)*.5+.5;const q=Math.min(3,Math.floor((n*.5+s*.7)*3.4));const c=RIFT32[q];return ghost?(((c&0x00ffffff)|0x58000000)>>>0):c;}
+const SEAL32=[[62,48,38],[88,70,54],[112,90,68],[138,114,86],[120,225,255]].map(c=>rgb32(c[0],c[1],c[2]));
+function sealCol(x,y,open){if(open){const e=(x%8===0&&y%2===0)||(y%8===0&&x%2===0);const c=e?SEAL32[4]:SEAL32[3];return(((c&0x00ffffff)|(e?0x90000000:0x30000000))>>>0);}const bx=x+((y>>3)&1)*4,mortar=(y%8===0)||(bx%8===0);if(mortar)return SEAL32[0];const rune=((x%8>=3&&x%8<=4)&&(y%8>=3&&y%8<=5))&&((x>>3)+(y>>3))%3===0;return rune?SEAL32[4]:SEAL32[1+((noise(x,y)*3)|0)%3];}
 function crumbCol(x,y){const n=noise(x,y)*.5+noise(x*3,y*3)*.25;const cr=Math.abs(((x*7+y*3)%23)-11)<1||Math.abs(((y*5-x*2)%29)-14)<1;return cr?CRUMB32[4]:CRUMB32[Math.min(3,Math.floor(n*4.6))];}
 function iceCol(x,y,thin){const R=thin?THIN32:ICE32,n=noise(x,y)*.5+noise(x*3,y*3)*.2;if(thin){const v=Math.abs(Math.sin((x*.9-y*1.3)*.28+noise(x>>3,y>>3)*6));if(v<.05)return R[4];}
  let q=.5+Math.sin((x*.7+y*.4)*.5+noise(x>>2,y>>2)*4)*.22+(n-.35)*.5;if(!thin&&noise(x>>1,(y>>1)+70)>.9)q=.05;const i=clamp(q*R.length+bayer(x,y)*.8-.4,0,R.length-1.01)|0;return R[i];}
@@ -45,7 +47,7 @@ function skinCol(id,x,y){const R=SKIN32[id];if(!R)return 0;const n=noise(x,y)*.6
 class Terrain{
  constructor(w,h,theme,seed){Object.assign(this,{w,h,theme:THEME[theme],seed});this.m=new Uint8Array(w*h);this.t=new Uint32Array(w*h);this.dirty=[];
   [this.cv,this.cx]=mk(w,h);[this.deco,this.dx]=mk(w,h);this.decos=[];this.pcs=[];this.mir=false;this.img=this.cx.createImageData(w,h);this.b=new Uint32Array(this.img.data.buffer);}
- solid(x,y){if(x<0||x>=this.w)return !this.open;if(y<0||y>=this.h)return false;{const v=this.m[y*this.w+x];return v!==0&&v!==15;}}
+ solid(x,y){if(x<0||x>=this.w)return !this.open;if(y<0||y>=this.h)return false;{const v=this.m[y*this.w+x];return v!==0&&v!==15&&v!==18;}}
  iron(x,y){return x>=0&&x<this.w&&y>=0&&y<this.h&&this.m[y*this.w+x]===2;}
  hasIron(x,y,w,h){for(let j=y;j<y+h;j++)for(let i=x;i<x+w;i++)if(this.iron(i,j))return true;return false;}
  count(x,y,w,h){let n=0;for(let j=y;j<y+h;j++)for(let i=x;i<x+w;i++)if(i>=0&&i<this.w&&j>=0&&j<this.h&&this.m[j*this.w+i])n++;return n;}
@@ -79,7 +81,7 @@ class Terrain{
    this.cx.putImageData(this.img,0,0,x,y,X-x,Y-y);this.dx.clearRect(x-1,y-12,X-x+2,Y-y+14);}d.length=0;}
  texCols(x0,x1){const{w,h,m,t,theme:T}=this,R=T.r32;
   for(let y=0;y<h;y++)for(let x=x0;x<x1;x++){const k=y*w+x,v=m[k];if(!v)continue;
-   if(v===7)t[k]=boneCol(x,y);else if(v===8||v===9)t[k]=iceCol(x,y,v===9);else if(v===10)t[k]=sandCol(x,y);else if(v===11)t[k]=vineCol(x,y);else if(v===12)t[k]=leafCol(x,y);else if(v===13)t[k]=FLAME32[(x+y)&3];else if(v===14||v===15)t[k]=riftCol(x,y,v===15);else if(v===16)t[k]=crumbCol(x,y);else if(v===1||v>=4){const n=noise(x,y)*.7+noise(x*3,y*3)*.3,st=Math.sin(y*.16+noise(x>>1,y>>2)*7)*.5+.5;let q=(n-.25)*1.6*.7+st*.3;q=clamp(q*R.length+bayer(x,y)-.5,0,R.length-1)|0;let c=R[q];const sk=(this.skin&&!this.gfx)?this.skin[k]:0;if(sk)c=skinCol(sk,x,y);
+   if(v===7)t[k]=boneCol(x,y);else if(v===8||v===9)t[k]=iceCol(x,y,v===9);else if(v===10)t[k]=sandCol(x,y);else if(v===11)t[k]=vineCol(x,y);else if(v===12)t[k]=leafCol(x,y);else if(v===13)t[k]=FLAME32[(x+y)&3];else if(v===14||v===15)t[k]=riftCol(x,y,v===15);else if(v===16)t[k]=crumbCol(x,y);else if(v===17||v===18)t[k]=sealCol(x,y,v===18);else if(v===1||v>=4){const n=noise(x,y)*.7+noise(x*3,y*3)*.3,st=Math.sin(y*.16+noise(x>>1,y>>2)*7)*.5+.5;let q=(n-.25)*1.6*.7+st*.3;q=clamp(q*R.length+bayer(x,y)-.5,0,R.length-1)|0;let c=R[q];const sk=(this.skin&&!this.gfx)?this.skin[k]:0;if(sk)c=skinCol(sk,x,y);
     const pb=sk?0:noise((x>>1)*7+90,(y>>1)*5+40)+noise(x>>2,(y>>2)+60)*.25;if(pb>.92)c=T.p32;else if(pb>.895)c=mul32(T.p32,.62);if(v>=4){const a=x&15,b=y&15,e=v===6?Math.abs(a-8)+(15-b):v===4?Math.abs(b-8)+a:Math.abs(b-8)+(15-a);c=mul32(c,e===8||e===9?1.75:.86);}t[k]=c;}
    else if(v===2)t[k]=this.ironTex(x,y);else{const q=((y>>2)&1)?(x+8)%16:x%16,c=q===0||(y&3)===3?0xff2a5480:0xff3c78b4;t[k]=c>>>0;}}
   for(let x=x0;x<x1;x++){let d=-1;for(let y=0;y<h;y++){const k=y*w+x;if(m[k]===0){d=0;continue;}if(d<0)continue;if(m[k]===1&&!(this.skin&&!this.gfx&&this.skin[k]&&this.skin[k]!==5)){const lim=T.capD+((noise(x*3,17)*6)|0);if(d<lim){const q=clamp(((d/lim)*T.c32.length+bayer(x,y)*.8)|0,0,T.c32.length-1);t[k]=T.c32[q];}}d++;if(d>30)d=30;}}

@@ -82,6 +82,14 @@ const LEVELS=[
  hatch:[{x:70,y:170,dir:1}],doors:[{x:830,y:210}],
  build(S){S.box(0,210,200,110,1);S.box(200,210,160,10,16);S.box(360,210,540,110,1);S.box(0,0,900,30);},
  plan:[]},
+ {name:'Rune Climb',theme:'ruins',w:800,h:300,n:20,need:14,rate:26,time:240,hint:'A rune seal bars the temple. The glyph plate on the ledge shifts every seal. Build up to it.',skills:{build:3},
+ hatch:[{x:70,y:170,dir:1}],doors:[{x:730,y:210}],traps:[{k:'glyph',x:330,y:190},{k:'well',x:352,y:190}],
+ build(S){S.wavy(0,800,212,3,48,1);S.box(290,190,90,8,1);S.box(420,100,14,114,17);S.box(420,214,14,90,1);S.box(0,0,800,30);},
+ plan:[{x:244,d:1,s:'build',tol:3}]},
+ {name:'Rune Bridge',theme:'ruins',w:900,h:320,n:20,need:12,rate:20,time:220,hint:'The bridge is only a memory until someone steps on the glyph. Mind the falling stones.',skills:{build:2},rules:['rubble'],
+ hatch:[{x:70,y:170,dir:1}],doors:[{x:830,y:210}],traps:[{k:'glyph',x:250,y:210}],
+ build(S){S.box(0,210,160,110,1);S.box(200,210,100,110,1);S.box(300,210,140,8,18);S.box(440,210,460,110,1);S.box(0,0,900,30);},
+ plan:[{x:150,d:1,s:'build',tol:3}]},
 ];
 // versus arenas: only the left half is authored; the right half is a mirror, so both sides are fair
 const ALLSKILLS={climb:5,flap:5,boom:5,block:4,build:7,bash:5,pick:4,dig:5};

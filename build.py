@@ -9,7 +9,7 @@ build/rabblings-all.html one file holding both, used by tests and previews
 import hashlib, json, os, shutil
 
 GAME = 'games/rabblings/'
-COMMON = ['kit/core.js', 'kit/input.js', GAME + 'art.js', GAME + 'art48.js', GAME + 'art48-goblin.js',GAME + 'art48-swamp.js',GAME + 'art48-imp.js',GAME + 'art48-fairy.js',GAME + 'art48-dwarf.js',GAME + 'art48-rat.js',GAME + 'art48-shroom.js', 'maps/terrain.js', GAME + 'world.js', GAME + 'levels.js', GAME + 'levels-more.js',
+COMMON = ['kit/core.js', 'kit/input.js', GAME + 'art.js', GAME + 'art48.js', GAME + 'art48-goblin.js',GAME + 'art48-swamp.js',GAME + 'art48-imp.js',GAME + 'art48-fairy.js',GAME + 'art48-dwarf.js',GAME + 'art48-rat.js',GAME + 'art48-shroom.js', 'maps/terrain.js', GAME + 'world.js', GAME + 'levels.js', GAME + 'levels-more.js', GAME + 'freeplay.js',
           GAME + 'profile.js', GAME + 'mapdata.js', 'maps/format.js', 'maps/terrain-gen.js', GAME + 'generate.js',
           GAME + 'foe-art.js', GAME + 'map-art.js', GAME + 'decor-art.js', 'maps/decor.js', 'maps/namida-data.js', 'maps/import.js', GAME + 'homes.js', GAME + 'races.js', GAME + 'game.js',
           'kit/dialog.js', GAME + 'my-maps.js']
