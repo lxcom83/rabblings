@@ -80,7 +80,7 @@
 
  // ---------- logging switch ----------
  function setLog(on){logOn=on;$('a-log').checked=!!on;RB.store(RB.LOG_KEY,on?'1':'0');$('a-sync').disabled=!on;
-  $('a-log-label').textContent=on?'Logging is on: attempts are sent when you visit this page':'Logging is off: notes stay on this device';}
+  $('a-log-label').textContent=on?'Logging is on: attempts are sent when you visit this page':'Logging is off: notes stay on this device. Switch it on to help test which races can beat each map';}
  $('a-log').addEventListener('change',function(){var on=this.checked;say('a-log-msg','Saving…');
   sb.from('profiles').update({log_attempts:on}).eq('id',me.id).then(function(r){
    if(r.error){$('a-log').checked=!on;say('a-log-msg',RB.missing(r.error)?'This switch works after the next site update.':RB.friendly(r.error),true);return;}

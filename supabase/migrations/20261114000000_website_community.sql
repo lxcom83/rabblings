@@ -9,8 +9,8 @@
 --   * helper functions that run on their own cannot be called from the website
 --   * Marching Orders tables start with mo_, website tables with site_
 
--- 0. Players can switch attempt logging off. It is on by default; the account page has the switch.
-alter table public.profiles add column if not exists log_attempts boolean not null default true;
+-- 0. Attempt logging is opt in: it is off until the player switches it on from the account page.
+alter table public.profiles add column if not exists log_attempts boolean not null default false;
 grant update (log_attempts) on public.profiles to authenticated;
 -- Player names stay public; the logging switch is only for its owner, so hide it from everyone else.
 revoke select on public.profiles from anon, authenticated;
