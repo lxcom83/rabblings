@@ -6,7 +6,7 @@ docs/builder/index.html  the map builder
 docs/index.html          the website home page, copied from site/
 build/rabblings-all.html one file holding both, used by tests and previews
 """
-import hashlib, json, os, shutil
+import hashlib, json, os, re, shutil
 
 GAME = 'games/rabblings/'
 COMMON = ['kit/core.js', 'kit/input.js', GAME + 'art.js', GAME + 'art48.js', GAME + 'art48-goblin.js',GAME + 'art48-swamp.js',GAME + 'art48-imp.js',GAME + 'art48-fairy.js',GAME + 'art48-dwarf.js',GAME + 'art48-rat.js',GAME + 'art48-shroom.js', 'maps/terrain.js', GAME + 'world.js', GAME + 'levels.js', GAME + 'levels-more.js', GAME + 'freeplay.js',
@@ -55,5 +55,10 @@ write('build/rabblings-all.html', bundle('all'))
 write('docs/play/index.html', full_page(bundle('play')))
 write('docs/builder/index.html', full_page(bundle('builder')))
 shutil.copytree('site', 'docs', dirs_exist_ok=True)
+# Which ink drawings exist yet, so pages only ask for files that are there (see ARTWORK_NEEDED.md)
+write('docs/img/journal/list.json', json.dumps(sorted(n for n in os.listdir('site/img/journal') if not n.startswith('.') and n != 'list.json')))
+# Free Play map names for the website's account page (id -> name), read from the game's map list
+_free = open(GAME + 'freeplay.js').read()
+write('docs/freeplay-maps.json', json.dumps(dict(re.findall(r"\{id:'([^']+)'[^{}]*?name:'((?:[^'\\]|\\.)*)'", _free))))
 stamp = hashlib.sha1(''.join(open(f).read() for f in ('docs/play/index.html', 'docs/builder/index.html', 'docs/index.html')).encode()).hexdigest()[:10]
 write('docs/sw.js', open('site/sw.js').read().replace('__VERSION__', stamp).replace('__FILES__', json.dumps(file_list())))

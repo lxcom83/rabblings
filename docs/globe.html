@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The World Globe: Rabblings</title>
+<meta name="description" content="Turn the world of Rabblings: continents, the vortex, drifting floating islands and the homelands of the eight peoples.">
+<meta property="og:title" content="The World Globe: Rabblings">
+<meta property="og:image" content="https://rabblings.com/img/journal/globe-still.png">
+<link rel="icon" href="img/home-goblin-0.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=IM+Fell+English:ital@0;1&family=Pirata+One&display=swap">
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#100c09">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the page</a>
+<header class="top"><div class="wrap">
+ <a class="brand" href="./"><img class="px" src="img/home-goblin-0.png" width="30" height="27" alt="">Rabblings</a>
+ <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+ <nav class="nav" id="nav" aria-label="Main"><a class="play" href="./#play">Play</a><a href="lore.html">Lore</a><a href="lore.html#peoples">Races</a><a href="globe.html" aria-current="page">Globe</a><a href="maps.html">Community maps</a><a href="./#news">News</a><button class="acct-btn" id="acct-btn" type="button">Sign in</button></nav>
+</div></header>
+
+<main id="main"><section><div class="wrap">
+ <div class="sec-head"><p class="kicker">A recognisable planet, badly broken</p><h1>The world</h1>
+  <p>Continents and oceans you could still name, split by fractures, with floating islands drifting above them and a vortex that never stops turning.</p></div>
+ <div class="globe-stage" id="globe">
+  <img class="still" src="img/journal/globe-still.png" width="720" height="720" alt="The globe of the Rabblings world: pale continents on a dark sea, a violet vortex rising from the middle, and small floating islands around it">
+  <div id="g-marks"></div>
+  <div class="gcard" id="g-card" hidden><div class="leaf"><button class="x" type="button" aria-label="Close">&times;</button><h3></h3><div class="g-body"></div><p style="margin-top:10px"><a href="lore.html">Read more</a></p></div></div>
+ </div>
+ <p class="dim small" id="g-status" style="text-align:center;margin-top:10px" aria-live="polite">Loading the globe&hellip;</p>
+ <div class="globe-tools"><button class="btn small" id="g-spin" type="button" aria-pressed="true">Spin</button><button class="btn small" id="g-names" type="button" aria-pressed="false">Place names</button><button class="btn small" id="g-reset" type="button">Reset view</button></div>
+
+ <div class="spread" style="margin-top:40px">
+  <div class="leaf">
+   <h2>Homelands</h2>
+   <p class="dim" style="margin:6px 0 12px">Where each people lives on the globe is still being decided. The markers are provisional.</p>
+   <ul class="homelands">
+    <li><a href="journal/goblin.html">Goblins</a>: Bog and Mines</li>
+    <li><a href="journal/swamp.html">Swampfolk</a>: the Drowned Marsh</li>
+    <li><a href="journal/imp.html">Imps</a>: the Cinder Forge</li>
+    <li><a href="journal/fairy.html">Fairies</a>: a dead night garden</li>
+    <li><a href="journal/dwarf.html">Dwarves</a>: the Deep Halls</li>
+    <li><a href="journal/rat.html">Ratfolk</a>: the Clockwork Sewers</li>
+    <li><a href="journal/bone.html">Skeletons</a>: the Crypts</li>
+    <li><a href="journal/shroom.html">Mushroom Folk</a>: the Glowing Caves</li>
+   </ul>
+  </div>
+  <div class="side">
+   <div class="tnote" style="margin-top:0"><b>Translators' note on the map</b>
+    <p>The continent and sea names shown are working names from a first concept map, not names the scholar uses. The final arrangement of continents, oceans and fractures is still being drawn.</p>
+    <p>Islands near the vortex move faster here, as the lore suggests. Their real number is unknown; most are unexplored.</p></div>
+  </div>
+ </div>
+</div></section></main>
+
+<footer><div class="wrap">
+ <nav class="fnav" aria-label="Footer"><a href="play/">Play</a><a href="builder/">Map builder</a><a href="lore.html">Lore</a><a href="maps.html">Community maps</a><a href="account.html">Account</a><a href="privacy.html">Privacy</a></nav>
+ <p>Rabblings is free to play and source available, by Luke83. The globe uses <a href="https://threejs.org">three.js</a>.</p>
+</div></footer>
+<script src="account.js"></script>
+<script src="site.js"></script>
+<script src="globe.js"></script>
+</body>
+</html>

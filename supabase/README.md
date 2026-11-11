@@ -7,6 +7,10 @@ Run these once, in order, in the Supabase SQL Editor:
 1. `setup.sql`: the profiles table, its access rules, the sign-up trigger and account deletion.
 2. `002-player-name.sql`: renames the designer name to a player name used in every game, and locks the table's grants down.
 3. `003-lock-functions.sql`: stops the website calling the sign-up helper and Supabase's automatic RLS helper directly.
+4. `migrations/20261114000000_website_community.sql` (website refresh, **not applied yet**): the attempt-logging switch on `profiles`,
+   `mo_free_attempts` (private Free Play attempt logs), `mo_scores` (public high scores, a lower score never replaces a higher one),
+   `site_maps` and `site_map_votes` (community map links and thumbs up), `site_feedback` (tester feedback, readable only in the dashboard),
+   and the owner-only view `mo_free_attempt_stats`. The website pages work before this runs: they show "coming soon" notes instead of errors.
 
 ## How data is laid out
 
