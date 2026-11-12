@@ -113,10 +113,7 @@
    b.className='gmark '+cls;b.innerHTML=html;if(label)b.setAttribute('aria-label',label);layer.appendChild(b);var p=dir(lon,lat);marks.push({b:b,v:new T.Vector3(p[0],p[1],p[2]),cls:cls});return b;}
   HOMES.forEach(function(h){var b=mark(h.at[0],h.at[1],'home','<img src="img/home-'+h.k+'-0.png" width="52" height="46" alt=""><span class="t">'+h.n+'</span>','Homeland of the '+h.n,function(){open(b,h.n,['Home: '+h.home+'.','Where the '+h.n+' live on the globe is not settled in the lore yet. This marker is a provisional placement for the website.'],'journal/'+h.k+'.html');});});
   var vb=mark(VORTEX[0],VORTEX[1]-6,'vx','The vortex','The vortex',function(){open(vb,'The vortex',['A vast magical vortex at a fixed point on the globe, reaching high into space. It amplifies magic and fluctuates without warning, with flashes, hums and sudden shifts in the islands.','Nobody is known to have reached its centre and returned.'],'lore.html#vortex');});
-  LANDS.forEach(function(L){if(L.n)mark(L.lab[0],L.lab[1],'land name',L.n);});
-  SEAS.forEach(function(S){mark(S[1],S[2],'sea name',S[0]);});
-  var compact=stage.clientWidth<600,names=false,nb=document.getElementById('g-names');nb.setAttribute('aria-pressed',names);if(compact)stage.classList.add('compact');
-  nb.addEventListener('click',function(){names=!names;nb.setAttribute('aria-pressed',names);});
+  var compact=stage.clientWidth<600;if(compact)stage.classList.add('compact');
 
   var cur=null;
   function open(b,title,lines,href){if(cur)cur.setAttribute('aria-expanded','false');cur=b;b.setAttribute('aria-expanded','true');
@@ -151,8 +148,8 @@
     o.m.position.copy(dv).multiplyScalar(1+o.alt+Math.sin(t*.7+o.bob)*.006);q.setFromUnitVectors(Y,dv);o.m.quaternion.copy(q);});
    ren.render(scene,cam);
    world.updateMatrixWorld();camDir.copy(cam.position).normalize();
-   marks.forEach(function(M){var nm=M.cls.indexOf('name')>=0;tmp.copy(M.v).applyMatrix4(world.matrixWorld);var face=tmp.dot(camDir);tmp.multiplyScalar(1.03).project(cam);
-    var x=(tmp.x+1)/2*W,y=(1-tmp.y)/2*Hh,show=face>.2&&(!nm||names);M.b.style.opacity=show?Math.min(1,(face-.2)*4):0;M.b.style.visibility=show?'visible':'hidden';
+   marks.forEach(function(M){tmp.copy(M.v).applyMatrix4(world.matrixWorld);var face=tmp.dot(camDir);tmp.multiplyScalar(1.03).project(cam);
+    var x=(tmp.x+1)/2*W,y=(1-tmp.y)/2*Hh,show=face>.2;M.b.style.opacity=show?Math.min(1,(face-.2)*4):0;M.b.style.visibility=show?'visible':'hidden';
     M.b.style.transform='translate('+x.toFixed(1)+'px,'+y.toFixed(1)+'px) translate(-50%,-50%)';});}
   if(still)still.hidden=true;
   document.getElementById('g-status').textContent='Drag to turn the world. Pinch or scroll to zoom. Tap a marker to read about it.';
