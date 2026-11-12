@@ -1,9 +1,11 @@
 // ---------- random terrain: a type plus a seed, so a whole landscape fits in one short step of a share code ----------
-const GEN=[['hills','ROLLING HILLS'],['floating','FLOATING ISLANDS'],['labyrinth','LABYRINTH'],['mountains','MOUNTAIN RANGE'],['canyons','CANYONS'],['twinpeaks','TWIN PEAKS'],['pillars','PILLAR ARENA'],['flat','FLAT'],['terraces','TERRACES'],['canyon','GAP RUN'],['islands','WATER ISLANDS'],['caves','CAVES'],['shafts','MINE SHAFTS']];
+const GEN=[['hills','ROLLING HILLS'],['floating','FLOATING ISLANDS'],['labyrinth','LABYRINTH'],['mountains','MOUNTAIN RANGE'],['canyons','CANYONS'],['twinpeaks','TWIN PEAKS'],['pillars','PILLAR ARENA'],['flat','FLAT'],['terraces','TERRACES'],['canyon','GAP RUN'],['islands','WATER ISLANDS'],['caves','CAVES'],['shafts','MINE SHAFTS'],['cavern','LIVING CAVERN'],['gorge','GORGE'],['ruins','BURIED RUINS'],['foundry','FOUNDRY'],['chasm','GREAT CHASM']];
 const LENGTHS=[[480,'SHORT'],[800,'MEDIUM'],[1400,'LONG'],[2400,'HUGE']],HEIGHTS=[[240,'LOW'],[300,'NORMAL'],[420,'TALL'],[600,'TOWER']];
+// sealTanks: after all carving, make sure every pool pocket has a floor and two walls, so water never floats or leaks
+function sealTanks(S,tanks){const T=S.T;for(const[x0,x1,y0,y1]of tanks){for(let y=y0-2;y<=y1+2;y++)for(const x of[x0-2,x0-1,x1,x1+1])if(x>=0&&x<T.w&&y>=0&&y<T.h&&!T.m[y*T.w+x])T.m[y*T.w+x]=1;for(let x=x0-2;x<=x1+1;x++)for(let y=y1;y<=y1+2;y++)if(x>=0&&x<T.w&&y<T.h&&!T.m[y*T.w+x])T.m[y*T.w+x]=1;}}
 function genTerrain(S,type,seed){const T=S.T,w=T.w,h=T.h,r=rng(seed*7919+type.length),R=(a,b)=>a+r()*(b-a),I=(a,b)=>Math.floor(R(a,b+1));
  const wv=(amp,len)=>{const p=[R(0,TAU),R(0,TAU),R(0,TAU)];return x=>amp*(.6*Math.sin(x/len+p[0])+.3*Math.sin(x/(len*.47)+p[1])+.1*Math.sin(x/(len*.19)+p[2]));};
- const fill=top=>{for(let x=0;x<w;x++){const y=Math.round(top(x));S.box(x,y,1,h-y);}};const base=h-Math.min(90,h*.3);const info={start:[Math.round(w*.09),0],end:[Math.round(w*.9),0],pool:null};
+ const fill=top=>{for(let x=0;x<w;x++){const y=Math.round(top(x));S.box(x,y,1,h-y);}};const base=h-Math.min(90,h*.3);const info={start:[Math.round(w*.09),0],end:[Math.round(w*.9),0],pool:null},f=(x,y)=>x>=0&&y>=0&&x<w&&y<h&&T.m[(y|0)*w+(x|0)]>0;
  switch(type){
  case'flat':S.box(0,base,w,h-base);break;
  case'hills':{const a=wv(Math.min(46,h*.13),150),b=wv(8,40);fill(x=>base-20+a(x)+b(x));for(let i=0;i<w/500;i++)S.rock(I(120,w-120),base-I(40,70),I(24,50),90,3);break;}
@@ -24,5 +26,28 @@ function genTerrain(S,type,seed){const T=S.T,w=T.w,h=T.h,r=rng(seed*7919+type.le
  case'canyons':{const rim=Math.round(h*R(.3,.42)),a=wv(10,110);fill(x=>rim+a(x));const n=Math.max(2,Math.round(w/R(260,340)));for(let i=0;i<n;i++){const c=Math.round(w*(i+.5+R(-.12,.12))/n),wd=I(60,130),fy=Math.min(h-24,rim+I(70,104)),l=c-(wd>>1),rr=l+wd;S.cut(l,0,wd,fy);S.cutEll(l,rim+((fy-rim)*.55|0),I(14,26),I(10,18));S.cutEll(rr,rim+((fy-rim)*.55|0),I(14,26),I(10,18));const ld=I(18,30),sd=r()<.5;S.rock(sd?l:rr-ld,rim+I(34,56),ld,7,1);if(r()<.4)S.box(l-4,rim+I(6,12),wd+8,I(7,10));}break;}
  case'twinpeaks':{const py=Math.round(h*R(.2,.32)),vy=Math.round(h*R(.7,.84)),vw=R(.1,.2),pw=R(.52,.66),a=wv(3,60),sm=t=>t*t*(3-2*t),top=t=>lerp(vy,py,sm(clamp((t-vw)/(pw-vw),0,1)));fill(x=>top(Math.abs(x-w/2)/(w/2))+a(x));
   for(let i=0;i<Math.max(2,w/300);i++){const t=R(vw+.02,pw-.04),n=I(30,60),y=Math.round(top(t))-I(30,60);if(y>16){S.rock(Math.round(w/2-t*w/2-n/2),y,n,8,1);S.rock(Math.round(w/2+t*w/2-n/2),y,n,8,1);}}break;}
- case'pillars':{const b0=h-Math.round(Math.min(70,h*.24)),a=wv(4,70);fill(x=>b0+a(x));let x=Math.round(w*.16);const end=Math.round(w*.84),tall=Math.round(Math.min(h*.55,150));while(x<end){const wd=I(10,36),ht=I(24,tall);S.box(x,b0-ht,wd,ht+8);if(r()<.4){const e=I(8,22);S.box(x-e,b0-ht,wd+e+I(8,22),7);}if(r()<.25)S.rock(x+I(30,50),b0-I(50,tall),I(24,50),8,1);x+=wd+I(34,90);}break;}}
+ case'pillars':{const b0=h-Math.round(Math.min(70,h*.24)),a=wv(4,70);fill(x=>b0+a(x));let x=Math.round(w*.16);const end=Math.round(w*.84),tall=Math.round(Math.min(h*.55,150));while(x<end){const wd=I(10,36),ht=I(24,tall);S.box(x,b0-ht,wd,ht+8);if(r()<.4){const e=I(8,22);S.box(x-e,b0-ht,wd+e+I(8,22),7);}if(r()<.25)S.rock(x+I(30,50),b0-I(50,tall),I(24,50),8,1);x+=wd+I(34,90);}break;}
+ // ---- living types (11 Nov 2026): smoothed outlines, attached masses, sealed pools, several heights, a roof somewhere. Uses maps/sculpt.js ----
+ case'cavern':case'ruins':{S.box(0,0,w,h);const tiers=h>=400?3:2,lanes=[];for(let j=0;j<tiers;j++)lanes.push(Math.round(h*(tiers===3?[.26,.52,.78][j]:[.34,.7][j])));
+  lanes.forEach((ly,j)=>{const P=[];let x=j%2?R(60,140):R(10,30);const end=j===0||r()<.6?w-R(10,30):w*R(.55,.8);while(x<end){P.push([x,clamp(ly+R(-1,1)*h*.07,40,h-40)]);x+=R(80,150);}P.push([end,ly]);fxSpine(S,P,R(16,22),4);
+   for(let i=0;i<w/360;i++){const c=I(80,w-80);S.cutEll(c,ly-6,I(40,80),I(20,30));}});
+  for(let j=0;j+1<lanes.length;j++)for(let i=0;i<Math.max(1,Math.round(w/450));i++){const x=I(60,w-60),x2=clamp(x+I(-60,60),40,w-40);fxSpine(S,[[x,lanes[j]],[(x+x2)/2+I(-20,20),(lanes[j]+lanes[j+1])/2],[x2,lanes[j+1]]],I(11,15),2);}
+  const tanks=[];const low=lanes[lanes.length-1];for(let i=0;i<Math.max(1,Math.round(w/500));i++){const x0=I(60,w-200),tw=I(70,140);let fy=-1;for(let y=low;y<h-10;y++)if(f(x0+tw/2,y)){fy=y;break;}if(fy>0&&fy<h-34&&!tanks.some(t=>x0<t[1]+30&&x0+tw>t[0]-30)){S.cut(x0,fy,tw,26);S.box(x0,fy+26,tw,h-fy-26);tanks.push([x0,x0+tw,fy+8,fy+26]);}}
+  for(let i=0;i<w/240;i++){const x=I(40,w-40),ly=lanes[I(0,lanes.length-1)];let cy=-1;for(let y=ly;y>4;y--)if(f(x,y)){cy=y;break;}if(cy>0)fxMass(S,[[x,cy-4],[x+I(-8,8),cy+I(16,30)],[x+I(-6,6),cy+I(30,46)]],I(7,11),2,2);}
+  if(type==='ruins')for(let i=0;i<w/300;i++){const x=I(60,w-90),ly=lanes[I(0,lanes.length-1)];let fy=-1;for(let y=ly;y<h-6;y++)if(f(x,y)){fy=y;break;}if(fy>0){const bw=I(26,48),bh=I(18,40);if(!f(x,fy-bh-30))S.box(x,fy-bh,bw,bh+4);}}
+  fxRough(S,tanks.map(t=>[t[0]-6,t[2]-14,t[1]+6,t[3]+6]));sealTanks(S,tanks);info.tanks=tanks;info.start=[Math.round(w*.08),lanes[0]];break;}
+ case'chasm':{S.box(0,0,w,h);const cx=w*R(.38,.62),P=[];for(let y=18;y<h-40;y+=R(50,80))P.push([cx+R(-1,1)*w*.07,y]);P.push([cx,h-40]);fxSpine(S,P,clamp(w*.07,34,70),6);
+  let side=r()<.5?1:-1;for(let y=I(66,84);y<h-64;y+=I(58,84)){let x=cx|0;while(x>6&&x<w-6&&!f(x,y))x+=side;fxMass(S,[[x+side*6,y],[x-side*I(30,50),y+I(-4,4)],[x-side*I(58,84),y+I(2,8)]],9,4,2);side=-side;}
+  for(let i=0;i<Math.max(2,h/150|0);i++){const y=I(60,h-80),d=i%2?1:-1,ex=d>0?w-R(24,60):R(24,60);fxSpine(S,[[cx,y],[cx+d*w*.2,y+R(-14,14)],[ex,y+R(-10,10)]],R(15,20),3);S.cutEll(ex-d*30|0,y|0,I(34,54),I(20,28));}
+  const tanks=[];{let fy=-1;for(let y=h*.6|0;y<h-8;y++)if(f(cx,y)){fy=y;break;}if(fy>0&&fy<h-30){const x0=(cx-34)|0;S.cut(x0,fy-2,68,24);S.box(x0,fy+22,68,h-fy-22);tanks.push([x0,x0+68,fy+6,fy+22]);}}
+  fxRough(S,tanks.map(t=>[t[0]-6,t[2]-14,t[1]+6,t[3]+6]));sealTanks(S,tanks);info.tanks=tanks;info.start=[cx|0,30];break;}
+ case'gorge':{const a=wv(10,90),hi=h*R(.24,.36),lo=h*R(.62,.74),P=[[-10,hi+R(-10,10)]];const n=Math.max(3,Math.round(w/220));for(let i=1;i<n;i++){const t=i/n,base=t<.35?lerp(hi,lo,t/.35):t>.7?lerp(lo,hi*1.1,(t-.7)/.3):lo;P.push([w*t,base+R(-1,1)*h*.06]);}P.push([w+10,hi*1.1]);fxProf(S,P,0,3);
+  const tanks=[];{const c=I(w*.42|0,w*.58|0),tw=I(40,70);let fy=-1;for(let y=10;y<h-10;y++)if(f(c,y)){fy=y;break;}if(fy>0&&fy<h-40){S.cut(c-tw/2|0,fy-2,tw,40);S.box(c-tw/2|0,fy+38,tw,h-fy-38);tanks.push([c-tw/2|0,(c-tw/2|0)+tw,fy+20,fy+38]);}}
+  const R0=I(w*.55|0,w*.7|0);fxCeil(S,[[R0,-30],[R0+60,h*.12],[w*.85,h*.16],[w+10,h*.1]],4);for(let i=0;i<2;i++){const x=I(R0+70,w-40);fxMass(S,[[x,h*.12],[x+I(-10,10),h*.2],[x+I(-8,8),h*.28]],I(8,11),2,2);}
+  
+  fxRough(S,tanks.map(t=>[t[0]-6,t[2]-24,t[1]+6,t[3]+6]));sealTanks(S,tanks);info.tanks=tanks;break;}
+ case'foundry':{S.box(0,0,12,h);S.box(w-12,0,12,h);S.box(0,h-14,w,14);const deck=Math.round(h*R(.48,.6)),gaps=[];
+  let x=12;while(x<w-12){const n=I(140,260),top=deck+[-24,0,0,24][I(0,3)];S.box(x,top,Math.min(n,w-12-x),16);for(let px=x+20;px<x+n-20&&px<w-30;px+=I(60,90))S.box(px,top+16,14,h-14-top-16);x+=n;if(x<w-60){const g=I(30,44);gaps.push(x);x+=g;}}
+  fxCeil(S,[[0,h*.1],[w*.3,h*.14],[w*.6,h*.1],[w,h*.13]],1);for(let i=0;i<w/300;i++){const cx=I(40,w-130),cy=deck-I(70,110),cw=I(40,90);S.box(cx,cy,cw,6);S.box(cx+6,h*.1|0,4,cy-(h*.1|0));S.box(cx+cw-10,h*.1|0,4,cy-(h*.1|0));}
+  info.tanks=[[12,w-12,h-30,h-14]];break;}}
  return info;}
