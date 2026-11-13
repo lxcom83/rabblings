@@ -35,6 +35,30 @@ const fxMound=(S,cx,floor,rx,ry)=>S.ell(cx,floor,rx,ry);   // a hill on a hall f
 const fxHang=(S,cx,top,rx,ry)=>{S.box(cx-9,0,18,top+2);S.ell(cx,top+ry-4,rx,ry);fxStal(S,cx-rx+6,cx+rx-6,top+ry-4,10,9);};   // rock mass hanging from the ceiling
 const fxPit=(S,x0,x1,floor,depth)=>S.cut(x0,floor,x1-x0,depth);
 const fxRamp=(S,x0,y0,x1,y1,r=14)=>{const n=Math.abs(x1-x0);for(let i=0;i<=n;i++){const t=i/n;S.cutEll(x0+(x1-x0)*t,y0+(y1-y0)*t-r,r,r);}};
+// fxBurrow: fxTun with a gently rolling floor. The wobble fades to nothing at both ends, so joins to ramps and stairs stay exact.
+const fxBurrow=(S,pts,r=10,a=3)=>{let L=0;for(let k=0;k<pts.length-1;k++)L+=Math.abs(pts[k+1][0]-pts[k][0]);let u=0;for(let k=0;k<pts.length-1;k++){const[x0,y0]=pts[k],[x1,y1]=pts[k+1],n=Math.max(1,Math.abs(x1-x0));for(let i=0;i<=n;i++){const x=x0+(x1-x0)*i/n,t=(u+Math.abs(x-x0))/(L||1),w=Math.round(S.n(x,.045,9)*a*Math.sin(Math.PI*t));S.cutEll(x,y0+(y1-y0)*i/n+w,r,r);}u+=Math.abs(x1-x0);}};
+// fxStair: a walkable shaft cut column by column. Unlike fxRamp it stays walkable when it is steep (up to about 3 px of rise per px).
+const fxStair=(S,x0,y0,x1,y1,h=18)=>{const n=Math.abs(x1-x0),d=x1>x0?1:-1;for(let i=0;i<=n;i++){const y=Math.round(y0+(y1-y0)*i/n);S.cut(x0+d*i,y-h,1,h);}};
+// fxLane: a walkable passage cut through solid rock between a smoothed floor line and a smoothed roof line (both ascending in x).
+const fxLane=(S,fl,ce)=>{const F=fxChaikin(fl,2),C=fxChaikin(ce,2),at=(P,x)=>{for(let i=0;i<P.length-1;i++)if(x>=P[i][0]&&x<=P[i+1][0]){const[a,b]=P[i],[c,d]=P[i+1];return c===a?b:b+(d-b)*(x-a)/(c-a);}return P[P.length-1][1];};
+ const x0=Math.ceil(Math.max(F[0][0],C[0][0])),x1=Math.floor(Math.min(F[F.length-1][0],C[C.length-1][0]));for(let x=x0;x<=x1;x++){const f=Math.round(at(F,x)+S.n(x,.05,3)*1.2),c=Math.round(at(C,x)+S.n(x,.07,5)*3);if(f>c)S.cut(x,c,1,f-c);}};
+// fxRun: a winding cave corridor cut along a floor polyline; the roof follows the highest floor nearby, H above it. Use a vertical step (two points 2 px apart) for a lip a builder must bridge.
+const fxRun=(S,pts,H=56)=>{const F=pts.map(p=>p.slice()),C=F.map((p,i)=>[p[0],Math.min(F[Math.max(0,i-1)][1],p[1],F[Math.min(F.length-1,i+1)][1])-(Array.isArray(H)?H[i]:H)]);fxLane(S,F,C);};
+// fxTunnel: a hidden passage with a gently rolling floor (9 px swells every 70 px) so tunnels are not dead flat. y is the mean floor.
+const fxTunnel=(S,x0,x1,y,h=18)=>{let px=x0,py=y;for(let x=x0+70;x<x1-30;x+=70){const ny=y+(((x*7)%3)-1)*9;fxStair(S,px,py,x,ny,h);px=x;py=ny;}fxStair(S,px,py,x1,y,h);};
+// ---- organic landforms (built to avoid flat floors and floating islands) ----
+// fxCrag: a standing crag / rock spire that tapers and leans, rooted into the ground. w = base width, h = height above baseY.
+const fxCrag=(S,cx,baseY,w,h,lean=0,m=1)=>{const top=baseY-h;for(let y=top;y<=baseY+24;y++){const t=Math.max(0,Math.min(1,(baseY-y)/h)),hw=Math.max(2,(w/2)*(1-.62*Math.pow(t,1.25))+S.n(y,.09,7)*(w*.07)+(t>.9?-(t-.9)*w*3:0)),c=cx+lean*t*h+S.n(y,.05,8)*(w*.05);S.box(Math.round(c-hw),y,Math.round(hw*2),1,m);}};
+// fxArchRock: a natural stone arch standing on baseY: span = clear width, rise = clear height under it, thick = the stone's thickness.
+const fxArchRock=(S,cx,baseY,span,rise,thick,m=1)=>{const rx=span/2+thick,ry=rise+thick;S.ell(cx,baseY,rx,ry,m);S.cutEll(cx,baseY+6,span/2,rise+6);S.box(cx-rx-4,baseY,2*rx+8,26,m);};
+// fxHill: a rounded hill (bell shaped, slightly lopsided), filled down to yb.
+const fxHill=(S,cx,baseY,w,h,skew=0,yb)=>fxProf(S,[[cx-w,baseY],[cx-w*.62,baseY-h*.42],[cx+skew,baseY-h],[cx+w*.6,baseY-h*.5],[cx+w,baseY]],yb,3);
+// fxBasin: a closed pool. Water is drawn as a plain rectangle, so the pit is cut to EXACTLY the same width (x0..x1) with straight rock walls,
+// and the surface sits `drop` px below the ground so rock stands above the water at both ends. Rounded lips soften the rim. Returns the haz entry.
+const fxBasin=(S,x0,x1,groundY,drop,floorY)=>{const top=x=>{for(let y=groundY-40;y<groundY+40;y++)if(fxSolid(S.T,x,y))return y;return groundY;};
+ let a=top(x0-3),b=top(x1+3);if(a<=groundY-40)a=b;if(b<=groundY-40)b=a;const gy=Math.max(a,b),hi=Math.min(a,b);S.cut(x0,hi-14,x1-x0,floorY-hi+14);S.box(x0,floorY,x1-x0,8);return{x0,x1,y:gy+drop,y1:floorY,water:1};};
+// fxBlocks: a tumbled stack of dressed stone, rows get narrower and ragged toward the top (ruins). m=2 draws as metal, so use 1.
+const fxBlocks=(S,x0,x1,baseY,rows,bh=11,m=1)=>{for(let r=0;r<rows;r++){const y=baseY-(r+1)*bh,a=x0+Math.round(r*(x1-x0)*.07)+((r*37)%9),b=x1-Math.round(r*(x1-x0)*.09)-((r*53)%11);for(let x=a;x<b;x+=1){if(r>1&&((x*7+r*13)%29)<4)continue;S.box(x,y,1,bh,m);}}};
 const fxTank=(S,x0,x1,y0,y1)=>S.cut(x0,y0,x1-x0,y1-y0);
 // erosion pass: roughens ceilings (hanging fangs and chips) and cave walls with noise. Floors are never touched, and `prot` rects (puzzle walls, pit edges) are left exact.
 const fxRough=(S,prot=[])=>{const T=S.T,w=T.w,h=T.h,m=T.m,ok=(x,y)=>!prot.some(r=>x>=r[0]&&x<r[2]&&y>=r[1]&&y<r[3]);
