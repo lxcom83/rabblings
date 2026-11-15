@@ -13,7 +13,7 @@ COMMON = ['kit/core.js', 'kit/input.js', GAME + 'art.js', GAME + 'art48.js', GAM
           GAME + 'profile.js', GAME + 'mapdata.js', 'maps/format.js', 'maps/terrain-gen.js', GAME + 'generate.js',
           GAME + 'foe-art.js', GAME + 'map-art.js', GAME + 'decor-art.js', 'maps/decor.js', 'maps/namida-data.js', 'maps/import.js', GAME + 'homes.js', GAME + 'races.js', 'maps/check.js', GAME + 'game.js',
           'kit/dialog.js', GAME + 'my-maps.js']
-BUILDER = ['builder/editor.js', 'builder/import-ui.js']
+BUILDER = ['builder/solver.js', 'builder/editor.js', 'builder/import-ui.js']
 BOOT = [GAME + 'boot.js']
 TARGETS = {'play': COMMON + BOOT, 'builder': COMMON + BUILDER + BOOT, 'all': COMMON + BUILDER + BOOT}
 TITLES = {'play': 'Rabblings: Marching Orders', 'builder': 'Rabblings Map Builder', 'all': 'Rabblings: Marching Orders'}

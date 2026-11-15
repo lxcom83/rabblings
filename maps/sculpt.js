@@ -18,7 +18,12 @@ const fxSpine=(S,pts,r=10,v=4)=>{let P=pts;for(let it=0;it<3;it++){const Q=[P[0]
 // ---- design-first sculpting tools (additive: shapes grow out of the void instead of rooms cut from a block) ----
 const fxChaikin=(pts,it=3)=>{let P=pts;for(let k=0;k<it;k++){const Q=[P[0]];for(let i=0;i<P.length-1;i++){const a=P[i],b=P[i+1];Q.push([.75*a[0]+.25*b[0],.75*a[1]+.25*b[1]],[.25*a[0]+.75*b[0],.25*a[1]+.75*b[1]]);}Q.push(P[P.length-1]);P=Q;}return P;};
 // fxProf: ground whose top surface follows smoothed control points (x rising), filled down to yb. r = noise roughness in px.
-const fxProf=(S,pts,yb,r=2,m=1)=>{const P=fxChaikin(pts,2),B=yb||S.T.h;for(let i=0;i<P.length-1;i++){const[a,b]=P[i],[c,d]=P[i+1];for(let x=Math.ceil(a);x<c;x++){const y=Math.round(b+(d-b)*(x-a)/(c-a)+S.n(x,.05,3)*r*.6+S.n(x,.17,4)*r*.4);S.box(x,y,1,B-y,m);}}};
+// fxSharp: smoothing turns a cliff drawn as two points a few px apart into a steep ramp goblins can walk up. This puts the vertical face back,
+// so every step meant as a wall needs a skill. Pairs closer than 5 px in x and at least 12 px apart in y count as walls.
+const fxSharp=(S,pts,m=1)=>{for(let i=0;i<pts.length-1;i++){const[x1,y1]=pts[i],[x2,y2]=pts[i+1];if(Math.abs(x2-x1)>4||Math.abs(y2-y1)<12)continue;
+ const wx=Math.round((x1+x2)/2),hi=Math.min(y1,y2),lo=Math.max(y1,y2),up=y2<y1?1:-1;
+ if(up>0){S.box(wx,hi,22,lo-hi,m);S.cut(wx-22,hi-2,22,lo-hi+2);}else{S.box(wx-22,hi,22,lo-hi,m);S.cut(wx,hi-2,22,lo-hi+2);}}};
+const fxProf=(S,pts,yb,r=2,m=1)=>{const P=fxChaikin(pts,2),B=yb||S.T.h;for(let i=0;i<P.length-1;i++){const[a,b]=P[i],[c,d]=P[i+1];for(let x=Math.ceil(a);x<c;x++){const y=Math.round(b+(d-b)*(x-a)/(c-a)+S.n(x,.05,3)*r*.6+S.n(x,.17,4)*r*.4);S.box(x,y,1,B-y,m);}}fxSharp(S,pts,m);};
 // fxCeil: cave roof whose underside follows smoothed control points, filled up to the top edge
 const fxCeil=(S,pts,r=3,m=1)=>{const P=fxChaikin(pts,2);for(let i=0;i<P.length-1;i++){const[a,b]=P[i],[c,d]=P[i+1];for(let x=Math.ceil(a);x<c;x++){const y=Math.round(b+(d-b)*(x-a)/(c-a)+S.n(x,.06,5)*r*.6+S.n(x,.21,6)*r*.4);S.box(x,0,1,Math.max(0,y),m);}}};
 // fxMass: a solid body grown along a smoothed line (roots, tendrils, rock arms, arches). r tapers from r0 to r1.
@@ -43,9 +48,27 @@ const fxStair=(S,x0,y0,x1,y1,h=18)=>{const n=Math.abs(x1-x0),d=x1>x0?1:-1;for(le
 const fxLane=(S,fl,ce)=>{const F=fxChaikin(fl,2),C=fxChaikin(ce,2),at=(P,x)=>{for(let i=0;i<P.length-1;i++)if(x>=P[i][0]&&x<=P[i+1][0]){const[a,b]=P[i],[c,d]=P[i+1];return c===a?b:b+(d-b)*(x-a)/(c-a);}return P[P.length-1][1];};
  const x0=Math.ceil(Math.max(F[0][0],C[0][0])),x1=Math.floor(Math.min(F[F.length-1][0],C[C.length-1][0]));for(let x=x0;x<=x1;x++){const f=Math.round(at(F,x)+S.n(x,.05,3)*1.2),c=Math.round(at(C,x)+S.n(x,.07,5)*3);if(f>c)S.cut(x,c,1,f-c);}};
 // fxRun: a winding cave corridor cut along a floor polyline; the roof follows the highest floor nearby, H above it. Use a vertical step (two points 2 px apart) for a lip a builder must bridge.
-const fxRun=(S,pts,H=56)=>{const F=pts.map(p=>p.slice()),C=F.map((p,i)=>[p[0],Math.min(F[Math.max(0,i-1)][1],p[1],F[Math.min(F.length-1,i+1)][1])-(Array.isArray(H)?H[i]:H)]);fxLane(S,F,C);};
-// fxTunnel: a hidden passage with a gently rolling floor (9 px swells every 70 px) so tunnels are not dead flat. y is the mean floor.
-const fxTunnel=(S,x0,x1,y,h=18)=>{let px=x0,py=y;for(let x=x0+70;x<x1-30;x+=70){const ny=y+(((x*7)%3)-1)*9;fxStair(S,px,py,x,ny,h);px=x;py=ny;}fxStair(S,px,py,x1,y,h);};
+const fxRun=(S,pts,H=56)=>{const F=pts.map(p=>p.slice()),C=F.map((p,i)=>[p[0],Math.min(F[Math.max(0,i-1)][1],p[1],F[Math.min(F.length-1,i+1)][1])-(Array.isArray(H)?H[i]:H)]);fxLane(S,F,C);fxSharp(S,F);};
+// fxCavern: a natural-looking hidden passage along a polyline. The floor rolls (noise fades to nothing at both ends so it meets its
+// neighbours), the roof swells into chambers and pinches into squeezes, boulders sit on the floor and stalactites hang from the roof.
+// Every column step is capped at 5 px so walkers never need a bridge; rises steeper than 1:1 are fine for them too.
+const fxCavern=(S,pts,o={})=>{const h=o.h||26,sw=o.swell||22,seed=o.seed||pts[0][0],lo=pts[0][0],hi=pts[pts.length-1][0],L=hi-lo;
+ const seg=x=>{for(let i=0;i<pts.length-1;i++){const[a,ya]=pts[i],[b,yb]=pts[i+1];if(x>=a&&x<=b){const t=(x-a)/(b-a||1);return[ya,yb,t,Math.abs(yb-ya)/(b-a||1)];}}return[pts[pts.length-1][1],pts[pts.length-1][1],0,0];};
+ const base=x=>{const[ya,yb,t]=seg(x),u=t*t*(3-2*t);return ya+(yb-ya)*u;},slope=x=>seg(x)[3];
+ const fade=x=>Math.min(1,(x-lo)/40,(hi-x)/40);
+ const F=[];let prev=null;for(let x=lo;x<=hi;x++){let f=base(x)+fade(x)*(S.n(x+seed,.025,31)*(o.roll||14)+S.n(x*2+seed,.07,32)*3);if(prev!==null)f=Math.max(prev-5,Math.min(prev+5,f));f=Math.round(f);F.push(f);prev=f;}
+ const fl=x=>F[Math.max(0,Math.min(F.length-1,x-lo))];
+ const rf=x=>{const t=Math.max(0,Math.sin((x-lo)/L*Math.PI*(o.rooms||Math.max(2,L/260))+1)),st=Math.min(2.5,slope(x)),f=fade(x),g=o.grow===undefined?.5:o.grow;return Math.round((h+f*t*t*sw)*(1+g*st*f)+f*S.n(x+seed,.04,33)*(6+4*st*g));};
+ for(let x=lo;x<=hi;x++){const f=fl(x),r=rf(x);S.cut(x,f-r,1,r);}
+ for(let x=lo+30;x<hi-30;x++){const r=rf(x)-h;
+  if(r>12&&S.n(x+seed,.5,34)>.62&&Math.abs(fl(x+9)-fl(x-9))<3){S.ell(x,fl(x)+1,4+(r>>3),4);x+=16;}
+  if(r>10&&S.n(x+seed,.5,37)>.6){const l=Math.min(rf(x)-22,4+(S.n(x,.3,38)+1)*5|0);if(l>3){S.ell(x,fl(x)-rf(x)+(l>>1),2+(l>>3),l>>1);x+=11;}}}
+ return{fl,rf};};
+// fxTunnel: level cavern between two x positions
+const fxTunnel=(S,x0,x1,y,h=18)=>fxCavern(S,[[Math.min(x0,x1),y],[Math.max(x0,x1),y]],{h:h+6,swell:18});
+// fxShard: a floating island with a flat walkable top and a lumpy rounded underside. lip>0 puts a small rock spur at the left end so walkers turn there.
+const fxShard=(S,x0,x1,top,d=26,lip=0)=>{const w=x1-x0;S.box(x0,top,w,5);for(let x=x0+8;x<=x1-8;x+=5){const t=(x-x0)/w,dp=Math.max(6,Math.round(d*Math.sin(Math.PI*t)*(1+S.n(x,.11,41)*.35)+S.n(x,.3,42)*3));S.ell(x,top+dp-2,7,dp);}
+ for(let x=x0+6;x<x1-6;x+=1)if(S.n(x,.5,43)>.75){S.ell(x,top,3,2);x+=14;}if(lip)S.box(x0+10,top-lip,5,lip+2);};
 // ---- organic landforms (built to avoid flat floors and floating islands) ----
 // fxCrag: a standing crag / rock spire that tapers and leans, rooted into the ground. w = base width, h = height above baseY.
 const fxCrag=(S,cx,baseY,w,h,lean=0,m=1)=>{const top=baseY-h;for(let y=top;y<=baseY+24;y++){const t=Math.max(0,Math.min(1,(baseY-y)/h)),hw=Math.max(2,(w/2)*(1-.62*Math.pow(t,1.25))+S.n(y,.09,7)*(w*.07)+(t>.9?-(t-.9)*w*3:0)),c=cx+lean*t*h+S.n(y,.05,8)*(w*.05);S.box(Math.round(c-hw),y,Math.round(hw*2),1,m);}};
@@ -65,8 +88,8 @@ const fxRough=(S,prot=[])=>{const T=S.T,w=T.w,h=T.h,m=T.m,ok=(x,y)=>!prot.some(r
  const run=(x,y,dx,dy,v,max)=>{let n=0;while(n<max){const X=x+dx*n,Y=y+dy*n;if(X<0||Y<0||X>=w||Y>=h||(v?m[Y*w+X]!==1:m[Y*w+X]!==0))break;n++;}return n;};
  const ch=[];
  for(let x=4;x<w-4;x++)for(let y=4;y<h-4;y++){if(m[y*w+x]===1&&m[(y+1)*w+x]===0&&ok(x,y)){const L=run(x,y,0,-1,1,40),f=run(x,y+1,0,1,0,60);if(L<12||f<34)continue;const e=Math.round(S.n(x,.11,11)*5+S.n(x,.31,12)*3+1.2);if(e>0)for(let k=1;k<=e;k++)ch.push([x,y+k,1]);else if(e<-1&&L>=14)for(let k=0;k<Math.min(3,-e);k++)ch.push([x,y-k,0]);}}
- for(let y=4;y<h-4;y++)for(let x=4;x<w-5;x++){const a=m[y*w+x],b=m[y*w+x+1];if(a===1&&b===0&&ok(x,y)){const L=run(x,y,-1,0,1,30),F=run(x+1,y,1,0,0,30);if(L<12||F<24)continue;const sh=Math.round(S.n(y,.09,13)*3.2);if(sh>0)for(let k=1;k<=sh;k++)ch.push([x+k,y,1]);else for(let k=0;k<-sh;k++)ch.push([x-k,y,0]);}
-  else if(a===0&&b===1&&ok(x,y)){const F=run(x,y,-1,0,0,30),L=run(x+1,y,1,0,1,30);if(L<12||F<24)continue;const sh=Math.round(S.n(y,.09,14)*3.2);if(sh>0)for(let k=0;k<sh;k++)ch.push([x+1+k,y,0]);else for(let k=1;k<=-sh;k++)ch.push([x+1-k,y,1]);}}
+ for(let y=4;y<h-4;y++)for(let x=4;x<w-5;x++){const a=m[y*w+x],b=m[y*w+x+1];if(a===1&&b===0&&ok(x,y)){const L=run(x,y,-1,0,1,30),F=run(x+1,y,1,0,0,30);if(L<12||F<24||run(x,y,0,-1,1,8)<6)continue;const sh=Math.round(S.n(y,.09,13)*3.2);if(sh>0)for(let k=1;k<=sh;k++)ch.push([x+k,y,1]);else for(let k=0;k<-sh;k++)ch.push([x-k,y,0]);}
+  else if(a===0&&b===1&&ok(x,y)){const F=run(x,y,-1,0,0,30),L=run(x+1,y,1,0,1,30);if(L<12||F<24||run(x+1,y,0,-1,1,8)<6)continue;const sh=Math.round(S.n(y,.09,14)*3.2);if(sh>0)for(let k=0;k<sh;k++)ch.push([x+1+k,y,0]);else for(let k=1;k<=-sh;k++)ch.push([x+1-k,y,1]);}}
  for(const[x,y,v]of ch)m[y*w+x]=v;};
 const fxPlank=(S,x0,x1,y)=>S.box(x0,y,x1-x0,3,3);
 
