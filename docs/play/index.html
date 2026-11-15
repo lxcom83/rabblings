@@ -1285,7 +1285,7 @@ const fxChaikin=(pts,it=3)=>{let P=pts;for(let k=0;k<it;k++){const Q=[P[0]];for(
 const fxSharp=(S,pts,m=1)=>{for(let i=0;i<pts.length-1;i++){const[x1,y1]=pts[i],[x2,y2]=pts[i+1];if(Math.abs(x2-x1)>4||Math.abs(y2-y1)<12)continue;
  const wx=Math.round((x1+x2)/2),hi=Math.min(y1,y2),lo=Math.max(y1,y2),up=y2<y1?1:-1;
  if(up>0){S.box(wx,hi,22,lo-hi,m);S.cut(wx-22,hi-2,22,lo-hi+2);}else{S.box(wx-22,hi,22,lo-hi,m);S.cut(wx,hi-2,22,lo-hi+2);}}};
-const fxProf=(S,pts,yb,r=2,m=1)=>{const P=fxChaikin(pts,2),B=yb||S.T.h;for(let i=0;i<P.length-1;i++){const[a,b]=P[i],[c,d]=P[i+1];for(let x=Math.ceil(a);x<c;x++){const y=Math.round(b+(d-b)*(x-a)/(c-a)+S.n(x,.05,3)*r*.6+S.n(x,.17,4)*r*.4);S.box(x,y,1,B-y,m);}}fxSharp(S,pts,m);};
+const fxProf=(S,pts,yb,r=2,m=1,sharp=1)=>{const P=fxChaikin(pts,2),B=yb||S.T.h;for(let i=0;i<P.length-1;i++){const[a,b]=P[i],[c,d]=P[i+1];for(let x=Math.ceil(a);x<c;x++){const y=Math.round(b+(d-b)*(x-a)/(c-a)+S.n(x,.05,3)*r*.6+S.n(x,.17,4)*r*.4);S.box(x,y,1,B-y,m);}}if(sharp)fxSharp(S,pts,m);};
 // fxCeil: cave roof whose underside follows smoothed control points, filled up to the top edge
 const fxCeil=(S,pts,r=3,m=1)=>{const P=fxChaikin(pts,2);for(let i=0;i<P.length-1;i++){const[a,b]=P[i],[c,d]=P[i+1];for(let x=Math.ceil(a);x<c;x++){const y=Math.round(b+(d-b)*(x-a)/(c-a)+S.n(x,.06,5)*r*.6+S.n(x,.21,6)*r*.4);S.box(x,0,1,Math.max(0,y),m);}}};
 // fxMass: a solid body grown along a smoothed line (roots, tendrils, rock arms, arches). r tapers from r0 to r1.
@@ -1357,7 +1357,7 @@ const fxPlank=(S,x0,x1,y)=>S.box(x0,y,x1-x0,3,3);
 
 // ['K','ground',pts,rough,mat] ['K','roof',pts,rough,mat] ['K','mass',pts,r0,r1,mat] ['K','tunnel',pts,r] ['K','tank',x0,y0,x1,y1] ['K','erode']
 const SCULPT_KINDS=[['ground','GROUND LINE'],['roof','ROOF LINE'],['mass','ROOT / ARM'],['tunnel','TUNNEL'],['tank','TANK']];
-function sculptOp(S,o){const k=o[1];if(k==='ground')fxProf(S,o[2],0,o[3]===undefined?2:o[3],o[4]||1);else if(k==='roof')fxCeil(S,o[2],o[3]===undefined?3:o[3],o[4]||1);else if(k==='mass')fxMass(S,o[2],o[3]||10,o[4]||3,2,o[5]||1);
+function sculptOp(S,o){const k=o[1];if(k==='ground')fxProf(S,o[2],0,o[3]===undefined?2:o[3],o[4]||1,0);else if(k==='roof')fxCeil(S,o[2],o[3]===undefined?3:o[3],o[4]||1);else if(k==='mass')fxMass(S,o[2],o[3]||10,o[4]||3,2,o[5]||1);
  else if(k==='tunnel')fxSpine(S,o[2],o[3]||12,3);else if(k==='tank')S.cut(Math.min(o[2],o[4]),Math.min(o[3],o[5]),Math.abs(o[4]-o[2]),Math.abs(o[5]-o[3]));else if(k==='erode')fxRough(S,o[2]||[]);}
 {const _op=Shaper.prototype.op;Shaper.prototype.op=function(o){if(o&&o[0]==='K')return sculptOp(this,o);return _op.call(this,o);};}
 

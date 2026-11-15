@@ -36,7 +36,7 @@ def full_page(body):
 
 
 def file_list():
-    files = ['./', 'play/', 'builder/', 'manifest.webmanifest']
+    files = ['./', 'play/', 'builder/', 'manifest.webmanifest', 'freeplay-maps.json', 'img/journal/list.json']
     for root, _, names in os.walk('site'):
         for n in names:
             rel = os.path.relpath(os.path.join(root, n), 'site').replace(os.sep, '/')

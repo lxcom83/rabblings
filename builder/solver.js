@@ -42,7 +42,7 @@ function* solveDefGen(def,own){const T0=Date.now(),maxT=Math.round(def.time*TPS)
  for(let it=0;it<30&&beam.length&&extra<3;it++){const next=[];if(win)extra++;
   for(const B of beam){const near=e=>B.plan.some(s=>Math.abs(s.x-e.x)<10&&Math.abs(s.y-e.y)<10&&s.d===e.d);
    const evs=B.r.ev.filter(e=>!near(e)).sort((a,b)=>a.t-b.t).slice(0,6);
-   for(const e of evs)for(const c of solveCands(e)){if(Date.now()-T0>120000)break;const p=B.plan.concat([c]),r=run(p);if(!r.fired[r.fired.length-1])continue;
+   for(const e of evs)for(const c of solveCands(e)){if(Date.now()-T0>120000)break;const p=B.plan.concat([c]),r=run(p);yield{msg:win?`Found a way with ${win.r.n} skills. Looking for a cheaper one...`:`Round ${it+1}: best so far ${B.r.saved} home`,sims};if(!r.fired[r.fired.length-1])continue;
     const nov=r.ev.some(e=>e.k==='top'&&!B.r.ev.some(f=>f.k==='top'&&Math.abs(f.x-e.x)<8&&Math.abs(f.y-e.y)<8));
     if(r.win){if(!win||r.score>win.r.score)win={plan:p,r};}else if((r.score>B.r.score+.5||nov)&&(!win||r.n<win.r.n))next.push({plan:p,r,k:r.score+(nov?40:0)});}
    yield{msg:win?`Found a way with ${win.r.n} skills. Looking for a cheaper one...`:`Round ${it+1}: best so far ${B.r.saved} home`,sims};}
@@ -51,7 +51,7 @@ function* solveDefGen(def,own){const T0=Date.now(),maxT=Math.round(def.time*TPS)
   beam=keep;if(Date.now()-T0>120000)break;}
  if(win){plan=win.plan;cur=win.r;}else{const all=[{plan,r:cur}].concat(beam);all.sort((a,b)=>b.r.score-a.r.score);plan=all[0].plan;cur=all[0].r;}
  // cheaper swaps: try every other way of handling each step's trouble spot, keep any that still wins for less
- if(cur.win)for(let i=0;i<plan.length;i++){const st=plan[i];if(!st.e)continue;for(const c of solveCands(st.e)){if(c.s===st.s&&c.x===st.x)continue;const p=plan.slice();p[i]=c;const r=run(p);yield{msg:'Looking for a cheaper way...',sims};if(r.win&&r.score>cur.score){plan=p;cur=r;}}}
+ if(cur.win)for(let i=0;i<plan.length&&Date.now()-T0<150000;i++){const st=plan[i];if(!st.e)continue;for(const c of solveCands(st.e)){if(Date.now()-T0>150000)break;if(c.s===st.s&&c.x===st.x)continue;const p=plan.slice();p[i]=c;const r=run(p);yield{msg:'Looking for a cheaper way...',sims};if(r.win&&r.score>cur.score){plan=p;cur=r;}}}
  if(cur.win){for(let i=plan.length-1;i>=0;i--){const p=plan.slice(0,i).concat(plan.slice(i+1)),r=run(p);yield{msg:'Checking which steps are really needed...',sims};if(r.win){plan=p;cur=r;}}
   plan=plan.filter((s,i)=>cur.fired[i]);cur=run(plan);}
  return{ok:cur.win,saved:cur.saved,need:def.need,n:def.n,used:cur.used,plan:plan.map(({e,...s})=>s),sims,secs:Math.round((Date.now()-T0)/1000)};}

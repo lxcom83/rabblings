@@ -1,5 +1,5 @@
 -- Rabblings website refresh: attempt logging, high scores, community maps, thumbs-up votes and tester feedback.
--- Applied 15 Nov 2026 (after setup.sql, 002 and 003). Safe to run again: every step checks before it creates.
+-- Run in the SQL Editor after setup.sql, 002 and 003. Safe to run again: every step checks before it creates.
 --
 -- Rules followed (see ../README.md):
 --   * every table has row level security on, and grants only what the website needs
