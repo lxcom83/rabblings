@@ -80,7 +80,7 @@
    .catch(function(e){d.view('out');d.say('acct-out-msg',friendly(e),true);});}
 
  // public reads without loading the library: RB.rest('site_maps?select=id,title&limit=3')
- function rest(q){return fetch(URL_+'/rest/v1/'+q,{headers:{apikey:KEY,Accept:'application/json'}}).then(function(r){return r.json().then(function(j){if(!r.ok){var e=new Error(j&&j.message||'Request failed');e.code=j&&j.code;throw e;}return j;});});}
+ function rest(q){var c=window.AbortController?new AbortController():null,t=c&&setTimeout(function(){c.abort();},8000);return fetch(URL_+'/rest/v1/'+q,{headers:{apikey:KEY,Accept:'application/json'},signal:c&&c.signal}).then(function(r){return r.text().then(function(x){var j=null;try{j=x?JSON.parse(x):null;}catch(_){}if(!r.ok||j===null&&x){var e=new Error(j&&j.message||'Could not reach the server');e.code=j&&j.code;throw e;}return j;});},function(){throw new Error('Could not reach the server');}).finally(function(){if(t)clearTimeout(t);});}
  window.RB={base:BASE,rest:rest,client:load,user:getUser,current:function(){return user;},known:function(){return known;},onChange:function(f){subs.push(f);if(known)try{f(user);}catch(e){}},
   openSignIn:openSignIn,missing:missing,friendly:friendly,loadName:loadName,saveName:saveName,signOut:signOut,deleteAll:deleteAll,sendLink:sendLink,store:store,read:read,LOG_KEY:LOG_KEY};
 

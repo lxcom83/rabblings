@@ -36,7 +36,7 @@
   function kind(){var k=f.querySelector('input[name=fb-kind]:checked');return k?k.value:'other';}
   function device(){return (navigator.userAgent||'').slice(0,280);}
   function block(){return 'Rabblings tester feedback\nType: '+kind()+'\nPage: '+location.pathname+'\nDevice: '+device()+'\nWhen: '+new Date().toISOString().slice(0,16).replace('T',' ')+' UTC\n\n'+$('fb-text').value.trim();}
-  RB.onChange(function(u){who.textContent=u?'Your note goes straight to the owner, signed with your player name.':'You are not signed in, so we cannot store your note. Write it here, press the button, and copy the text into an email to support@rabblings.com or the Discord.';send.textContent=u?'Send feedback':'Make copyable text';});
+  RB.onChange(function(u){who.textContent=u?'Your note goes straight to the owner, signed with your player name.':'You are not signed in, so we cannot store your note. Write it here, press the button, and copy the text into an email to support@rabblings.com.';send.textContent=u?'Send feedback':'Make copyable text';});
   copy.addEventListener('click',function(){var t=out.textContent;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){copy.textContent='Copied';setTimeout(function(){copy.textContent='Copy text';},1600);}).catch(function(){var r=document.createRange();r.selectNodeContents(out);var s=getSelection();s.removeAllRanges();s.addRange(r);});});
   f.addEventListener('submit',function(e){e.preventDefault();var text=$('fb-text').value.trim();
    if(text.length<5){say('Write a few more words first.',true);return;}

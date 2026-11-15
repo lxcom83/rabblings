@@ -1,6 +1,5 @@
 -- Rabblings website refresh: attempt logging, high scores, community maps, thumbs-up votes and tester feedback.
--- NOT APPLIED YET. Review, then run once in the Supabase SQL Editor after setup.sql, 002 and 003
--- (or with `supabase db push`). Safe to run again: every step checks before it creates.
+-- Applied 15 Nov 2026 (after setup.sql, 002 and 003). Safe to run again: every step checks before it creates.
 --
 -- Rules followed (see ../README.md):
 --   * every table has row level security on, and grants only what the website needs
@@ -140,7 +139,7 @@ create policy "Players delete their own scores" on public.mo_scores
 revoke all on public.mo_scores from anon, authenticated;
 grant select on public.mo_scores to anon, authenticated;
 grant insert (player_id, level_key, score, race, diff, classic, set_at) on public.mo_scores to authenticated;
-grant update (score, race, diff, classic, set_at) on public.mo_scores to authenticated;
+grant update (level_key, score, race, diff, classic, set_at) on public.mo_scores to authenticated;
 grant delete on public.mo_scores to authenticated;
 
 -- A lower score never replaces a higher one, whoever sends it.

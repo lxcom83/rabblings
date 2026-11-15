@@ -7,10 +7,10 @@ Run these once, in order, in the Supabase SQL Editor:
 1. `setup.sql`: the profiles table, its access rules, the sign-up trigger and account deletion.
 2. `002-player-name.sql`: renames the designer name to a player name used in every game, and locks the table's grants down.
 3. `003-lock-functions.sql`: stops the website calling the sign-up helper and Supabase's automatic RLS helper directly.
-4. `migrations/20261114000000_website_community.sql` (website refresh, **not applied yet**): the attempt-logging switch on `profiles`,
+4. `migrations/20261114000000_website_community.sql` (website refresh, applied 15 Nov 2026): the attempt-logging switch on `profiles`,
    `mo_free_attempts` (private Free Play attempt logs), `mo_scores` (public high scores, a lower score never replaces a higher one),
    `site_maps` and `site_map_votes` (community map links and thumbs up), `site_feedback` (tester feedback, readable only in the dashboard),
-   and the owner-only view `mo_free_attempt_stats`. The website pages work before this runs: they show "coming soon" notes instead of errors.
+   and the owner-only view `mo_free_attempt_stats`. The website pages also cope when the project is unreachable: they show "coming soon" or "could not reach the server" notes instead of errors.
 
 ## How data is laid out
 
@@ -21,3 +21,7 @@ Run these once, in order, in the Supabase SQL Editor:
 - Every new table must enable row level security, grant only what the site needs, and delete its rows when the account is deleted (`on delete cascade` from `profiles`).
 
 Never put the secret key in website or game code. Only the publishable key belongs there.
+
+## Keeping the project awake
+
+Supabase pauses a free project after about a week without requests. `.github/workflows/keep-supabase-awake.yml` reads one row every day so that never happens. GitHub switches scheduled jobs off in a repository with no commits for 60 days: if the job stops, turn it back on from the repository's Actions tab.
