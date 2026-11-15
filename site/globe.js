@@ -22,7 +22,7 @@
   {k:'dwarf',n:'Dwarves',home:'The Deep Halls',at:[8,70]},
   {k:'rat',n:'Ratfolk',home:'The Clockwork Sewers',at:[-72,-18]},
   {k:'bone',n:'Skeletons',home:'The Crypts',at:[-98,-42]}];
- var STUDIES={goblin:1,swamp:1,imp:1,fairy:1,dwarf:1,rat:1,bone:1};
+ var STUDIES={goblin:1,swamp:1,imp:1,fairy:1,dwarf:1,rat:1,bone:1,shroom:1};
 
  function build(){
  var THREE=window.THREE;

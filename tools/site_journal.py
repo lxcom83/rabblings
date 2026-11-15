@@ -218,7 +218,7 @@ def race_page(k, r, prev, nxt):
  </div>
  <hr class="rule">
  <p class="oneliner">{E(L['oneliner'])}</p>
- <div class="race-study">{pending('race-' + k + '-study.webp', 'Study of the ' + name, 'Field study, front and side, with details.', 'II', up, 'Ink field study of the ' + name)}</div>
+ <div class="race-study{' wide' if k == 'shroom' else ''}">{pending('race-' + k + '-study.webp', 'Study of the ' + name, 'Field study, front and side, with details.', 'II', up, 'Ink field study of the ' + name)}</div>
  <div class="spread">
   <div>
    <div class="hand">{entry}</div>
