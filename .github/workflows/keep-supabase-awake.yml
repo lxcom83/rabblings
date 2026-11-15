@@ -1,0 +1,29 @@
+# Supabase pauses a free project after about a week without requests, which switches off sign-in
+# and the website's account features. This sends one small read to the database every day so that never happens.
+# It uses only the publishable key, which is already public in the website's code.
+# GitHub stops scheduled jobs in repositories with no commits for 60 days; if that happens, press
+# "Enable workflow" on the Actions tab (or run it once by hand with "Run workflow").
+name: Keep Supabase awake
+on:
+  schedule:
+    - cron: '23 17 * * *'   # 17:23 UTC daily, early morning in Sydney
+  workflow_dispatch:
+permissions: {}
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Read one row
+        env:
+          URL: https://fstpymozoxfnwfgkzuay.supabase.co/rest/v1/profiles?select=id&limit=1
+          KEY: sb_publishable_gaPE_7-5wvqtwElBBrgdCw_fPjNkZc3
+        run: |
+          for i in 1 2 3; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$URL" -H "apikey: $KEY")
+            echo "Supabase answered $code"
+            [ "$code" = "200" ] && exit 0
+            sleep 20
+          done
+          echo "Supabase did not answer 200. It may be paused: restore it from the Supabase dashboard."
+          exit 1

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Community Maps: Rabblings</title>
+<meta name="description" content="Rabblings maps and map packs shared by players. Open packs straight in the game, and give a thumbs up to the best.">
+<link rel="icon" href="img/home-goblin-0.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=IM+Fell+English:ital@0;1&family=Pirata+One&display=swap">
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#100c09">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the page</a>
+<header class="top"><div class="wrap">
+ <a class="brand" href="./"><img class="px" src="img/home-goblin-0.png" width="30" height="27" alt="">Rabblings</a>
+ <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+ <nav class="nav" id="nav" aria-label="Main"><a class="play" href="./#play">Play</a><a href="lore.html">Lore</a><a href="lore.html#peoples">Races</a><a href="globe.html">Globe</a><a href="maps.html" aria-current="page">Community maps</a><a href="./#news">News</a><button class="acct-btn" id="acct-btn" type="button">Sign in</button></nav>
+</div></header>
+
+<main id="main"><section><div class="wrap">
+ <div class="sec-head"><p class="kicker">Made by players, stored by players</p><h1>Community maps</h1>
+  <p>Maps and packs live on their makers' own drives or sites. This list keeps only the link, the title, a few words and the designer's name, plus a tally of thumbs up.</p></div>
+
+ <div class="notice" id="m-off" hidden><b>Opening soon.</b> Sharing and voting switch on with the next site update. Check back shortly.</div>
+
+ <div class="toolbar" role="search">
+  <div class="field"><label for="m-sort">Sort by</label><select id="m-sort"><option value="new">Newest first</option><option value="top">Most thumbs up</option></select></div>
+  <div class="field"><label for="m-kind">Show</label><select id="m-kind"><option value="">Maps and packs</option><option value="pack">Packs only</option><option value="map">Single maps only</option></select></div>
+  <div class="field" style="flex:2 1 220px"><label for="m-q">Search titles and designers</label><input id="m-q" type="search" placeholder="Bog, Carnage, a name&hellip;"></div>
+ </div>
+ <p class="msg" id="m-msg" aria-live="polite"></p>
+ <div class="maps" id="m-list" aria-live="polite"></div>
+ <div class="row" style="justify-content:center;margin-top:22px"><button class="btn" id="m-more" type="button" hidden>Show more</button></div>
+
+ <div class="spread" style="margin-top:48px">
+  <div class="panel" id="share">
+   <h2 id="share-title">Share a map or pack</h2>
+   <div id="s-out"><p>Sign in to share a link. Anyone can browse without an account.</p><div class="row" style="margin-top:14px"><button class="btn" id="s-signin" type="button">Sign in</button></div></div>
+   <form class="form" id="s-form" hidden>
+    <fieldset class="radios"><legend class="label">What are you sharing?</legend>
+     <label><input type="radio" name="s-kind" value="pack" checked> A map pack</label>
+     <label><input type="radio" name="s-kind" value="map"> A single map file</label>
+    </fieldset>
+    <div class="field"><label for="s-title">Title</label><input id="s-title" type="text" maxlength="60" required minlength="3"></div>
+    <div class="field"><label for="s-link">Link to the file (https)</label><input id="s-link" type="url" maxlength="600" required placeholder="https://"></div>
+    <p class="dim small" id="s-hint">Packs on GitHub, Gist, Cloudflare R2 or Supabase Storage open straight in the game. Google Drive, Dropbox and OneDrive work too, but players must download the file and use OPEN FILE.</p>
+    <div class="field"><label for="s-designer">Designer credit</label><input id="s-designer" type="text" maxlength="40" required minlength="2"></div>
+    <div class="field"><label for="s-desc">A few words (optional)</label><textarea id="s-desc" maxlength="600" placeholder="Which races, how hard, what to watch for."></textarea></div>
+    <div class="row"><button class="btn" id="s-save" type="submit">Share it</button><button class="btn small" id="s-cancel" type="button" hidden>Cancel edit</button></div>
+    <p class="msg" id="s-msg" aria-live="polite"></p>
+   </form>
+  </div>
+  <div class="side">
+   <div class="leaf">
+    <h3>How sharing works</h3>
+    <ol style="margin-top:8px;display:flex;flex-direction:column;gap:6px">
+     <li>In the game, open <b>Map Builder &rarr; My Maps</b>, then save your pack or map file.</li>
+     <li>Upload it to your own storage and copy a public link.</li>
+     <li>Paste the link here with a title and a few words.</li>
+    </ol>
+    <p class="tnote"><b>Be careful what you open</b>Only open packs from people you trust. The game checks every map before saving it, and shows you where a pack comes from before importing.</p>
+   </div>
+  </div>
+ </div>
+</div></section></main>
+
+<footer><div class="wrap">
+ <nav class="fnav" aria-label="Footer"><a href="play/">Play</a><a href="builder/">Map builder</a><a href="lore.html">Lore</a><a href="globe.html">Globe</a><a href="account.html">Account</a><a href="privacy.html">Privacy</a></nav>
+ <p>Rabblings is free to play and source available, by Luke83. Shared maps belong to their designers.</p>
+</div></footer>
+<script src="account.js"></script>
+<script src="site.js"></script>
+<script src="maps.js"></script>
+</body>
+</html>

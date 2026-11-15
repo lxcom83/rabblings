@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Your Account: Rabblings</title>
+<meta name="description" content="Your Rabblings player name, Free Play attempt log, high scores and account settings.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="img/home-goblin-0.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=IM+Fell+English:ital@0;1&family=Pirata+One&display=swap">
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#100c09">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the page</a>
+<header class="top"><div class="wrap">
+ <a class="brand" href="./"><img class="px" src="img/home-goblin-0.png" width="30" height="27" alt="">Rabblings</a>
+ <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+ <nav class="nav" id="nav" aria-label="Main"><a class="play" href="./#play">Play</a><a href="lore.html">Lore</a><a href="lore.html#peoples">Races</a><a href="globe.html">Globe</a><a href="maps.html">Community maps</a><a href="./#news">News</a><button class="acct-btn" id="acct-btn" type="button">Sign in</button></nav>
+</div></header>
+
+<main id="main"><section><div class="wrap narrow">
+ <div class="sec-head"><p class="kicker">Ledger of one rabble</p><h1>Your account</h1></div>
+
+ <div id="a-wait" class="panel"><p>Checking whether you are signed in&hellip;</p></div>
+
+ <div id="a-out" class="panel" hidden>
+  <h2>Sign in</h2>
+  <p>You can play without an account. With one, your player name shows in every Rabblings game, you can share community maps and vote, post high scores, and help us learn which races can beat which Free Play maps.</p>
+  <div class="row" style="margin-top:16px"><button class="btn go" id="a-signin" type="button">Sign in with email</button></div>
+  <p class="dim small" style="margin-top:12px">No password. We email you a link. <a href="privacy.html">What we store, and why</a>.</p>
+ </div>
+
+ <div id="a-in" hidden>
+  <div class="panel">
+   <h2>Player name</h2>
+   <p class="dim small">Signed in as <strong id="a-email"></strong>. Your email is never shown to other players.</p>
+   <form class="form" id="a-name-form" style="margin-top:12px">
+    <div class="field"><label for="a-name">Player name (public)</label><input id="a-name" type="text" maxlength="24" autocomplete="nickname" placeholder="Shown in every Rabblings game"></div>
+    <div><button class="btn" type="submit">Save name</button></div>
+    <p class="msg" id="a-name-msg" aria-live="polite"></p>
+   </form>
+  </div>
+
+  <div class="panel">
+   <h2>Free Play attempt log</h2>
+   <p>When you play Free Play with a race that has not been confirmed for that map yet, the game notes the map, race, clan, difficulty, how many you saved and how long it took. Sending those notes helps the designer find out which races can really solve each map. Nothing else about you is logged.</p>
+   <label class="switch" style="margin-top:14px"><input type="checkbox" id="a-log" role="switch"><span id="a-log-label">Log my Free Play attempts</span></label>
+   <p class="msg" id="a-log-msg" aria-live="polite"></p>
+   <div class="row" style="margin:6px 0 14px"><button class="btn small" id="a-sync" type="button">Send attempts from this device</button><button class="btn small danger" id="a-clear" type="button">Clear my logged attempts</button></div>
+   <div class="scroll-x"><table class="ledger" id="a-tries"><caption class="sr">Your Free Play attempts, newest first</caption>
+    <thead><tr><th scope="col">When</th><th scope="col">Map</th><th scope="col">Race</th><th scope="col">Grade</th><th scope="col" class="num">Saved</th><th scope="col" class="num">Time</th><th scope="col">Result</th><th scope="col">Stored</th></tr></thead><tbody></tbody></table></div>
+   <p class="dim small" id="a-tries-note" style="margin-top:8px"></p>
+  </div>
+
+  <div class="panel">
+   <h2>High scores</h2>
+   <p>Your best scores live in this browser's game save. Post them to put your name on the public boards.</p>
+   <div class="row" style="margin:12px 0 14px"><button class="btn small" id="a-post" type="button">Post my best scores</button></div>
+   <p class="msg" id="a-post-msg" aria-live="polite"></p>
+   <div class="scroll-x"><table class="ledger" id="a-scores"><caption class="sr">Your high scores</caption>
+    <thead><tr><th scope="col">Map</th><th scope="col">Race</th><th scope="col">Grade</th><th scope="col" class="num">Score</th><th scope="col">Posted</th></tr></thead><tbody></tbody></table></div>
+   <p class="dim small" id="a-scores-note" style="margin-top:8px"></p>
+  </div>
+
+  <div class="panel">
+   <h2>Leave or start over</h2>
+   <div class="row"><button class="btn" id="a-signout" type="button">Sign out</button><button class="btn danger" id="a-del" type="button">Delete everything</button></div>
+   <div class="acct-confirm" id="a-del-confirm" hidden style="margin-top:14px">
+    <p>This deletes your account, player name, logged attempts, posted scores, shared map links, votes and feedback, for good. Maps and progress saved in this browser stay here.</p>
+    <div class="row"><button class="btn danger" id="a-del-yes" type="button">Yes, delete everything</button><button class="btn" id="a-del-no" type="button">Keep it</button></div>
+   </div>
+   <p class="msg" id="a-out-msg" aria-live="polite"></p>
+  </div>
+ </div>
+</div></section></main>
+
+<footer><div class="wrap">
+ <nav class="fnav" aria-label="Footer"><a href="play/">Play</a><a href="builder/">Map builder</a><a href="lore.html">Lore</a><a href="globe.html">Globe</a><a href="maps.html">Community maps</a><a href="privacy.html">Privacy</a></nav>
+ <p>Rabblings is free to play and source available, by Luke83.</p>
+</div></footer>
+<script src="account.js"></script>
+<script src="site.js"></script>
+<script src="account-page.js"></script>
+</body>
+</html>

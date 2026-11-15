@@ -4,125 +4,136 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Rabblings: Marching Orders</title>
-<meta name="description" content="A free 16-bit style strategy game. Boss around tiny rabbles of goblins, frogs, imps and more, or sabotage a friend in 2 player.">
+<meta name="description" content="A free 16-bit style strategy game in a grim, darkly funny world. Boss around tiny rabbles of goblins, frog folk, imps and worse, build maps, or sabotage a friend.">
 <meta property="og:title" content="Rabblings: Marching Orders">
-<meta property="og:description" content="Tiny troops. Big trouble. A free 16-bit style strategy game with 8 races and a map builder.">
+<meta property="og:description" content="Tiny troops. Big trouble. A free 16-bit style strategy game with 8 races, Free Play and a map builder.">
 <meta property="og:image" content="https://rabblings.com/img/logo.png">
 <link rel="icon" href="img/home-goblin-0.png">
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
-<link rel="preload" href="fonts/silkscreen-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=IM+Fell+English:ital@0;1&family=Pirata+One&display=swap">
 <link rel="stylesheet" href="style.css">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#120a18">
+<meta name="theme-color" content="#100c09">
 </head>
 <body>
+<a class="skip" href="#main">Skip to the page</a>
 <header class="top"><div class="wrap">
- <a class="brand" href="#top">RABBLINGS</a>
- <nav class="nav" aria-label="Main"><a href="#races">Races</a><a href="#game">The game</a><a href="#updates">Updates</a><a href="play/">Play</a><a href="builder/">Builder</a><button class="acct-btn" id="acct-btn" type="button">Sign in</button></nav>
+ <a class="brand" href="./"><img class="px" src="img/home-goblin-0.png" width="30" height="27" alt="">Rabblings</a>
+ <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+ <nav class="nav" id="nav" aria-label="Main"><a class="play" href="#play">Play</a><a href="lore.html">Lore</a><a href="lore.html#peoples">Races</a><a href="globe.html">Globe</a><a href="maps.html">Community maps</a><a href="#news">News</a><button class="acct-btn" id="acct-btn" type="button">Sign in</button></nav>
 </div></header>
-<main id="top">
-<div class="hero">
- <div class="wrap">
-  <h1 style="margin:0"><img class="logo" src="img/logo.png" width="330" height="100" alt="Rabblings"></h1>
-  <p class="sub-name">Marching Orders</p>
-  <p class="tag">Tiny troops. Big trouble.</p>
-  <p class="lead">Lead a marching rabble of goblins, frogs, imps and worse. Dig, build and blow your way home, or sabotage a friend.</p>
-  <div class="cta"><a class="btn go" href="play/">PLAY NOW</a><a class="btn" href="builder/">MAP BUILDER</a><button class="btn" id="install" type="button" hidden>INSTALL</button></div>
-  <p class="install-tip" id="install-tip" hidden>Play offline: install Rabblings to your desktop or home screen.</p>
+
+<main id="main">
+<section class="title-page"><div class="wrap">
+ <div class="title-grid">
+  <div class="title-copy">
+   <h1><img class="logo" src="img/logo.png" width="330" height="100" alt="Rabblings"></h1>
+   <p class="sub">Marching Orders</p>
+   <p class="lead">Tiny troops, big trouble. Lead a marching rabble of goblins, frog folk, imps and worse. Dig, build and blow your way home, or sabotage a friend on the same screen.</p>
+   <div class="row"><a class="btn go" href="play/">Play now</a><a class="btn" href="builder/">Map builder</a><button class="btn" id="install" type="button" hidden>Install</button></div>
+   <p class="fine" id="install-tip" hidden>Play offline: install Rabblings to your desktop or home screen.</p>
+   <p class="fine">Free in your browser on phone, tablet or computer. Touch, mouse or keyboard.</p>
+  </div>
+  <figure class="plate dark hero-plate">
+   <div class="art"><img class="px" src="img/bg-goblin.png" width="480" height="224" alt="A dusk bog with dead trees and toadstools, drawn in the game's pixel art"><span class="banner" data-art="hero-banner.webp" data-alt=""></span></div>
+   <figcaption>A bog at dusk, where most marches begin. <b>PL. I</b></figcaption>
+  </figure>
  </div>
  <div class="march" id="march" aria-hidden="true"></div>
-</div>
+</div></section>
 
-<section class="races" id="races"><div class="wrap">
- <h2>Pick your rabble</h2>
- <p class="sub">Eight races, two clans each, and every one plays differently. Take a look.</p>
- <div class="show" id="show" tabindex="0" role="group" aria-roledescription="slideshow" aria-label="Playable races">
-  <div class="left"><div class="shot"><img id="r-shot" alt="" width="480" height="270"></div>
-   <div class="stage" id="r-stage"><div class="sprite" id="r-sprite" role="img" aria-label="Walking trooper"></div><img class="home" id="r-home" alt="" width="52" height="46"></div></div>
-  <div class="info" aria-live="polite">
-   <h3 id="r-name"></h3>
-   <p class="like" id="r-like"></p>
-   <ul class="pm"><li class="good" id="r-good"></li><li class="bad" id="r-bad"></li><li id="r-world"></li></ul>
-   <ul class="skills" id="r-skills"></ul>
-   <div class="clans" id="r-clans"></div>
-   <p class="perk" id="r-perk"></p>
+<section id="play"><div class="wrap">
+ <div class="sec-head"><p class="kicker">Where to begin</p><h2>Take up your orders</h2><p>Everything runs in your browser and keeps working offline after the first visit. Your maps and progress stay on your device unless you share them.</p></div>
+ <div class="hub">
+  <a class="door" href="play/"><span class="icon"><img src="img/home-goblin-0.png" width="52" height="46" alt=""><img src="img/home-goblin-1.png" width="52" height="46" alt=""></span><h3>Campaign and sabotage</h3><p>Each race has its own run of maps, getting larger and nastier as you go. Or race a friend, or the computer, and wreck their route.</p><span class="go-line">Play &rarr; New Game</span></a>
+  <a class="door" href="play/"><span class="icon"><img src="img/home-imp-0.png" width="52" height="46" alt=""><img src="img/home-fairy-0.png" width="52" height="46" alt=""></span><h3>Free Play</h3><p>A growing pile of standalone maps in four grades, from Pushover to Carnage. Pick any race that can solve the map, and switch each time.</p><span class="go-line">Play &rarr; New Game &rarr; Free Play</span></a>
+  <a class="door" href="play/"><span class="icon"><img src="img/home-rat-0.png" width="52" height="46" alt=""><img src="img/home-shroom-0.png" width="52" height="46" alt=""></span><h3>Custom maps and packs</h3><p>Play maps you built, packs from friends, or a pack link straight from the community maps list.</p><span class="go-line">Play &rarr; Map Builder &rarr; My Maps</span></a>
+  <a class="door" href="builder/"><span class="icon"><img src="img/home-dwarf-0.png" width="52" height="46" alt=""><img src="img/home-bone-0.png" width="52" height="46" alt=""></span><h3>Map builder</h3><p>Paint terrain or generate a starting point, add traps, critters and triggers, then link maps into a pack.</p><span class="go-line">Open the builder</span></a>
+  <a class="door" href="builder/#neolemmix"><span class="icon"><img src="img/home-swamp-0.png" width="52" height="46" alt=""><img src="img/home-swamp-1.png" width="52" height="46" alt=""></span><h3>Your NeoLemmix levels</h3><p>Got NeoLemmix? Bring your own level packs across and replay them with Rabblings races and art.</p><span class="go-line">Import levels</span></a>
+ </div>
+</div></section>
+
+<section class="band" id="peoples"><div class="wrap">
+ <div class="sec-head"><p class="kicker">From the scholar's journals</p><h2>Eight peoples, none of them nice</h2><p>Two clans each, and every one marches differently. Open a page to read what the wandering scholar wrote about them.</p></div>
+ <div class="races-grid">
+  <a class="race-tile leaf" href="journal/goblin.html"><span class="leaf-in"><span class="walker sm" style="background-image:url(img/walk-goblin-0.png)"></span><img src="img/home-goblin-0.png" width="52" height="46" alt=""></span><b>Goblins</b><span>Cheap, sneaky swarm</span></a>
+  <a class="race-tile leaf" href="journal/swamp.html"><span class="leaf-in"><span class="walker sm" style="background-image:url(img/walk-swamp-0.png)"></span><img src="img/home-swamp-0.png" width="52" height="46" alt=""></span><b>Swampfolk</b><span>Leaping frog people</span></a>
+  <a class="race-tile leaf" href="journal/imp.html"><span class="leaf-in"><span class="walker sm" style="background-image:url(img/walk-imp-0.png)"></span><img src="img/home-imp-0.png" width="52" height="46" alt=""></span><b>Imps</b><span>Fire-loving pranksters</span></a>
+  <a class="race-tile leaf" href="journal/fairy.html"><span class="leaf-in"><span class="walker sm" style="background-image:url(img/walk-fairy-0.png)"></span><img src="img/home-fairy-0.png" width="52" height="46" alt=""></span><b>Fairies</b><span>Winged, flighty tricksters</span></a>
+  <a class="race-tile leaf" href="journal/dwarf.html"><span class="leaf-in"><span class="walker sm" style="background-image:url(img/walk-dwarf-0.png)"></span><img src="img/home-dwarf-0.png" width="52" height="46" alt=""></span><b>Dwarves</b><span>Grumpy, honour-bound tunnellers</span></a>
+  <a class="race-tile leaf" href="journal/rat.html"><span class="leaf-in"><span class="walker sm" style="background-image:url(img/walk-rat-0.png)"></span><img src="img/home-rat-0.png" width="52" height="46" alt=""></span><b>Ratfolk</b><span>Scurrying inventors</span></a>
+  <a class="race-tile leaf" href="journal/bone.html"><span class="leaf-in"><span class="walker sm" style="background-image:url(img/walk-bone-0.png)"></span><img src="img/home-bone-0.png" width="52" height="46" alt=""></span><b>Skeletons</b><span>Will not stay dead</span></a>
+  <a class="race-tile leaf" href="journal/shroom.html"><span class="leaf-in"><span class="walker sm" style="background-image:url(img/walk-shroom-0.png)"></span><img src="img/home-shroom-0.png" width="52" height="46" alt=""></span><b>Mushroom Folk</b><span>Strange fungus people</span></a>
+ </div>
+ <div class="row" style="margin-top:24px"><a class="btn" href="lore.html">Read the lore</a><a class="btn" href="globe.html">Turn the globe</a></div>
+</div></section>
+
+<section id="news"><div class="wrap narrow">
+ <div class="sec-head"><p class="kicker">Patch notes and news</p><h2>Dispatches</h2></div>
+ <div class="news">
+  <article class="entry">
+   <time datetime="2026-11-15">15 Nov<small>2026</small></time>
+   <div><h3>Free Play opens, the maps wake up, and new music</h3>
+    <p>Free Play is in: 20 standalone maps from Pushover to Carnage, each playable with any race that can actually solve it. Many more are on the way.</p>
+    <ul>
+     <li>Maps are getting livelier: critters lurk on ledges, wildcard beasts drop in, and the new biomes (frost, dunes, giant forest, vortex lands, shattered borders and temple ruins) each play by their own rules.</li>
+     <li>New music tracks for the march. Pick one, or let them rotate, in Settings.</li>
+     <li>A new website, laid out as the wandering scholar's journals: lore, a page and field study for every race, a world globe, community map links and a feedback form for testers.</li>
+    </ul></div>
+  </article>
+  <article class="entry">
+   <time datetime="2026-11">Nov<small>2026</small></time>
+   <div><h3>Earlier this month</h3>
+    <details class="older"><summary>Show the older notes</summary><ul>
+     <li>Install Rabblings to your desktop or home screen and play offline. NeoLemmix levels have their own menu.</li>
+     <li>The first Rabblings game has a name: Marching Orders.</li>
+     <li>Spells arrive, and the game works offline after your first visit.</li>
+     <li>Decor stamps and image import for map builders.</li>
+     <li>rabblings.com goes live, with the game and map builder on their own pages.</li>
+     <li>New map builder with a side menu, setup pages, object previews and tooltips.</li>
+     <li>Six new terrain layouts, from Floating Islands to Twin Peaks.</li>
+     <li>All 8 races are playable, and each race has its own home.</li>
+    </ul></details></div>
+  </article>
+ </div>
+</div></section>
+
+<section class="band" id="community"><div class="wrap">
+ <div class="spread">
+  <div>
+   <div class="sec-head"><p class="kicker">Made by players</p><h2>Community maps</h2><p>Share a link to a map or pack you keep on your own drive, and give a thumbs up to the ones that ruined your evening in the right way.</p></div>
+   <div id="top-maps" class="dim">The list opens once the first maps are shared.</div>
+   <div class="row" style="margin-top:18px"><a class="btn" href="maps.html">Browse and share maps</a></div>
+  </div>
+  <div class="panel" id="feedback">
+   <h2>Tester feedback</h2>
+   <p class="dim small" id="fb-who" style="margin-bottom:12px">Found a bug, a dull map or a better idea? Tell us.</p>
+   <form class="form" id="fb-form">
+    <fieldset class="radios"><legend class="label">What is it about?</legend>
+     <label><input type="radio" name="fb-kind" value="bug" checked> A bug</label>
+     <label><input type="radio" name="fb-kind" value="map"> A map</label>
+     <label><input type="radio" name="fb-kind" value="idea"> An idea</label>
+     <label><input type="radio" name="fb-kind" value="other"> Other</label>
+    </fieldset>
+    <div class="field"><label for="fb-text">What happened, or what would you change?</label><textarea id="fb-text" maxlength="4000" required placeholder="Which map, which race, what you did, what went wrong."></textarea></div>
+    <button class="btn" id="fb-send" type="submit">Send feedback</button>
+    <p class="msg" id="fb-msg" aria-live="polite"></p>
+    <div id="fb-copywrap" class="form" hidden><pre class="copybox" id="fb-out"></pre><button class="btn small" id="fb-copy" type="button">Copy text</button></div>
+   </form>
   </div>
  </div>
- <div class="ctrl">
-  <button class="arrow" id="prev" type="button" aria-label="Previous race">&lt;</button>
-  <div class="dots" id="dots"></div>
-  <button class="arrow" id="next" type="button" aria-label="Next race">&gt;</button>
- </div>
-</div></section>
-
-<section id="game"><div class="wrap">
- <h2>Small soldiers. Bad plans.</h2>
- <div class="grid">
-  <article class="card"><h3>Guide the march</h3><p>Your troops walk on their own. Hand out skills at the right moment and get enough of them home.</p></article>
-  <article class="card"><h3>2 player sabotage</h3><p>Race a friend on one screen. Steal their troops, wreck their route and enjoy the shouting.</p></article>
-  <article class="card"><h3>Swords and spells</h3><p>Arm your rabble, clear nests and golems, and save rare magic for when it counts. Campaign mana is gone once spent.</p></article>
-  <article class="card"><h3>Grumpy little morale</h3><p>Lose too many and your troops answer back, refuse orders or sit down in protest.</p></article>
-  <article class="card"><h3>Build your own maps</h3><p>Paint terrain or generate a starting point, add traps and triggers, then share the code.</p></article>
-  <article class="card"><h3>Your NeoLemmix levels</h3><p>Got NeoLemmix? Bring your level packs into Rabblings and replay them with our races. <a href="builder/#neolemmix">Import NeoLemmix levels</a>.</p></article>
-  <article class="card"><h3>Classic mode</h3><p>Want the pure old-school puzzle? Switch off the morale and the chatter.</p></article>
- </div>
-</div></section>
-
-<section class="upd" id="updates"><div class="wrap">
- <h2>Latest updates</h2>
- <ul class="log">
-  <li><time datetime="2026-11">Nov 2026</time><span>Install Rabblings to your desktop or home screen and play offline. NeoLemmix levels now have their own menu.</span></li>
-  <li><time datetime="2026-11">Nov 2026</time><span>The first Rabblings game now has a name: Marching Orders.</span></li>
-  <li><time datetime="2026-11">Nov 2026</time><span>Spells arrive, and the game now works offline after your first visit.</span></li>
-  <li><time datetime="2026-11">Nov 2026</time><span>Decor stamps and image import for map builders.</span></li>
-  <li><time datetime="2026-11">Nov 2026</time><span>rabblings.com is live, with the game and map builder on their own pages.</span></li>
-  <li><time datetime="2026-11">Nov 2026</time><span>New map builder with a side menu, setup pages, object previews and tooltips.</span></li>
-  <li><time datetime="2026-11">Nov 2026</time><span>Six new terrain layouts, from Floating Islands to Twin Peaks.</span></li>
-  <li><time datetime="2026-11">Nov 2026</time><span>All 8 races are playable, and each race has its own home.</span></li>
- </ul>
 </div></section>
 </main>
-<dialog class="acct" id="acct" aria-labelledby="acct-title">
- <div class="acct-head"><h2 id="acct-title">Your account</h2><button class="acct-x" id="acct-close" type="button" aria-label="Close">X</button></div>
- <div id="acct-wait"><p>One moment...</p></div>
- <div id="acct-out" hidden>
-  <p>Sign in or make an account with just your email. We send you a link, so there is no password to remember.</p>
-  <form id="acct-send" class="acct-form">
-   <label for="acct-addr">Email address</label>
-   <input id="acct-addr" type="email" autocomplete="email" required placeholder="you@example.com">
-   <button class="btn go" id="acct-send-btn" type="submit">SEND MY LINK</button>
-  </form>
-  <p class="acct-msg" id="acct-out-msg" aria-live="polite"></p>
- </div>
- <div id="acct-sent" hidden>
-  <p>Check your email. We sent a sign-in link to <strong id="acct-sent-to"></strong>.</p>
-  <p class="acct-small">Open it on this device to sign in here. It works once. If nothing arrives in a few minutes, check your spam folder.</p>
-  <button class="btn" id="acct-again" type="button">USE ANOTHER EMAIL</button>
- </div>
- <div id="acct-in" hidden>
-  <p>Signed in as <strong id="acct-email"></strong>.</p>
-  <form id="acct-save" class="acct-form">
-   <label for="acct-name">Player name</label>
-   <input id="acct-name" type="text" maxlength="24" autocomplete="nickname" placeholder="Shown in every Rabblings game">
-   <button class="btn go" type="submit">SAVE NAME</button>
-  </form>
-  <p class="acct-msg" id="acct-in-msg" aria-live="polite"></p>
-  <div class="acct-row"><button class="btn" id="acct-signout" type="button">SIGN OUT</button><button class="btn acct-danger" id="acct-del" type="button">DELETE MY ACCOUNT</button></div>
-  <div class="acct-confirm" id="acct-del-confirm" hidden>
-   <p>Delete your account and player name for good? Maps saved in this browser stay here.</p>
-   <div class="acct-row"><button class="btn acct-danger" id="acct-del-yes" type="button">YES, DELETE IT</button><button class="btn" id="acct-del-no" type="button">KEEP IT</button></div>
-  </div>
- </div>
- <p class="acct-small"><a href="privacy.html">What we store, and why</a></p>
-</dialog>
+
 <footer><div class="wrap">
- <p>Rabblings: Marching Orders is free to play and source available, by Luke83.</p>
- <p><a href="https://github.com/lxcom83/rabblings">Source on GitHub</a> · <a href="https://github.com/lxcom83/rabblings/blob/main/LICENSE.md">Licence</a></p>
- <p>Your saved maps stay in your browser unless you share them. <a href="privacy.html">Privacy</a></p>
+ <nav class="fnav" aria-label="Footer"><a href="play/">Play</a><a href="builder/">Map builder</a><a href="lore.html">Lore</a><a href="globe.html">Globe</a><a href="maps.html">Community maps</a><a href="account.html">Account</a><a href="privacy.html">Privacy</a></nav>
+ <p>Rabblings: Marching Orders is free to play and source available, by Luke83. <a href="https://github.com/lxcom83/rabblings">Source on GitHub</a> &middot; <a href="https://github.com/lxcom83/rabblings/blob/main/LICENSE.md">Licence</a></p>
+ <p class="colophon">Your maps and progress stay in your browser unless you share them.</p>
 </div></footer>
 <script src="races.js"></script>
-<script src="site.js"></script>
 <script src="account.js"></script>
+<script src="site.js"></script>
 <script>if('serviceWorker'in navigator)addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});</script>
 </body>
 </html>
