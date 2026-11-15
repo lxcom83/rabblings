@@ -332,8 +332,6 @@ footer .colophon{font:italic 400 16px var(--fell);color:var(--ink-faint)}
 
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.trooper,.walker{animation:none}.trooper{left:calc(var(--i)*6%)}}
 @media (max-width:420px){body{font-size:18px}.btn.go{font-size:23px}.hand{font-size:20px}}
-.gmark.name{background:none;border:0;min-height:0;padding:2px;pointer-events:none;font:italic 400 15px/1 var(--fell);color:#efe3c6;text-shadow:0 0 3px #000,0 0 6px #000,0 1px 0 #000}
-.gmark.land{font:400 12px/1 var(--fell);letter-spacing:.14em;text-transform:uppercase}
 .globe-tools .btn[aria-pressed=false]{color:var(--ink-faint)}
 #g-marks{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 #g-marks button{pointer-events:auto}

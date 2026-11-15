@@ -64,13 +64,13 @@
   if(T>.6){if(M<.4)return'desert';if(M<.48)return kind==='ash'?'badland':'steppe';return M>.58?'jungle':'forest';}
   if(M<.4)return kind==='ash'?'badland':'steppe';if(M<.48)return'heath';return M>.58?'deepwood':'forest';}
  // ---------- paint the surface (smaller on phones, where the paint is the slow part) ----------
- var small=stage.clientWidth<600,TW=small?1024:2048,TH=TW/2,HGT;
- function paint(){var cv=document.createElement('canvas');cv.width=TW;cv.height=TH;var x=cv.getContext('2d'),img=x.createImageData(TW,TH),a=img.data;var ec=document.createElement('canvas');ec.width=TW;ec.height=TH;var ex=ec.getContext('2d');ex.fillStyle='#000';ex.fillRect(0,0,TW,TH);var ei=ex.getImageData(0,0,TW,TH),ea=ei.data;
+ var small=stage.clientWidth<600||Math.min(screen.width,screen.height)<820||(navigator.hardwareConcurrency||8)<=4,TW=small?1024:2048,TH=TW/2,HGT;
+ function* paint(){var cv=document.createElement('canvas');cv.width=TW;cv.height=TH;var x=cv.getContext('2d'),img=x.createImageData(TW,TH),a=img.data;var ec=document.createElement('canvas');ec.width=TW;ec.height=TH;var ex=ec.getContext('2d');ex.fillStyle='#000';ex.fillRect(0,0,TW,TH);var ei=ex.getImageData(0,0,TW,TH),ea=ei.data;
   var LW=TW/2,LH=TH/2,LN=LW*LH,LH_=new Float32Array(LN),LM=new Float32Array(LN),LR=new Float32Array(LN),LQ=new Float32Array(LN),BC=new Float32Array(LN*3),i,j,k;
   for(j=0;j<LH;j++){var th=(j+.5)/LH*Math.PI,st=Math.sin(th),ct=Math.cos(th);for(i=0;i<LW;i++){var ph=(i+.5)/LW*Math.PI*2,s=sample(-Math.cos(ph)*st,ct,Math.sin(ph)*st);k=i+j*LW;LH_[k]=s.e;LR[k]=s.ridge;LM[k]=s.mtn;LQ[k]=s.n2;
    if(s.e>0){var kd=LANDS[s.ci].kind,b=biome(s.e,s.mtn,s.T,s.M,s.vol,kd),col=(kd==='ash'&&WOOD[b])?[70,62,50]:BIO[b],j2=(s.n2-.5)*(WOOD[b]?.5:.25);col=col.map(function(v){return v*(1+j2);});
     if(s.mtn>0&&b!=='ice'){var tgt=kd==='ash'?[46,40,38]:s.T<.28?BIO.ice:BIO.rock,w=Math.min(1,s.mtn*1.3);col=col.map(function(v,q){return v+(tgt[q]-v)*w;});}
-    BC[k*3]=col[0];BC[k*3+1]=b==='ash'?-Math.max(1,col[1]):col[1];BC[k*3+2]=col[2];}}}
+    BC[k*3]=col[0];BC[k*3+1]=b==='ash'?-Math.max(1,col[1]):col[1];BC[k*3+2]=col[2];}}if(j%4===3)yield 0;}
   // soften biome borders a little
   var LB=new Float32Array(LN*3);for(j=0;j<LH;j++)for(i=0;i<LW;i++){k=i+j*LW;var r=0,g=0,bb=0,n=0;for(var dj=-1;dj<=1;dj++)for(var di=-1;di<=1;di++){var kk=((i+di+LW)%LW)+Math.max(0,Math.min(LH-1,j+dj))*LW;if(LH_[kk]<=0)continue;r+=BC[kk*3];g+=Math.abs(BC[kk*3+1]);bb+=BC[kk*3+2];n++;}if(n){LB[k*3]=r/n;LB[k*3+1]=(BC[k*3+1]<0?-1:1)*g/n;LB[k*3+2]=bb/n;}}
   // full size: smooth those out and add fine coastline and ground detail
@@ -80,7 +80,7 @@
     var d=(vnoise(dx*48+7,ct2*48,dz*48)-.5)*.6+(vnoise(dx*110,ct2*110+5,dz*110)-.5)*.4;
     HGT[k]=(LH_[k00]*w00+LH_[k10]*w10+LH_[k01]*w01+LH_[k11]*w11)+d*.07;MT[k]=Math.max(0,(LM[k00]*w00+LM[k10]*w10+LM[k01]*w01+LM[k11]*w11)+d*.12);RG[k]=LR[k00]*w00+LR[k10]*w10+LR[k01]*w01+LR[k11]*w11;N2[k]=(LQ[k00]*w00+LQ[k10]*w10+LQ[k01]*w01+LQ[k11]*w11)+d*.12;
     var kn=(tx<.5?(ty<.5?k00:k01):(ty<.5?k10:k11)),r2=0,g2=0,b2=0,n2=0,KS=[k00,k10,k01,k11],WS=[w00,w10,w01,w11];for(var q=0;q<4;q++){var kq=KS[q];if(LB[kq*3]||LB[kq*3+2]){r2+=LB[kq*3]*WS[q];g2+=Math.abs(LB[kq*3+1])*WS[q];b2+=LB[kq*3+2]*WS[q];n2+=WS[q];}}
-    if(n2){var m=1+d*.3;B2[k*3]=r2/n2*m;B2[k*3+1]=(LB[kn*3+1]<0?-1:1)*g2/n2*m;B2[k*3+2]=b2/n2*m;}}}
+    if(n2){var m=1+d*.3;B2[k*3]=r2/n2*m;B2[k*3+1]=(LB[kn*3+1]<0?-1:1)*g2/n2*m;B2[k*3+2]=b2/n2*m;}}if(j%16===15)yield 0;}
   var at=function(i,j){return HGT[((i+TW)%TW)+Math.max(0,Math.min(TH-1,j))*TW];};
   for(j=0;j<TH;j++)for(i=0;i<TW;i++){k=i+j*TW;var e=HGT[k],p=k*4,cl;
    if(e<=0){var near=0;for(var rr=1;rr<=12&&!near;rr++)if(at(i+rr,j)>0||at(i-rr,j)>0||at(i,j+rr)>0||at(i,j-rr)>0)near=1-rr/13;var deep=Math.min(1,-e*2.2),wv=(N2[k]-.5)*10;cl=[22+12*near-6*deep+wv,34+14*near-8*deep+wv,40+12*near-8*deep+wv];}
@@ -88,7 +88,7 @@
     var sh=(at(i-1,j-1)+MT[((i-1+TW)%TW)+Math.max(0,j-1)*TW]*.6-at(i+1,j+1)-MT[((i+1)%TW)+Math.min(TH-1,j+1)*TW]*.6),shade=Math.max(-.6,Math.min(.6,sh*9));cl=[cl[0]*(1+shade*.5),cl[1]*(1+shade*.5),cl[2]*(1+shade*.5)];
     if(isAsh&&Math.abs(RG[k]-.9)<.016&&e>.04&&e<.4){cl=[255,120,32];ea[p]=255;ea[p+1]=110;ea[p+2]=24;}
     if(at(i+1,j)<=0||at(i-1,j)<=0||at(i,j+1)<=0||at(i,j-1)<=0)cl=[18,12,16];}
-   a[p]=cl[0];a[p+1]=cl[1];a[p+2]=cl[2];a[p+3]=255;}
+   a[p]=cl[0];a[p+1]=cl[1];a[p+2]=cl[2];a[p+3]=255;if(i===TW-1&&j%32===31)yield 0;}
   x.putImageData(img,0,0);ex.putImageData(ei,0,0);
   // rifts: cracks of magic that run out from the vortex across the seas and stop where they reach land
   var rc=document.createElement('canvas');rc.width=TW;rc.height=TH;var rx=rc.getContext('2d');rx.fillStyle='#000';rx.fillRect(0,0,TW,TH);rx.globalCompositeOperation='lighten';rx.lineCap='round';rx.lineJoin='round';
@@ -121,7 +121,9 @@
  var ISL=[],vortexParts=null,riftMat=null,Y=new THREE.Vector3(0,1,0),q=new THREE.Quaternion();
  // the vortex is violet, but every so often it shifts to another colour for a while, then drifts back
  var VCOL={base:new THREE.Color(0xc896f0),cur:new THREE.Color(0xc896f0),list:[0xc23812,0x48c8b4,0xe0b448,0x9ad048,0x6a8ce8,0xe8e0f0],from:new THREE.Color(),to:new THREE.Color(0xc896f0),t:1,dur:1,next:8};
- var P=paint(),tex=P[0],emi=P[1],rift=P[2];
+ pump(paint(),function(P){try{finish(P);}catch(e){console.error(e);status.textContent='The globe could not be drawn here, so here is a still picture of it.';}});
+ function pump(gen,done){(function step(){var t=performance.now(),r;while(!(r=gen.next()).done){if(performance.now()-t>24){setTimeout(step,0);return;}}done(r.value);})();}
+ function finish(P){var tex=P[0],emi=P[1],rift=P[2];
  var Tt=new THREE.CanvasTexture(tex),E=new THREE.CanvasTexture(emi);Tt.anisotropy=ren.capabilities.getMaxAnisotropy();
  var g=new THREE.SphereGeometry(1,small?200:320,small?100:160),PA=g.attributes.position,v=new THREE.Vector3();for(i=0;i<PA.count;i++){v.fromBufferAttribute(PA,i).normalize();v.multiplyScalar(1+heightAt(v));PA.setXYZ(i,v.x,v.y,v.z);}g.computeVertexNormals();
  world.add(new THREE.Mesh(g,new THREE.MeshToonMaterial({map:Tt,gradientMap:grad,emissive:0xffffff,emissiveMap:E,emissiveIntensity:.75})));
@@ -168,13 +170,13 @@
   for(i=0;i<70;i++){var v3=new THREE.Vector3(R()-.5,R()-.5,R()-.5).normalize();if(away(v3))drift(v3,.009+R()*.014,.035+R()*.09);}})();
  function stepIslands(t,dt){for(var i=0;i<ISL.length;i++){var o=ISL[i],dir;if(!reduce)o.a+=o.w*dt;
    if(o.mode==='v'){var c=Math.cos(o.d),s=Math.sin(o.d);dir=VX.clone().multiplyScalar(c).addScaledVector(T1,Math.cos(o.a)*s).addScaledVector(T2,Math.sin(o.a)*s).normalize();}else dir=o.st.clone().applyAxisAngle(o.ax,o.a);
-   var alt=o.alt+Math.sin(t*.7+o.bob)*.008;if(o.sink){var k=(Math.sin(t*.15+o.bob)+1)/2;alt=Math.max(-.02,o.alt*k*k*1.2-.01);}
-   o.mesh.position.copy(dir).multiplyScalar(1+alt);q.setFromUnitVectors(Y,dir);o.mesh.quaternion.copy(q);o.mesh.rotateY(t*o.spin+o.bob);}}
+   var alt=o.alt+(reduce?0:Math.sin(t*.7+o.bob)*.008);if(o.sink&&!reduce){var k=(Math.sin(t*.15+o.bob)+1)/2;alt=Math.max(-.02,o.alt*k*k*1.2-.01);}
+   o.mesh.position.copy(dir).multiplyScalar(1+alt);q.setFromUnitVectors(Y,dir);o.mesh.quaternion.copy(q);o.mesh.rotateY((reduce?0:t*o.spin)+o.bob);}}
 
  // ---------- markers and the info card ----------
  var layer=document.getElementById('g-marks'),marks=[],cur=null;
  function mark(lon,lat,cls,html,label,onclick){var b=document.createElement('button');b.type='button';b.addEventListener('click',onclick);b.setAttribute('aria-expanded','false');
-  b.className='gmark '+cls;b.innerHTML=html;b.setAttribute('aria-label',label);b.title=label;layer.appendChild(b);marks.push({b:b,v:dirLL(lon,lat)});return b;}
+  b.className='gmark '+cls;b.innerHTML=html;b.setAttribute('aria-label',label);b.title=label;b.addEventListener('pointerenter',function(){if(spin){spin=false;sb.setAttribute('aria-pressed','false');}});b.addEventListener('focus',function(){if(spin){spin=false;sb.setAttribute('aria-pressed','false');}});layer.appendChild(b);marks.push({b:b,v:dirLL(lon,lat)});return b;}
  HOMES.forEach(function(h){var face=STUDIES[h.k]?'<img src="img/journal/race-'+h.k+'-head.webp" width="160" height="160" alt="">':'<span class="dot"></span>';
   var b=mark(h.at[0],h.at[1],'home',face,'Homeland of the '+h.n,function(){open(b,h.n,['Home: '+h.home+'.','Where the '+h.n+' live on the globe is not settled in the lore yet. This marker is a provisional placement for the website.'],'journal/'+h.k+'.html');});});
  var VINFO=['A vast magical vortex at a fixed point on the globe, reaching high into space. It formed around the time of the Great Disappointment.','It channels and amplifies magic, but is not its only source. It fluctuates without warning, with flashes, hums and sudden shifts in the floating islands.','No one is known to have reached its centre and returned.'];
@@ -189,7 +191,7 @@
  // ---------- controls: drag to turn, pinch or wheel to zoom, tap an island or the vortex ----------
  var yaw=ROT0,pitch=.21,vy=0,vp=0,spin=!reduce,ptr={},drag=null,pinch=null,down=null;
  var sb=document.getElementById('g-spin');sb.setAttribute('aria-pressed',spin);sb.addEventListener('click',function(){spin=!spin;sb.setAttribute('aria-pressed',spin);});
- document.getElementById('g-reset').addEventListener('click',function(){yaw=ROT0;pitch=.21;dist=stage.clientWidth<600?4.6:4.2;vy=vp=0;card.hidden=true;});
+ document.getElementById('g-reset').addEventListener('click',function(){yaw=ROT0;pitch=.21;dist=stage.clientWidth<600?4.6:4.2;vy=vp=0;if(!card.hidden)close();});
  cnv.addEventListener('pointerdown',function(e){ptr[e.pointerId]={x:e.clientX,y:e.clientY};down=[e.clientX,e.clientY];cnv.setPointerCapture(e.pointerId);var k=Object.keys(ptr);if(k.length===1)drag={x:e.clientX,y:e.clientY};if(k.length===2){var a=ptr[k[0]],b=ptr[k[1]];pinch={d:Math.hypot(a.x-b.x,a.y-b.y),dist:dist};drag=null;}spin=false;sb.setAttribute('aria-pressed','false');});
  cnv.addEventListener('pointermove',function(e){if(!ptr[e.pointerId])return;ptr[e.pointerId]={x:e.clientX,y:e.clientY};var k=Object.keys(ptr);
   if(pinch&&k.length===2){var a=ptr[k[0]],b=ptr[k[1]];dist=Math.max(1.6,Math.min(9,pinch.dist*pinch.d/Math.max(20,Math.hypot(a.x-b.x,a.y-b.y))));return;}
@@ -212,12 +214,12 @@
   if(spin)yaw+=dt*.06;if(!drag){yaw+=vy;pitch=Math.max(-1.3,Math.min(1.3,pitch+vp));vy*=.92;vp*=.92;}
   world.rotation.set(pitch,yaw,0,'XYZ');cam.position.set(0,0,dist);cam.lookAt(0,0,0);
   if(!reduce)mist.rotation.y+=dt*.012;
-  var vp_=vortexParts;vp_.parts.forEach(function(m){m.material.map.offset.x+=dt*m.userData.sp*.25;m.material.map.offset.y-=dt*.08;});
+  var vp_=vortexParts;if(!reduce)vp_.parts.forEach(function(m){m.material.map.offset.x+=dt*m.userData.sp*.25;m.material.map.offset.y-=dt*.08;});
   if(!reduce){VCOL.next-=dt;if(VCOL.next<=0){var away=VCOL.to.equals(VCOL.base);VCOL.from.copy(VCOL.cur);VCOL.to.set(away?VCOL.list[Math.random()*VCOL.list.length|0]:VCOL.base);VCOL.t=0;VCOL.dur=1.5+Math.random()*2;VCOL.next=away?4+Math.random()*5:10+Math.random()*14;vp_.flick=1;}
    if(VCOL.t<1){VCOL.t=Math.min(1,VCOL.t+dt/VCOL.dur);VCOL.cur.copy(VCOL.from).lerp(VCOL.to,VCOL.t*VCOL.t*(3-2*VCOL.t));vp_.parts.forEach(function(m){m.material.color.copy(VCOL.cur);});vLight.color.copy(VCOL.cur);}
    if(Math.random()<dt*.5)vp_.flick=1;}
-  vp_.flick*=.9;var f=1+vp_.flick*1.4+Math.sin(t*2.3)*.12;vp_.parts.forEach(function(m){m.material.opacity=Math.min(1,.6*f);});vLight.intensity=1.4*f;
-  riftMat.uniforms.time.value=t;
+  vp_.flick*=.9;var f=reduce?1:1+vp_.flick*1.4+Math.sin(t*2.3)*.12;vp_.parts.forEach(function(m){m.material.opacity=Math.min(1,.6*f);});vLight.intensity=1.4*f;
+  riftMat.uniforms.time.value=reduce?0:t;
   stepIslands(t,dt);
   ren.render(scene,cam);
   world.updateMatrixWorld();camDir.copy(cam.position).normalize();
@@ -227,5 +229,5 @@
  if(still)still.hidden=true;
  status.textContent='Drag to turn the world. Pinch or scroll to zoom. Tap a portrait, a floating island or the vortex.';
  requestAnimationFrame(frame);
- window.__globeReady=true;}
+ window.__globeReady=true;}}
 })();
