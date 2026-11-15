@@ -276,5 +276,8 @@ function buildEntrance(name){const T=THEME[name],R=T.ramp,[sky,sx]=ditherSky(VW,
  layer(.5,x=>{ridge(x,236,8,4.4,'#141216','#2b2226');for(let i=0;i<LW;i+=5){if((i*7)%23<9)continue;const h=6+(i*13)%7;x.fillStyle='#1d1a1e';x.fillRect(i,236-h,2,h);x.fillRect(i,236-h-1,1,1);}for(let k=0;k<3;k++){const a=40+k*170+r()*40|0;x.fillStyle='#1d1a1e';x.fillRect(a,206,1,30);x.fillStyle='#8e897a';x.fillRect(a-2,202,5,4);x.fillStyle='#070708';x.fillRect(a-1,203,1,1);x.fillRect(a+1,203,1,1);}});
  return{sky,L};}
 const BACKDROP={};function backdrop(n,under){const u=isUnder(n,under),nat=!!UNDER_DEF[n],key=n+(u?'_u':'_s');return BACKDROP[key]||(BACKDROP[key]=u===nat?buildBackdrop(n):u?buildCave(n):buildEntrance(n));}
-function drawBackdrop(C,b,vx,vw,camX,camY,maxY){C.drawImage(b.sky,0,0,vw,VIEWH,vx,0,vw,VIEWH);
- for(const l of b.L){const off=((camX*l.f)%LW+LW)%LW,oy=Math.round(-camY*l.f*.5+(maxY*l.f*.25));let dx=-Math.round(off);while(dx<vw){C.drawImage(l.c,vx+dx,oy-10);dx+=LW;}}}
+// the sky is a tile that scrolls slowly with the camera and repeats (mirrored vertically so the gradient has no seam), so wide and tall maps show
+// more sky instead of one picture stretched over the whole map. The moon, sun or glow simply repeats as you travel.
+function drawBackdrop(C,b,vx,vw,camX,camY,maxY){const SW=b.sky.width,SH=b.sky.height,ox=-((((camX||0)*.14)%SW)+SW)%SW,ry=(camY||0)*.45,k0=Math.floor(ry/SH),oy=-(ry-k0*SH);
+ for(let i=0;oy+i*SH<VIEWH;i++){const ty=oy+i*SH,flip=(k0+i)&1;for(let tx=ox;tx<vw;tx+=SW){if(flip){C.save();C.translate(vx+tx,ty+SH);C.scale(1,-1);C.drawImage(b.sky,0,0);C.restore();}else C.drawImage(b.sky,vx+tx,ty);}}
+ for(const l of b.L){const off=((camX*l.f)%LW+LW)%LW,oy=Math.max(VIEWH-262,Math.round(-camY*l.f*.5+(maxY*l.f*.25)));let dx=-Math.round(off);while(dx<vw){C.drawImage(l.c,vx+dx,oy-10);dx+=LW;}}}

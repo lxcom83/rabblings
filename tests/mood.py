@@ -1,6 +1,6 @@
 import asyncio,json
 from playwright.async_api import async_playwright
-JS='''()=>{const G=__GS,o={};const l=G.WAR_LEVELS[0],mk=(race,dead)=>{const w=new G.World({...l,foes:[],hatch:[{x:70,y:165,dir:1}]},{quiet:true,sides:[{race,clan:0},{race:'goblin',clan:1}]});w.def.rate=4;return w};
+JS='''()=>{const G=__GS,o={};const l=G.LEVELS[0],mk=(race,dead)=>{const w=new G.World({...l,foes:[],hatch:[{x:70,y:165,dir:1}]},{quiet:true,sides:[{race,clan:0},{race:'goblin',clan:1}]});w.def.rate=4;return w};
  // morale drop per race after a third of the team die
  for(const race of ['goblin','swamp','imp']){const w=mk(race);for(let i=0;i<120;i++)w.step();const p=w.pl[0],g=w.gobs.filter(a=>w.alive(a)).slice(0,5);g.forEach(a=>w.kill(a));w.step();o[race]=[p.total,Math.round(p.mood),p.moodT];}
  // mutiny, sit down, order refused, forced Boom works

@@ -1,6 +1,6 @@
 import asyncio,json
 from playwright.async_api import async_playwright
-JS='''()=>{const G=__GS,o={};const l=G.WAR_LEVELS[0];
+JS='''()=>{const G=__GS,o={};const l=G.LEVELS[0];
  // wildcards fire on Wild difficulty, and terrain and troops react
  {const w=new G.World({...l,foes:[]},{quiet:true,diff:3});const seen={};const orig=w.fire.bind(w);w.fire=a=>{seen[a]=(seen[a]||0)+1;orig(a)};let holes=0;for(let i=0;i<4400&&!w.over;i++)w.step();o.wild={seen,lost:w.pl[0].lost,saved:w.pl[0].saved,need:w.need,time:w.time,mobs:w.mobs.filter(m=>m.kind==='spider').length,crater:w.T.count(0,230,780,40)<780*40};}
  // spider hits and leaves

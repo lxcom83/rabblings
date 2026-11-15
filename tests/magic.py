@@ -2,7 +2,7 @@
 import asyncio,json,os,sys
 from playwright.async_api import async_playwright
 OUT=sys.argv[1] if len(sys.argv)>1 else '.'
-JS='''()=>{const G=__GS,o={};const L=G.WAR_LEVELS[0];G.setSides([{race:'goblin',clan:0},{race:'imp',clan:1}]);
+JS='''()=>{const G=__GS,o={};const L=G.LEVELS[0];G.setSides([{race:'goblin',clan:0},{race:'imp',clan:1}]);
  const mk2=()=>{const w=new G.World(L,{quiet:true,sides:[{race:'goblin',clan:0},{race:'imp',clan:1}]});for(let i=0;i<300;i++)w.step();return w;};
  let w=mk2(),p=w.pl[0];o.startNone=w.cast(p,'sleep',100,100)===false;p.spells=['sleep','ward'];p.mana=1;const m={kind:'skel',x:150,y:150,px:150,py:150,dir:1,t:0,hp:2,cd:0};w.mobs.push(m);const g=w.gobs.find(a=>w.alive(a));
  o.notPicked=w.cast(p,'rally',100,100)===false;o.cast=w.cast(p,'sleep',150,156);o.manaLeft=p.mana;o.mobAsleep=m.sleep>0;o.cooldown=w.cast(p,'sleep',150,156)===false;
