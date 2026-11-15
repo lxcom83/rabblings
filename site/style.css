@@ -167,7 +167,7 @@ section{padding-block:clamp(40px,7vw,72px)}
 .hero-plate .art{position:relative;aspect-ratio:1310/818}
 .hero-plate .art>img{position:absolute;inset:0;height:100%;object-fit:cover}
 .hero-plate .art .banner{z-index:1}
-.march{position:relative;height:60px;margin-top:22px;overflow:hidden;border-bottom:1px solid var(--rule);
+.march{position:relative;height:60px;margin:0 0 22px;overflow:hidden;border-bottom:1px solid var(--rule);
  background:linear-gradient(transparent 52px,#000 52px 54px,transparent 54px)}
 .trooper{position:absolute;bottom:8px;left:-60px;width:48px;height:48px;background-size:384px 48px;image-rendering:pixelated;animation:walk8s .7s steps(8) infinite,cross var(--t) linear infinite;animation-delay:0s,var(--d)}
 @keyframes cross{to{transform:translateX(calc(100vw + 120px))}}
@@ -180,7 +180,7 @@ section{padding-block:clamp(40px,7vw,72px)}
 .door:hover{box-shadow:inset 0 0 0 1px var(--sepia),0 8px 16px -10px #000}
 .door:hover h3{color:var(--sepia)}
 .door .icon{display:flex;align-items:flex-end;gap:6px;height:52px}
-.door .icon img{height:52px;width:52px;border-radius:50%;border:1px solid var(--sepia-d,#6a5236);object-fit:cover}
+.door .icon img{height:46px;width:auto;image-rendering:pixelated}
 .door p{color:var(--ink-dim);font-size:18px}
 .door .go-line{margin-top:auto;font:italic 400 17px var(--fell);color:var(--sepia)}
 
