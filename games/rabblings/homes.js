@@ -2,26 +2,41 @@
 const HOME_DOOR=(x,glow,core,frame)=>{const P=(c,a,b,w,h)=>{x.fillStyle=c;x.fillRect(a,b,w,h);};P('#1f0f09',19,28,14,18);P('#1f0f09',20,26,12,2);P(glow,21,30,10,16);P(core,23,34,6,12);if(frame){P(frame,18,28,1,18);P(frame,33,28,1,18);}};
 const HOME_FLAG=(x,cl,pole,top)=>{x.fillStyle=pole;x.fillRect(42,0,2,top||24);x.fillStyle=cl.hood;x.fillRect(44,1,8,4);x.fillRect(44,5,6,3);x.fillStyle=cl.hoodD;x.fillRect(44,7,5,1);};
 const RACE_HOME={
- // a mud mound shaped like a squatting frog, with reeds either side
+ // a lodge of mud, rotting reeds and woven branches heaped on half-sunk logs, sticks poking out and moss sagging off it, with a lashed lookout perch on the flag pole
  swamp(x,cl){const P=(c,a,b,w,h)=>{x.fillStyle=c;x.fillRect(a,b,w,h);};
-  HOME_FLAG(x,cl,'#4e4e37');
-  for(const s of [3,47]){P('#434531',s,16,1,30);P('#503723',s-1,10,3,8);P('#684a30',s-1,10,1,7);}
-  const m=[[74,104,58],[100,132,68],[52,78,46]],mud=[[92,70,44],[116,90,56],[70,52,36]];
-  for(let y=18;y<46;y++)for(let i=4;i<48;i++){const dx=(i-26)/22,dy=(y-46)/28;if(dx*dx+dy*dy>1)continue;const n=noise(i*5,y*5+cl.seed*40),p=(y+n*8>40?mud:m);x.fillStyle=css(p[n>.58?1:n<.42?2:0]);x.fillRect(i,y,1,1);}
-  P('#323529',9,27,34,1);P('#262820',12,28,28,1);
-  for(const e of [14,38]){for(let y=-6;y<=6;y++)for(let i=-6;i<=6;i++)if(i*i+y*y<=34){x.fillStyle=y<-2?'#71754e':'#5b5f44';x.fillRect(e+i,19+y,1,1);}for(let y=-4;y<=4;y++)for(let i=-4;i<=4;i++)if(i*i+y*y<=15){x.fillStyle='#ad9f55';x.fillRect(e+i,19+y,1,1);}P('#090a0c',e-1,16,2,7);P('#c6b874',e-3,15,2,2);}
-  HOME_DOOR(x,'#bba23f','#bdac5d','#323529');},
- // a small basalt volcano with a horned face and lava in its cracks
+  HOME_FLAG(x,cl,'#4e4e37');P('#3e3424',36,17,12,2);P('#5a4a30',36,17,12,1);P('#2a2418',38,19,1,4);P('#2a2418',45,19,1,3);
+  const top=i=>{const dx=(i-25)/22;return dx*dx>=1?99:46-23*Math.sqrt(1-dx*dx)+noise(i*9,cl.seed*50)*4-2+(i>14&&i<20?-2:0);};
+  // sticks poking out of the top of the heap
+  for(const [a,b,e,g] of [[12,26,7,10],[21,22,19,4],[29,22,33,6],[36,26,41,12],[17,24,13,9]]){const st=Math.max(Math.abs(e-a),Math.abs(g-b));for(let k=0;k<=st;k++)P(k%3?'#3a2e1e':'#54442c',Math.round(a+(e-a)*k/st),Math.round(b+(g-b)*k/st),1,1);}
+  for(let i=3;i<48;i++){const t=top(i)|0;for(let y=Math.max(t,6);y<46;y++){const n=noise(i*5,y*5+cl.seed*40),w=((i+y*2)%7===0)||((i*2-y)%9===0),moss=y<t+3+((i*7)%3)&&n>.45;
+   x.fillStyle=moss?(n>.6?'#6a7a42':'#4f5e34'):w?'#2a2016':y>38?(n>.55?'#4a3a26':'#3a2c1c'):(n>.62?'#7a6a40':n<.4?'#4e4228':'#5e5034');x.fillRect(i,y,1,1);}
+   if((i*13)%11===0)P('#4f5e34',i,t+3,1,2+(i%3));}
+  // half-sunk logs along the foot
+  for(const [a,b,w] of [[1,41,18],[33,42,18]]){P('#3e2c1e',a,b,w,4);P('#5a4430',a,b,w,1);P('#2a1e14',a,b+3,w,1);P('#6e5638',a,b,2,4);P('#8a7050',a,b+1,1,2);}
+  HOME_DOOR(x,'#8a8a3a','#a8a85a','#2a2016');},
+ // an ancestor hall: a lumpy stack of swelling tiers of brick fired with the ashes of the dead, each tier sagging under a drooping eave, buttressed at the foot, on cracked lava rock
  imp(x,cl){const P=(c,a,b,w,h)=>{x.fillStyle=c;x.fillRect(a,b,w,h);};
-  HOME_FLAG(x,cl,'#2d2323',34);
-  const m=[[56,42,50],[78,56,60],[38,30,40]],hw=y=>6+(y-8)*.52;
-  for(let y=8;y<46;y++){const w=hw(y);for(let i=0;i<52;i++){if(Math.abs(i-26)>w)continue;const n=noise(i*6,y*6+cl.seed*30);x.fillStyle=css(m[n>.58?1:n<.42?2:0]);x.fillRect(i,y,1,1);}}
-  P('#e89217',21,6,10,3);P('#f2d378',23,6,6,1);P('#b83b26',20,9,12,2);P('#3e3c3c',24,1,3,3);P('#302d2e',28,3,2,2);P('#3e3c3c',21,3,2,2);
-  const crack=[[12,44,3,-3],[39,44,-2,-3],[22,12,-2,3],[31,12,2,3]];
-  for(const c of crack){let a=c[0],b=c[1];for(let k=0;k<7;k++){x.fillStyle=k%2?'#d85f15':'#e89217';x.fillRect(a,b,1,3);a+=k%2?c[2]>0?1:-1:0;b+=c[3];}}
-  for(const s of [-1,1]){P('#121010',26+s*8-1,16,4,3);P('#9a8966',26+s*10-1,13,3,3);P('#c9b998',26+s*12-1,10,3,3);P('#e8dcc0',26+s*14-1,7,2,3);P('#f9eac7',26+s*15-1,5,2,2);}
-  P('#d1a915',19,19,5,2);P('#d1a915',29,19,5,2);P('#090a0c',21,19,1,2);P('#090a0c',31,19,1,2);P('#090a0c',20,18,5,1);P('#090a0c',28,18,5,1);
-  HOME_DOOR(x,'#d15315','#e9b61e','#5a2617');},
+  HOME_FLAG(x,cl,'#2d2323',30);
+  const bricks=['#2e2b2d','#3c3639','#4a4448','#55392e','#6a625c'],mort='#161314',N=(a,b)=>noise(a*7,b*7+cl.seed*20);
+  // tiers from the foot up: [top, bottom, half-width at the swell, lean]
+  const tiers=[[29,43,21,0],[17,30,15,1],[7,18,9,-1]];
+  for(const [t0,t1,w,ln] of tiers){for(let y=t0;y<t1;y++){const u=(y-t0)/(t1-t0),hw=w*(.78+.22*Math.sin(u*Math.PI))+N(y,w)*3.2-(y%5===0?1:0),cxx=26+ln*u*2;
+    for(let i=0;i<52;i++){const d=i-cxx;if(Math.abs(d)>hw)continue;const sag=Math.round((d*d)/(hw*hw)*2),row=((y+sag-t0)/3)|0,off=row%2?3:0;let col;
+     if((y+sag-t0)%3===2||((i+off)%6===0))col=mort;else{const n=noise(((i+off)/6|0)*31+row*17+t0,cl.seed*7);col=bricks[Math.min(4,n*5|0)];if(n>.92)col='#6e3820';}
+     x.fillStyle=Math.abs(d)>hw-1.2?'#1e1b1d':col;x.fillRect(i,y,1,1);}}
+   // a drooping eave of dark slate over the top of the tier, its ends sagging past the walls
+   const ew=w+4;for(let i=-ew;i<=ew;i++){const dr=Math.round((i*i)/(ew*ew)*4),yy=t0-1+dr;P(i%3?'#2a2220':'#3e302c',26+i,yy,1,2);P('#1c1617',26+i,yy+2,1,1);}}
+  // buttress lumps at the foot
+  for(const [a,w] of [[3,7],[42,7]]){for(let y=34;y<44;y++){const hw=w*(y-33)/10;for(let i=0;i<52;i++)if(Math.abs(i-a-w/2)<hw){x.fillStyle=N(i,y)>.55?'#3c3639':'#2e2b2d';x.fillRect(i,y,1,1);}}}
+  // a few bricks still warm, and slit windows glowing with ember light
+  for(const [a,b] of [[11,34],[38,37],[16,22],[33,24],[24,12]]){P('#a8481a',a,b,2,1);P('#ff8a20',a,b,1,1);}
+  for(const [a,b] of [[18,20],[31,20]]){P('#090a0c',a,b,3,5);P('#c2561a',a+1,b+1,1,3);P('#ffb43a',a+1,b+2,1,1);}
+  // a crooked chimney with a spark at the top
+  P('#2e2b2d',30,3,5,6);P('#4a4448',31,4,1,5);P('#2e2b2d',29,5,1,3);P('#ff8a20',31,3,3,1);P('#ffd9a0',32,3,1,1);
+  // cracked lava rock underfoot
+  for(let i=0;i<52;i++){const t=42+(noise(i*7,cl.seed*3)*3|0);for(let y=t;y<46;y++){x.fillStyle=noise(i*9,y*9)>.55?'#2a2426':'#1e1a1c';x.fillRect(i,y,1,1);}}
+  for(const [a,b,dd] of [[4,43,1],[46,43,-1],[13,44,1],[40,44,-1]]){let q=a;for(let k=0;k<4;k++){P(k%2?'#d85f15':'#e89217',q,b+(k%2),1,1);q+=dd;}}
+  HOME_DOOR(x,'#d15315','#e9b61e','#3a2a2a');},
  // a hollow dead tree, its knothole the door, with silk cocoons and a roosting moth
  fairy(x,cl){const P=(c,a,b,w,h)=>{x.fillStyle=c;x.fillRect(a,b,w,h);};
   HOME_FLAG(x,cl,'#3a3432',20);
@@ -42,18 +57,22 @@ const RACE_HOME={
   P('#f1d176',23,15,6,3);P('#987838',23,17,6,1);P('#7b612d',25,18,2,5);
   HOME_DOOR(x,'#dd7c16','#ebbc36','#262728');
   for(let k=0;k<3;k++){P('#262728',19,31+k*5,14,1);P('#595a5e',19,31+k*5,1,1);P('#595a5e',32,31+k*5,1,1);}},
- // a riveted boiler with a big brass gear and a tin chimney
+ // a warren mouth dug into a heap of rubble, rusted scrap and bones, framed by two rib bones lashed with sinew, with a hide bellows worked by bone handles
  rat(x,cl){const P=(c,a,b,w,h)=>{x.fillStyle=c;x.fillRect(a,b,w,h);};
   HOME_FLAG(x,cl,'#463b31');
-  P('#47403b',11,6,5,12);P('#6c6153',11,6,1,12);P('#60584f',10,4,7,2);P('#7c776e',12,1,3,2);P('#605d56',15,0,2,2);
-  const ramp=[[74,44,30],[116,70,42],[158,96,54],[192,124,70],[158,96,54],[116,70,42],[84,50,34]];
-  for(let y=17;y<46;y++)for(let i=7;i<45;i++){const n=noise(i*7,y*7+cl.seed*30),t=(i-7)/38*6.99|0;const c=ramp[t];x.fillStyle=css(n>.68?[c[0]*.72,c[1]*.82,c[2]*.72]:c);x.fillRect(i,y,1,1);}
-  for(const r of [17,27,37]){P('#38241a',7,r,38,2);P('#a97b4c',7,r,38,1);for(let k=0;k<7;k++){P('#e3c995',9+k*6,r,1,1);}}
-  for(let y=-11;y<=11;y++)for(let i=-11;i<=11;i++){const d=Math.hypot(i,y),a=Math.atan2(y,i),t=Math.cos(a*8)>.2;if(d>(t?10.5:8.4))continue;x.fillStyle=d<3?'#432e15':d<4.5?'#d8b435':(i-y>4?'#675224':'#987838');x.fillRect(26+i,12+y,1,1);}
-  P('#e9bd23',35,20,8,1);P('#e9bd23',37,19,6,1);P('#e9bd23',35,21,8,4);P('#987838',38,22,2,1);P('#987838',36,23,1,1);P('#987838',41,23,1,1);
-  P('#3a3c3f',17,26,18,20);P('#62666c',17,26,18,1);P('#62666c',17,26,1,20);P('#292a2d',34,26,1,20);
-  HOME_DOOR(x,'#e9a21e','#bdac5d','#1d1e20');
-  for(const r of [29,36,43]){P('#7f8a99',17,r,1,1);P('#7f8a99',34,r,1,1);}},
+  const top=i=>{const dx=(i-25)/24;return dx*dx>=1?99:46-26*Math.sqrt(1-dx*dx)*(.85+noise(i*6,cl.seed*30)*.3);};
+  // scrap and bone spikes jutting from the heap
+  for(const [a,b,e,g,col] of [[10,28,6,16,'#6e3e24'],[19,22,17,10,'#d8d0b8'],[30,21,34,8,'#7a7068'],[38,28,42,18,'#d8d0b8'],[25,20,25,12,'#8a5232']]){const st=Math.max(Math.abs(e-a),Math.abs(g-b));for(let k=0;k<=st;k++)P(col,Math.round(a+(e-a)*k/st),Math.round(b+(g-b)*k/st),k<st-1?2:1,1);}
+  for(let i=1;i<50;i++){const t=top(i)|0;for(let y=Math.max(t,4);y<46;y++){const n=noise(i*5,y*5+cl.seed*40),m=noise(i*2,y*2+90);
+   x.fillStyle=m>.72?(n>.5?'#8a5232':'#6e3e24'):m<.22?(n>.5?'#6a625c':'#5e5650'):n>.6?'#4e4234':n<.38?'#3a3026':'#463a2e';x.fillRect(i,y,1,1);}}
+  // bones scattered in the heap
+  for(const [a,b,h] of [[8,34,1],[40,36,0],[14,41,0],[34,26,1]]){if(h){P('#d8d0b8',a,b,1,5);P('#d8d0b8',a-1,b,3,1);P('#d8d0b8',a-1,b+4,3,1);}else{P('#d8d0b8',a,b,5,1);P('#d8d0b8',a,b-1,1,3);P('#d8d0b8',a+4,b-1,1,3);}}
+  // a hide bellows on the left, squeezed by bone handles
+  P('#5a3e2a',3,30,9,8);P('#7a5a40',4,31,7,6);P('#5a3e2a',4,33,7,1);P('#d8d0b8',1,29,4,1);P('#d8d0b8',1,38,4,1);P('#a87c74',11,33,3,2);
+  // the warren mouth, framed by two ribs lashed together with sinew at the top
+  HOME_DOOR(x,'#c89a3a','#e0c070','#1d1612');
+  for(let k=0;k<20;k++){const u=k/19,dx=Math.round(Math.sin(u*Math.PI*.5)*3);P('#d8d0b8',17+dx,45-k,2,1);P('#d8d0b8',33-dx,45-k,2,1);}
+  P('#d8d0b8',19,24,14,2);P('#a89c80',19,25,14,1);P('#a87c74',24,23,4,4);P('#6e4a44',25,24,2,2);},
  // a hut framed in bone: rib arches for a roof, rag panels, and a skull over the door
  bone(x,cl){const P=(c,a,b,w,h)=>{x.fillStyle=c;x.fillRect(a,b,w,h);};
   HOME_FLAG(x,cl,'#8e8878',16);

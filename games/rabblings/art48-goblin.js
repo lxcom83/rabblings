@@ -56,6 +56,9 @@ RIG48.goblin=function(x,c,s,f,n){
  P(cx-7,hy+3,c.tunD,15,1);P(cx-7,hy+4,c.tunD,3,1);P(cx-2,hy+4,c.tunD,3,1);P(cx+3,hy+4,c.tunD,4,1);// ragged hem
  P(cx-7,hy-2,belt,14,2);P(cx-7,hy-2,sh(belt,1.4),14,1);P(cx+1,hy-2,buck,4,3);P(cx+2,hy-1,buckD,2,1);
  P(cx-6,hy,'#5b4623',4,4);P(cx-6,hy,'#7a5e2e',4,1);P(cx-5,hy+1,belt,1,1);
+ // a souvenir of something it trapped, hanging from the belt: a Ratfolk tail or a bone
+ if(c.name==='ASHGUT'){P(cx+5,hy,'#d8d0b8',1,5);P(cx+4,hy,'#d8d0b8',3,1);P(cx+4,hy+4,'#d8d0b8',3,1);P(cx+5,hy+1,'#a89c80',1,3);}
+ else{const sw=s==='walk'?R(S(f/n*6.283)):0;L(cx+5,hy,cx+6+sw,hy+4,'#b08a84',1);L(cx+6+sw,hy+4,cx+4+sw,hy+8,'#b08a84',1);P(cx+5,hy,'#7a5a54',2,1);}
  for(let r=3;r<10;r+=3)P(cx+4+off(r),hy-10+r,sh(c.tun,1.4),1,1);// stitches
  // head
  const ox=sx-10,oy=sy-14+hd,sk=c.skin,skD=c.skinD,skL=c.skinL,gl=c.glow||'#f0c040';
@@ -66,7 +69,8 @@ RIG48.goblin=function(x,c,s,f,n){
  L(ox+6,oy+3,ox+0,oy+2,hood,3);L(ox+1,oy+4,ox-1,oy+7,hoodD,3);HP(0,2,hoodL,2,1);
  HP(7,0,hood,9,1);HP(5,1,hood,13,1);HP(4,2,hood,15,1);HP(3,3,hood,17,3);HP(3,6,hood,19,1);
  HP(8,0,hoodL,5,1);HP(6,1,hoodL,4,1);HP(4,3,hoodL,3,2);HP(16,2,hoodD,3,3);HP(3,6,hoodD,19,1);HP(14,4,hoodD,5,2);
- HP(6,3,hoodD,1,2);HP(10,2,hoodD,1,3);// hat seams
+ // a dried Mushroom Folk cap: pale spots on top, gills under the brim
+ {const sp='#d9cfb4',spD='#a89c80';HP(8,1,sp,2,1);HP(13,0,sp,1,1);HP(10,3,sp,2,2);HP(16,3,sp,2,1);HP(5,4,sp,1,1);HP(7,5,spD,1,1);HP(13,4,spD,1,1);for(let k=0;k<9;k++)HP(4+k*2,6,spD,1,1);}
  // face
  HP(6,7,skD,16,1);HP(5,8,sk,17,1);HP(5,9,sk,18,3);HP(6,12,sk,17,1);HP(7,13,sk,14,2);HP(9,15,sk,9,1);
  HP(5,8,skD,2,5);HP(7,14,skD,2,1);HP(9,15,skD,9,1);HP(13,12,skL,2,1);HP(16,10,skL,3,1);

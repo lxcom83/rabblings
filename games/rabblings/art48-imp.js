@@ -27,7 +27,7 @@ function rigImp(x,c,s,f,n){
  L(bs[0],bs[1],be[0],be[1],c.skinD,3);L(be[0],be[1],bh[0],bh[1],c.skinD,2);P(be[0]-1|0,be[1]-1|0,c.skin,3,3);P(be[0]|0,be[1]|0,leather,2,1);hand(bh,c.skinD,c.skin);
  // legs: thigh, knee, shin, clawed foot
  const leg=(l,col,lt)=>{const fx=cx+l[0]-(bx<=4?bx:2),fy=45+l[1],kx=(cx+fx)/2+(l[0]>0?3:-2),ky=(hy+2+fy)/2,fb=Math.min(fy+1,46);
-  L(cx,hy+2,kx,ky,col,4);L(kx,ky,fx,fy-2,col,3);P(kx-1|0,ky-1|0,lt,3,2);
+  L(cx,hy+2,kx,ky,col,4);L(kx,ky,fx,fy-2,col,3);P(kx-1|0,ky-1|0,lt,3,2);if(col===c.skin){P(kx|0,ky+2|0,c.glow,1,2);P(kx+1|0,ky+4|0,'#a8481a',1,1);}
   P(fx-2|0,fb-2,c.boot,9,3);P(fx-2|0,fb-2,c.tunD,5,1);P(fx+1|0,fb-3,c.boot,4,1);P(fx+7|0,fb-1,claw,2,1);P(fx+7|0,fb,claw,2,1);P(fx-2|0,fb,ol,9,1);};
  leg(lb,c.skinD,c.skin);leg(lf,c.skin,c.skinL);
  // tunic: sleeveless, ragged hem, open chest, belt with an ember buckle
@@ -36,6 +36,9 @@ function rigImp(x,c,s,f,n){
  P(sx-1,sy+1,c.skin,4,7);P(sx-1,sy+1,c.skinL,1,6);P(sx+2,sy+3,c.skinD,1,3);P(sx,sy+5,c.skinD,3,1);P(sx,sy+7,c.skinD,3,1);
  P(cx-7,hy-1,leather,14,2);P(cx-7,hy-1,'#6a4e30',14,1);P(cx-1,hy-1,gold,3,2);P(cx,hy-1,c.glow,1,2);P(cx+4,hy+1,leather,3,3);P(cx+4,hy+1,'#6a4e30',3,1);
  P(sx-6,sy-1,c.tunD,4,3);P(sx+3,sy-1,c.tunD,4,3);P(sx+3,sy-1,c.tun,2,1);P(sx+6,sy-3,claw,1,2);// shoulder pads with a spike
+ // the ember in its chest, showing between the ribs: dull at rest, flaring when it laughs, rages or panics
+ {const hot=open||s==='panic'||s==='block',fl=(f%3===0)?1:0,core=hot?'#fff0b8':ember,mid=hot?'#ffb43a':c.glow,low=hot?c.glow:'#a8481a';
+  P(sx-1,sy+2,low,4,6);P(sx,sy+3,mid,2,4);P(sx,sy+3+fl,core,2,2-fl);P(sx-1,sy+4,c.skinD,4,1);P(sx-1,sy+6,c.skinD,4,1);if(hot){P(sx-2,sy+3,low,1,3);P(sx+3,sy+3,low,1,3);}}
  // head: horns with ridges, pointed ear, brow, glowing eyes, snout, fangs
  const rows=[[-5,5],[-7,7],[-8,8],[-9,9],[-9,10],[-9,10],[-9,11],[-9,11],[-9,11],[-8,11],[-8,10],[-7,9],[-6,8],[-4,5]];
  const horn=(a,b,m,n2,e,g,col,dk)=>{L(a,b,m,n2,col,3);L(m,n2,e,g,col,2);L(a-1,b+1,m-1,n2+1,dk,1);L(m-1,n2+1,e-1,g+1,dk,1);P((a+m)>>1,((b+n2)>>1)+1,dk,3,1);P(e,g,'#fff6dc',1,1);};
@@ -43,6 +46,8 @@ function rigImp(x,c,s,f,n){
  P(hx-6,hy2+6,c.hoodD,4,1);P(hx+3,hy2+6,c.hoodD,4,1);
  rows.forEach(([l,r],k)=>{const y=hy2+4+k;P(hx+l,y,c.skin,r-l+1,1);P(hx+l,y,c.skinD,2,1);if(k===1||k===2)P(hx-3,y,c.skinL,7,1);if(k>=12)P(hx+l+1,y,c.skinD,r-l-1,1);else if(k>=10)P(hx+l+2,y,c.skinD,2,1);});
  P(hx+9,hy2+11,c.skinL,2,1);// snout highlight
+ // charred skin split by cracks that glow from the ember inside
+ P(hx-2,hy2+6,c.glow,1,2);P(hx-1,hy2+8,'#a8481a',1,1);P(hx+5,hy2+13,c.glow,2,1);P(hx+7,hy2+12,'#a8481a',1,1);P(hx-7,hy2+13,c.glow,1,2);
  // near ear, pointing back
  P(hx-10,hy2+10,c.skin,2,4);P(hx-12,hy2+9,c.skin,2,3);P(hx-14,hy2+8,c.skin,2,2);P(hx-15,hy2+7,c.skinD,1,2);P(hx-10,hy2+11,c.skinD,2,2);P(hx-12,hy2+10,c.skinD,1,1);
  // eyes and brows
@@ -56,6 +61,7 @@ function rigImp(x,c,s,f,n){
  // front arm
  const fs=[sx+3,sy+3],fh=[sx+3+af[0],sy+3+af[1]],fe=[fs[0]+af[0]*0.5+1,fs[1]+af[1]*0.5+2];
  L(fs[0],fs[1],fe[0],fe[1],c.skin,3);L(fe[0],fe[1],fh[0],fh[1],c.skin,2);P(fe[0]-1|0,fe[1]-1|0,c.skinL,3,3);P(fe[0]-1|0,fe[1]+1|0,leather,3,1);hand(fh,c.skinL,c.skinL);
+ P(fe[0]|0,fe[1]+2|0,c.glow,1,2);P(fe[0]+1|0,fe[1]+4|0,'#a8481a',1,1);P(bh[0]+1|0,bh[1]-2|0,'#a8481a',1,1);
  if(tool){const T=tool,hx0=fh[0]|0,hy0=fh[1]|0;
   if(T.k==='brolly'){L(hx0,hy0,hx0,hy0-5,'#513925',2);const ux=hx0-14,uy=hy0-9;[[6,0,18,'#5b313a'],[2,2,26,'#35374b'],[0,4,30,'#35374b'],[0,6,30,'#35374b']].forEach(([a,b,w,col])=>P(ux+a,uy+b,col,w,2));for(let i=0;i<4;i++)P(ux+i*10,uy+6,'#1d1f29',4,2);for(let i=0;i<5;i++)P(ux+2+i*6,uy+8,'#35374b',3,1);}
   else if(T.k==='plank'){P(hx0-2,hy0+(T.d?2:-2),'#8d6d42',18,4);P(hx0-2,hy0+(T.d?4:0),'#5c432c',18,2);P(hx0+3,hy0+(T.d?2:-2),'#6f5233',1,2);P(hx0+10,hy0+(T.d?3:-1),'#a88458',3,1);}

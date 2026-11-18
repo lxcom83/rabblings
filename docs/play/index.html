@@ -344,8 +344,8 @@ glide:['............','..g.....g...','.ggg...ggg..','ggggg.ggggg.','gg.gg.gg.gg.
 dust:['..a....a....','....g.....a.','.a....a.....','...g.....g..','a.....a.....','....a.....a.','..g.....a...','.....g......','.a.....a....','....a.......'],
 steam:['...a..a.....','..a..a......','...a..a.....','...eeee.....','..eeeeee....','..eeddee....','..eeeeee....','...eeee.....','...d..d.....','...a..a.....'],
 cannon:['..........d.','.........dd.','.......eee..','.....eeeee..','...eeeeeb...','..eeeeebb...','..eee.bbbb..','.....bcccb..','.....bcccb..','......bbb...'],
-spring:['....eeee....','...e....e...','....eeee....','...e....e...','....eeee....','...e....e...','....eeee....','..cccccccc..','.cccccccccc.','............'],
-ratmine:['.....d......','......a.....','....eeee....','..eeeeeeee..','.eeeddeeeee.','.eeeddeeeee.','.eeeeeeeee..','..eeeeeeee..','....eeee....','............'],
+spring:['......aa....','.....aaaa...','.....dad....','....aa......','...aa.......','..dad.......','..aa........','...aa.......','....aa......','..aaaaaa....'],
+ratmine:['......d.....','.....c......','...eeeee....','..eeeeeee...','.eaeeeeeee..','.eeececeeee.','.eeeeeeeeee.','..eeeeeeee..','..c.c..c.c..','............'],
 vine:['........eee.','.......eeeee','........c...','....eee.c...','...eeeee....','....c.......','.eee.c......','eeeee.......','.c..........','.c..........'],
 puff:['............','...gg.gg....','..gggggggg..','.gggggggggg.','..gggggggg..','...gggggg...','....f.ff....','.....f......','.....f......','............'],
 sword:['..........aa','.........aae','........aae.','.......aae..','......aae...','.b...aae....','.bb.aae.....','..bcae......','..cbb.......','.c..b.......'],
@@ -458,7 +458,12 @@ function buildBackdrop(name){const T=THEME[name],[sky,sx]=ditherSky(VW,VH,T.sky)
   layer(.5,x=>{ridge(x,240,3,1.2,'#17120e','#b48d33');});}
  else if(name==='sewers'){layer(.14,x=>{for(let y=0;y<270;y+=10)for(let i=0;i<LW;i+=22){const o=(y/10&1)*11;x.fillStyle=noise(i,y)>.5?'#191c18':'#151713';x.fillRect((i+o)%LW,y,21,9);}});
   layer(.3,x=>{for(let i=0;i<3;i++){const a=i*170+85;x.strokeStyle='#31322d';x.lineWidth=16;x.beginPath();x.arc(a,190,76,Math.PI,0);x.stroke();x.fillStyle='#090a08';x.beginPath();x.arc(a,190,68,Math.PI,0);x.fill();x.fillRect(a-68,190,136,80);for(let k=0;k<70;k+=2){const q=Math.sin(k*.09+i)*3;x.fillStyle='#454e36';x.fillRect(a-3+q,190+k,6,2);x.fillStyle='#636945';x.fillRect(a-1+q,190+k,2,2);}}x.fillStyle='#463c2f';x.fillRect(0,40,LW,14);x.fillStyle='#6b593e';x.fillRect(0,40,LW,3);for(let i=0;i<8;i++)x.fillRect(i*64+6,36,8,22);});
-  layer(.52,x=>{for(let i=0;i<4;i++){const a=60+i*128,b=90+(i%2)*50,cr=24;x.fillStyle='#463c2f';for(let k=0;k<12;k++){const q=k/12*TAU;x.fillRect(a+Math.cos(q)*cr-3,b+Math.sin(q)*cr-3,7,7);}x.beginPath();x.arc(a,b,cr-1,0,TAU);x.fill();x.fillStyle='#121410';x.beginPath();x.arc(a,b,9,0,TAU);x.fill();}ridge(x,244,4,2,'#0e100d','#636945');});}
+  layer(.52,x=>{// the Warrens: big spoked treadwheels (no gears), worked by bred muscle, and chains hanging from the main pipe
+   for(let i=0;i<4;i++){const a=60+i*128,b=90+(i%2)*50,cr=26;x.strokeStyle='#463c2f';x.lineWidth=6;x.beginPath();x.arc(a,b,cr,0,TAU);x.stroke();x.strokeStyle='#2d2924';x.lineWidth=2;x.beginPath();x.arc(a,b,cr-4,0,TAU);x.stroke();
+    x.strokeStyle='#3a3127';x.lineWidth=3;for(let k=0;k<6;k++){const q=k/6*Math.PI+i*.4;x.beginPath();x.moveTo(a+Math.cos(q)*(cr-3),b+Math.sin(q)*(cr-3));x.lineTo(a-Math.cos(q)*(cr-3),b-Math.sin(q)*(cr-3));x.stroke();}
+    x.fillStyle='#5e5040';for(let k=0;k<16;k++){const q=k/16*TAU;x.fillRect(a+Math.cos(q)*(cr-1)-1,b+Math.sin(q)*(cr-1)-1,2,2);}x.fillStyle='#121410';x.beginPath();x.arc(a,b,5,0,TAU);x.fill();x.fillStyle='#6a5a46';x.fillRect(a-1,b-1,2,2);}
+   x.fillStyle='#2d2924';for(let i=0;i<7;i++){const a=30+i*74,len=30+(i*37)%50;for(let k=0;k<len;k+=4)x.fillRect(a+(k/4&1),54+k,2,3);}
+   ridge(x,244,4,2,'#0e100d','#636945');});}
  else if(name==='crypts'){sx.fillStyle='#7c796e';sx.beginPath();sx.arc(240,84,44,0,TAU);sx.fill();sx.fillStyle='#1b1d21';sx.fillRect(238,40,4,88);sx.fillRect(196,82,88,4);
   layer(.2,x=>{x.fillStyle='#151619';x.fillRect(0,0,LW,26);for(let i=0;i<6;i++){const a=i*86;x.fillRect(a,0,16,270);x.beginPath();x.arc(a+51,26,36,0,Math.PI);x.lineTo(a+87,0);x.lineTo(a+16,0);x.fill();}});
   layer(.42,x=>{ridge(x,226,6,2,'#121316','#32353a');for(let i=0;i<11;i++){const a=r()*LW|0,h=20+r()*22|0;x.fillStyle='#202225';x.fillRect(a,226-h,16,h+6);x.beginPath();x.arc(a+8,226-h,8,Math.PI,0);x.fill();x.fillStyle='#404348';x.fillRect(a+7,226-h-1,2,12);x.fillRect(a+4,226-h+3,8,2);if(i%3===0){x.fillStyle='#f0c36b';x.fillRect(a+18,216,3,10);x.fillStyle='#c0ae65';x.fillRect(a+18,213,3,3);}}});}
@@ -627,6 +632,9 @@ RIG48.goblin=function(x,c,s,f,n){
  P(cx-7,hy+3,c.tunD,15,1);P(cx-7,hy+4,c.tunD,3,1);P(cx-2,hy+4,c.tunD,3,1);P(cx+3,hy+4,c.tunD,4,1);// ragged hem
  P(cx-7,hy-2,belt,14,2);P(cx-7,hy-2,sh(belt,1.4),14,1);P(cx+1,hy-2,buck,4,3);P(cx+2,hy-1,buckD,2,1);
  P(cx-6,hy,'#5b4623',4,4);P(cx-6,hy,'#7a5e2e',4,1);P(cx-5,hy+1,belt,1,1);
+ // a souvenir of something it trapped, hanging from the belt: a Ratfolk tail or a bone
+ if(c.name==='ASHGUT'){P(cx+5,hy,'#d8d0b8',1,5);P(cx+4,hy,'#d8d0b8',3,1);P(cx+4,hy+4,'#d8d0b8',3,1);P(cx+5,hy+1,'#a89c80',1,3);}
+ else{const sw=s==='walk'?R(S(f/n*6.283)):0;L(cx+5,hy,cx+6+sw,hy+4,'#b08a84',1);L(cx+6+sw,hy+4,cx+4+sw,hy+8,'#b08a84',1);P(cx+5,hy,'#7a5a54',2,1);}
  for(let r=3;r<10;r+=3)P(cx+4+off(r),hy-10+r,sh(c.tun,1.4),1,1);// stitches
  // head
  const ox=sx-10,oy=sy-14+hd,sk=c.skin,skD=c.skinD,skL=c.skinL,gl=c.glow||'#f0c040';
@@ -637,7 +645,8 @@ RIG48.goblin=function(x,c,s,f,n){
  L(ox+6,oy+3,ox+0,oy+2,hood,3);L(ox+1,oy+4,ox-1,oy+7,hoodD,3);HP(0,2,hoodL,2,1);
  HP(7,0,hood,9,1);HP(5,1,hood,13,1);HP(4,2,hood,15,1);HP(3,3,hood,17,3);HP(3,6,hood,19,1);
  HP(8,0,hoodL,5,1);HP(6,1,hoodL,4,1);HP(4,3,hoodL,3,2);HP(16,2,hoodD,3,3);HP(3,6,hoodD,19,1);HP(14,4,hoodD,5,2);
- HP(6,3,hoodD,1,2);HP(10,2,hoodD,1,3);// hat seams
+ // a dried Mushroom Folk cap: pale spots on top, gills under the brim
+ {const sp='#d9cfb4',spD='#a89c80';HP(8,1,sp,2,1);HP(13,0,sp,1,1);HP(10,3,sp,2,2);HP(16,3,sp,2,1);HP(5,4,sp,1,1);HP(7,5,spD,1,1);HP(13,4,spD,1,1);for(let k=0;k<9;k++)HP(4+k*2,6,spD,1,1);}
  // face
  HP(6,7,skD,16,1);HP(5,8,sk,17,1);HP(5,9,sk,18,3);HP(6,12,sk,17,1);HP(7,13,sk,14,2);HP(9,15,sk,9,1);
  HP(5,8,skD,2,5);HP(7,14,skD,2,1);HP(9,15,skD,9,1);HP(13,12,skL,2,1);HP(16,10,skL,3,1);
@@ -783,7 +792,7 @@ function rigImp(x,c,s,f,n){
  L(bs[0],bs[1],be[0],be[1],c.skinD,3);L(be[0],be[1],bh[0],bh[1],c.skinD,2);P(be[0]-1|0,be[1]-1|0,c.skin,3,3);P(be[0]|0,be[1]|0,leather,2,1);hand(bh,c.skinD,c.skin);
  // legs: thigh, knee, shin, clawed foot
  const leg=(l,col,lt)=>{const fx=cx+l[0]-(bx<=4?bx:2),fy=45+l[1],kx=(cx+fx)/2+(l[0]>0?3:-2),ky=(hy+2+fy)/2,fb=Math.min(fy+1,46);
-  L(cx,hy+2,kx,ky,col,4);L(kx,ky,fx,fy-2,col,3);P(kx-1|0,ky-1|0,lt,3,2);
+  L(cx,hy+2,kx,ky,col,4);L(kx,ky,fx,fy-2,col,3);P(kx-1|0,ky-1|0,lt,3,2);if(col===c.skin){P(kx|0,ky+2|0,c.glow,1,2);P(kx+1|0,ky+4|0,'#a8481a',1,1);}
   P(fx-2|0,fb-2,c.boot,9,3);P(fx-2|0,fb-2,c.tunD,5,1);P(fx+1|0,fb-3,c.boot,4,1);P(fx+7|0,fb-1,claw,2,1);P(fx+7|0,fb,claw,2,1);P(fx-2|0,fb,ol,9,1);};
  leg(lb,c.skinD,c.skin);leg(lf,c.skin,c.skinL);
  // tunic: sleeveless, ragged hem, open chest, belt with an ember buckle
@@ -792,6 +801,9 @@ function rigImp(x,c,s,f,n){
  P(sx-1,sy+1,c.skin,4,7);P(sx-1,sy+1,c.skinL,1,6);P(sx+2,sy+3,c.skinD,1,3);P(sx,sy+5,c.skinD,3,1);P(sx,sy+7,c.skinD,3,1);
  P(cx-7,hy-1,leather,14,2);P(cx-7,hy-1,'#6a4e30',14,1);P(cx-1,hy-1,gold,3,2);P(cx,hy-1,c.glow,1,2);P(cx+4,hy+1,leather,3,3);P(cx+4,hy+1,'#6a4e30',3,1);
  P(sx-6,sy-1,c.tunD,4,3);P(sx+3,sy-1,c.tunD,4,3);P(sx+3,sy-1,c.tun,2,1);P(sx+6,sy-3,claw,1,2);// shoulder pads with a spike
+ // the ember in its chest, showing between the ribs: dull at rest, flaring when it laughs, rages or panics
+ {const hot=open||s==='panic'||s==='block',fl=(f%3===0)?1:0,core=hot?'#fff0b8':ember,mid=hot?'#ffb43a':c.glow,low=hot?c.glow:'#a8481a';
+  P(sx-1,sy+2,low,4,6);P(sx,sy+3,mid,2,4);P(sx,sy+3+fl,core,2,2-fl);P(sx-1,sy+4,c.skinD,4,1);P(sx-1,sy+6,c.skinD,4,1);if(hot){P(sx-2,sy+3,low,1,3);P(sx+3,sy+3,low,1,3);}}
  // head: horns with ridges, pointed ear, brow, glowing eyes, snout, fangs
  const rows=[[-5,5],[-7,7],[-8,8],[-9,9],[-9,10],[-9,10],[-9,11],[-9,11],[-9,11],[-8,11],[-8,10],[-7,9],[-6,8],[-4,5]];
  const horn=(a,b,m,n2,e,g,col,dk)=>{L(a,b,m,n2,col,3);L(m,n2,e,g,col,2);L(a-1,b+1,m-1,n2+1,dk,1);L(m-1,n2+1,e-1,g+1,dk,1);P((a+m)>>1,((b+n2)>>1)+1,dk,3,1);P(e,g,'#fff6dc',1,1);};
@@ -799,6 +811,8 @@ function rigImp(x,c,s,f,n){
  P(hx-6,hy2+6,c.hoodD,4,1);P(hx+3,hy2+6,c.hoodD,4,1);
  rows.forEach(([l,r],k)=>{const y=hy2+4+k;P(hx+l,y,c.skin,r-l+1,1);P(hx+l,y,c.skinD,2,1);if(k===1||k===2)P(hx-3,y,c.skinL,7,1);if(k>=12)P(hx+l+1,y,c.skinD,r-l-1,1);else if(k>=10)P(hx+l+2,y,c.skinD,2,1);});
  P(hx+9,hy2+11,c.skinL,2,1);// snout highlight
+ // charred skin split by cracks that glow from the ember inside
+ P(hx-2,hy2+6,c.glow,1,2);P(hx-1,hy2+8,'#a8481a',1,1);P(hx+5,hy2+13,c.glow,2,1);P(hx+7,hy2+12,'#a8481a',1,1);P(hx-7,hy2+13,c.glow,1,2);
  // near ear, pointing back
  P(hx-10,hy2+10,c.skin,2,4);P(hx-12,hy2+9,c.skin,2,3);P(hx-14,hy2+8,c.skin,2,2);P(hx-15,hy2+7,c.skinD,1,2);P(hx-10,hy2+11,c.skinD,2,2);P(hx-12,hy2+10,c.skinD,1,1);
  // eyes and brows
@@ -812,6 +826,7 @@ function rigImp(x,c,s,f,n){
  // front arm
  const fs=[sx+3,sy+3],fh=[sx+3+af[0],sy+3+af[1]],fe=[fs[0]+af[0]*0.5+1,fs[1]+af[1]*0.5+2];
  L(fs[0],fs[1],fe[0],fe[1],c.skin,3);L(fe[0],fe[1],fh[0],fh[1],c.skin,2);P(fe[0]-1|0,fe[1]-1|0,c.skinL,3,3);P(fe[0]-1|0,fe[1]+1|0,leather,3,1);hand(fh,c.skinL,c.skinL);
+ P(fe[0]|0,fe[1]+2|0,c.glow,1,2);P(fe[0]+1|0,fe[1]+4|0,'#a8481a',1,1);P(bh[0]+1|0,bh[1]-2|0,'#a8481a',1,1);
  if(tool){const T=tool,hx0=fh[0]|0,hy0=fh[1]|0;
   if(T.k==='brolly'){L(hx0,hy0,hx0,hy0-5,'#513925',2);const ux=hx0-14,uy=hy0-9;[[6,0,18,'#5b313a'],[2,2,26,'#35374b'],[0,4,30,'#35374b'],[0,6,30,'#35374b']].forEach(([a,b,w,col])=>P(ux+a,uy+b,col,w,2));for(let i=0;i<4;i++)P(ux+i*10,uy+6,'#1d1f29',4,2);for(let i=0;i<5;i++)P(ux+2+i*6,uy+8,'#35374b',3,1);}
   else if(T.k==='plank'){P(hx0-2,hy0+(T.d?2:-2),'#8d6d42',18,4);P(hx0-2,hy0+(T.d?4:0),'#5c432c',18,2);P(hx0+3,hy0+(T.d?2:-2),'#6f5233',1,2);P(hx0+10,hy0+(T.d?3:-1),'#a88458',3,1);}
@@ -983,8 +998,8 @@ RIG48.dwarf=function(x,c,s,f,n){
 };
 
 // 48px Ratfolk rig (HR=2). Same pose() as the 24px rig, doubled; same cell, ground line and centre as rig48 in art48.js.
-// Gadget-keeping rat: big round ears, goggle lens over one eye, long snout with whiskers and buck teeth, patched tunic,
-// scrap backpack with a cog, segmented bare tail, clawed hands and feet.
+// Ratfolk of the Litters: big round ears, a beady eye with a bred second eye above it, long snout with whiskers and buck teeth, patched tunic,
+// bred mutations (an extra eye, a growth or a scrap-and-bone graft), segmented bare tail bound with sinew, clawed hands and feet. No cogs, brass or goggles: Ratfolk machines are meat and scrap.
 RIG48.rat=function(x,c,s,f,n){
  if(s==='splat'){x.save();x.scale(2,2);drawRig(x,c,s,f,n);x.restore();return;}
  const p=pose(s,f,n),t=f/n*Math.PI*2,S=Math.sin,C=Math.cos,R=Math.round;
@@ -999,33 +1014,35 @@ RIG48.rat=function(x,c,s,f,n){
  if(s==='float'){af=[2,-12];ab=[2,-12];}
  by=Math.max(by,-6);x.save();x.translate(-2,-3);
  if(s==='drown'||s==='swim'){x.beginPath();x.rect(0,0,52,44);x.clip();}
- const ol='#090a0c',claw='#e8e0cc',brass=c.hood,brassD=c.hoodD,steel='#8a8f96',steelL='#c4c9cf',leather='#4a3622';
+ const ol='#090a0c',claw='#e8e0cc',brass=c.hood,brassD=c.hoodD,steel='#6e6a66',steelL='#9a948c',leather='#4a3622',sinew='#a87c74',sinewD='#6e4a44',bone='#d8d0b8',boneD='#a89c80',graft=c.name!=='SEWERCLAW';
  const cx=24+bx,hy=36+by,sx=cx+lean,sy=hy-5;
- // tail: long bare tail with segment rings and a brass ring near the tip
+ // tail: long bare tail with segment rings, bound with sinew near the tip
  {const sw=s==='walk'||s==='panic'?R(S(t*2)*2):0,P0=[cx-5+lean,hy+2],P1=[cx-13,hy+7+sw],P2=[cx-18,hy+2+sw],P3=[cx-20,hy-6-sw];
   let prev=P0;for(let i=1;i<=22;i++){const u=i/22,q=1-u,X=q*q*q*P0[0]+3*q*q*u*P1[0]+3*q*u*u*P2[0]+u*u*u*P3[0],Y=q*q*q*P0[1]+3*q*q*u*P1[1]+3*q*u*u*P2[1]+u*u*u*P3[1];
-   L(prev[0],prev[1],X,Y,i%3===0?c.skin:c.skinD,i<14?3:2);prev=[X,Y];if(i===19)P(X-1|0,Y-1|0,brass,4,4),P(X|0,Y|0,brassD,2,2);}
+   L(prev[0],prev[1],X,Y,i%3===0?c.skin:c.skinD,i<14?3:2);prev=[X,Y];if(i===19)P(X-1|0,Y-1|0,sinew,3,3),P(X|0,Y|0,sinewD,2,1);}
   P(P3[0]-1|0,P3[1]-3|0,c.skinD,2,3);}
- // scrap backpack: small sack, patch, a cog and a copper pipe sticking out
- P(cx-12+lean,hy-8,6,10);P(cx-12+lean,hy-8,c.hoodD,6,10);P(cx-11+lean,hy-9,brass,4,2);P(cx-12+lean,hy-7,c.hood,1,8);P(cx-10+lean,hy-4,c.tun,3,3);
- P(cx-11+lean,hy-12,steel,4,3);P(cx-10+lean,hy-13,steel,2,1);P(cx-10+lean,hy-11,c.hoodD,2,1);P(cx-9+lean,hy-12,steelL,1,1);
- L(cx-8+lean,hy-9,cx-8+lean,hy-13,brass,2);
+ // a bred growth on the back: a lumpy, bald, grey-pink swelling with a bone lashed across it
+ {const gx=cx-11+lean,gy=hy-10;for(let j=0;j<9;j++){const w=j<2?4:j<6?7:6;P(gx+(j<2?2:0),gy+j,j<3?sinew:c.skinD,w,1);}P(gx+2,gy+2,'#c49a90',2,2);P(gx+5,gy+4,sinewD,1,2);P(gx+1,gy+6,sinewD,2,1);
+  L(gx-1,gy+8,gx+7,gy+2,bone,2);P(gx-2,gy+8,bone,2,2);P(gx+7,gy+1,bone,2,2);P(gx+3,gy+4,leather,1,3);}
  // back arm: sleeve, forearm, clawed hand
  const bs=[sx-3,sy+3],be=[bs[0]+ab[0]*0.5-1,bs[1]+ab[1]*0.5+2],bh=[sx-3+ab[0],sy+3+ab[1]];
- L(bs[0],bs[1],be[0],be[1],c.tunD,3);L(be[0],be[1],bh[0],bh[1],c.skinD,2);P(bh[0]|0,bh[1]|0,c.skinD,4,3);P(bh[0]+3|0,bh[1]+1|0,claw,2,1);P(bh[0]+2|0,bh[1]+3|0,claw,1,1);
+ L(bs[0],bs[1],be[0],be[1],c.tunD,3);
+ if(graft){// a forearm of scrap iron and bone, lashed on with sinew
+  L(be[0],be[1],bh[0],bh[1],steel,3);L(be[0],be[1]-1,bh[0],bh[1]-1,steelL,1);P(be[0]|0,be[1]|0,sinew,3,2);P((be[0]+bh[0])/2|0,(be[1]+bh[1])/2|0,sinew,3,1);P(bh[0]|0,bh[1]|0,bone,4,3);P(bh[0]+3|0,bh[1]+1|0,boneD,3,1);P(bh[0]+2|0,bh[1]+3|0,boneD,2,1);}
+ else{L(be[0],be[1],bh[0],bh[1],c.skinD,2);P(bh[0]|0,bh[1]|0,c.skinD,4,3);P(bh[0]+3|0,bh[1]+1|0,claw,2,1);P(bh[0]+2|0,bh[1]+3|0,claw,1,1);}
  // legs: thigh, knee, shin, big clawed foot in a patched boot
  const leg=(l,col,lt)=>{const fx=cx+l[0]-(bx<=4?bx:2),fy=45+l[1],kx=(cx+fx)/2+(l[0]>0?3:-2),ky=(hy+3+fy)/2;
   L(cx,hy+3,kx,ky,col,3);L(kx,ky,fx,fy-1,col,2);P(kx-1|0,ky-1|0,lt,3,2);
   P(fx-2|0,Math.min(fy+1,47),c.boot,9,1);P(fx-2|0,Math.min(fy,46),c.boot,8,1);P(fx-1|0,Math.min(fy-1,45),c.boot,5,1);P(fx|0,Math.min(fy,46),c.hood,2,1);
   P(fx+6|0,Math.min(fy+1,47),claw,1,1);P(fx+4|0,Math.min(fy+1,47),c.skinD,2,1);};
  leg(lb,c.skinD,c.skin);leg(lf,c.skin,c.skinL);
- // hunched torso: patched tunic, belt with cog buckle
+ // hunched torso: patched tunic, belt with a knucklebone buckle
  P(sx-6,hy-6,c.tun,12,9);P(sx-6,hy-6,c.tunD,2,9);P(sx-7,hy-4,c.tun,2,5);P(sx-6,hy+2,c.tunD,12,1);
  P(sx+1,hy-5,c.hood,4,4);P(sx+2,hy-4,c.hoodD,2,1);P(sx+1,hy-2,c.hoodD,4,1);// patch with stitches
  P(sx-3,hy-3,c.tunD,1,3);
- P(sx-6,hy-1,leather,12,2);P(sx-1,hy-2,steel,4,4);P(sx,hy-1,leather,2,2);P(sx,hy-2,steelL,1,1);P(sx+3,hy-1,steelL,1,1);
+ P(sx-6,hy-1,leather,12,2);P(sx-1,hy-2,bone,4,3);P(sx,hy-1,boneD,2,1);P(sx-2,hy,bone,1,1);P(sx+3,hy,bone,1,1);// a knucklebone buckle
  P(sx-6,hy+3,c.tun,3,3);P(sx-1,hy+3,c.tun,2,2);P(sx+3,hy+3,c.tun,3,1);// ragged hem
- // head: big skull, round ears, long snout, goggle lens, whiskers, buck teeth
+ // head: big skull, round ears, long snout, bred eyes, bald patches, whiskers, buck teeth
  const hx=sx+2,hy2=hy-22+hd;
  P(hx-8,hy2+5,c.skin,12,12);P(hx-7,hy2+4,c.skin,10,1);P(hx-7,hy2+17,c.skinD,10,1);P(hx-9,hy2+7,c.skinD,2,8);P(hx-6,hy2+5,c.skinL,8,2);P(hx-7,hy2+7,c.skinL,3,2);P(hx+2,hy2+8,c.skinD,2,8);
  P(hx+3,hy2+9,c.skin,6,7);P(hx+9,hy2+10,c.skin,3,5);P(hx+3,hy2+9,c.skinL,7,1);P(hx+3,hy2+15,c.skinD,9,1);
@@ -1033,9 +1050,11 @@ RIG48.rat=function(x,c,s,f,n){
  // ears: outer skin, inner pink
  P(hx-7,hy2,c.skinD,6,6);P(hx-6,hy2-1,c.skinD,4,1);P(hx-6,hy2+1,'#c98f8a',4,4);P(hx-5,hy2+1,'#e1b0aa',2,2);
  P(hx,hy2,c.skinD,6,6);P(hx+1,hy2-1,c.skinD,4,1);P(hx+1,hy2+1,'#c98f8a',4,4);P(hx+2,hy2+1,'#e1b0aa',2,2);
- // goggle strap + lens over the eye
- P(hx-8,hy2+9,brassD,9,2);P(hx+1,hy2+7,brass,7,7);P(hx+2,hy2+6,brass,5,1);P(hx+2,hy2+14,brassD,5,1);P(hx+2,hy2+8,'#a8d6dc',5,5);P(hx+3,hy2+8,'#d8f0f0',1,1);
- P(hx+4,hy2+9,c.glow||'#f0c040',2,3);P(hx+5,hy2+10,ol,1,2);
+ // a beady eye, and a second, smaller one bred in above it; bald patches on the skull
+ P(hx+2,hy2+8,ol,5,4);P(hx+3,hy2+9,'#d8b84a',3,2);P(hx+4,hy2+9,ol,1,2);P(hx+3,hy2+8,c.skinD,4,1);
+ P(hx+5,hy2+5,ol,3,3);P(hx+6,hy2+6,'#c86a4a',1,1);
+ P(hx-5,hy2+7,'#b49a92',3,2);P(hx-2,hy2+11,'#b49a92',2,2);P(hx-6,hy2+12,'#8e7670',1,2);
+ if(!graft){P(hx-9,hy2+9,sinew,3,4);P(hx-10,hy2+10,'#c49a90',2,2);P(hx-9,hy2+12,sinewD,2,1);}
  // whiskers
  L(hx+9,hy2+13,hx+15,hy2+11,'#b8b2a6',1);L(hx+9,hy2+14,hx+15,hy2+16,'#b8b2a6',1);
  // mouth and teeth
@@ -3150,26 +3169,41 @@ window.__IMP={ImpFiles,impConvert,nxParse};
 const HOME_DOOR=(x,glow,core,frame)=>{const P=(c,a,b,w,h)=>{x.fillStyle=c;x.fillRect(a,b,w,h);};P('#1f0f09',19,28,14,18);P('#1f0f09',20,26,12,2);P(glow,21,30,10,16);P(core,23,34,6,12);if(frame){P(frame,18,28,1,18);P(frame,33,28,1,18);}};
 const HOME_FLAG=(x,cl,pole,top)=>{x.fillStyle=pole;x.fillRect(42,0,2,top||24);x.fillStyle=cl.hood;x.fillRect(44,1,8,4);x.fillRect(44,5,6,3);x.fillStyle=cl.hoodD;x.fillRect(44,7,5,1);};
 const RACE_HOME={
- // a mud mound shaped like a squatting frog, with reeds either side
+ // a lodge of mud, rotting reeds and woven branches heaped on half-sunk logs, sticks poking out and moss sagging off it, with a lashed lookout perch on the flag pole
  swamp(x,cl){const P=(c,a,b,w,h)=>{x.fillStyle=c;x.fillRect(a,b,w,h);};
-  HOME_FLAG(x,cl,'#4e4e37');
-  for(const s of [3,47]){P('#434531',s,16,1,30);P('#503723',s-1,10,3,8);P('#684a30',s-1,10,1,7);}
-  const m=[[74,104,58],[100,132,68],[52,78,46]],mud=[[92,70,44],[116,90,56],[70,52,36]];
-  for(let y=18;y<46;y++)for(let i=4;i<48;i++){const dx=(i-26)/22,dy=(y-46)/28;if(dx*dx+dy*dy>1)continue;const n=noise(i*5,y*5+cl.seed*40),p=(y+n*8>40?mud:m);x.fillStyle=css(p[n>.58?1:n<.42?2:0]);x.fillRect(i,y,1,1);}
-  P('#323529',9,27,34,1);P('#262820',12,28,28,1);
-  for(const e of [14,38]){for(let y=-6;y<=6;y++)for(let i=-6;i<=6;i++)if(i*i+y*y<=34){x.fillStyle=y<-2?'#71754e':'#5b5f44';x.fillRect(e+i,19+y,1,1);}for(let y=-4;y<=4;y++)for(let i=-4;i<=4;i++)if(i*i+y*y<=15){x.fillStyle='#ad9f55';x.fillRect(e+i,19+y,1,1);}P('#090a0c',e-1,16,2,7);P('#c6b874',e-3,15,2,2);}
-  HOME_DOOR(x,'#bba23f','#bdac5d','#323529');},
- // a small basalt volcano with a horned face and lava in its cracks
+  HOME_FLAG(x,cl,'#4e4e37');P('#3e3424',36,17,12,2);P('#5a4a30',36,17,12,1);P('#2a2418',38,19,1,4);P('#2a2418',45,19,1,3);
+  const top=i=>{const dx=(i-25)/22;return dx*dx>=1?99:46-23*Math.sqrt(1-dx*dx)+noise(i*9,cl.seed*50)*4-2+(i>14&&i<20?-2:0);};
+  // sticks poking out of the top of the heap
+  for(const [a,b,e,g] of [[12,26,7,10],[21,22,19,4],[29,22,33,6],[36,26,41,12],[17,24,13,9]]){const st=Math.max(Math.abs(e-a),Math.abs(g-b));for(let k=0;k<=st;k++)P(k%3?'#3a2e1e':'#54442c',Math.round(a+(e-a)*k/st),Math.round(b+(g-b)*k/st),1,1);}
+  for(let i=3;i<48;i++){const t=top(i)|0;for(let y=Math.max(t,6);y<46;y++){const n=noise(i*5,y*5+cl.seed*40),w=((i+y*2)%7===0)||((i*2-y)%9===0),moss=y<t+3+((i*7)%3)&&n>.45;
+   x.fillStyle=moss?(n>.6?'#6a7a42':'#4f5e34'):w?'#2a2016':y>38?(n>.55?'#4a3a26':'#3a2c1c'):(n>.62?'#7a6a40':n<.4?'#4e4228':'#5e5034');x.fillRect(i,y,1,1);}
+   if((i*13)%11===0)P('#4f5e34',i,t+3,1,2+(i%3));}
+  // half-sunk logs along the foot
+  for(const [a,b,w] of [[1,41,18],[33,42,18]]){P('#3e2c1e',a,b,w,4);P('#5a4430',a,b,w,1);P('#2a1e14',a,b+3,w,1);P('#6e5638',a,b,2,4);P('#8a7050',a,b+1,1,2);}
+  HOME_DOOR(x,'#8a8a3a','#a8a85a','#2a2016');},
+ // an ancestor hall: a lumpy stack of swelling tiers of brick fired with the ashes of the dead, each tier sagging under a drooping eave, buttressed at the foot, on cracked lava rock
  imp(x,cl){const P=(c,a,b,w,h)=>{x.fillStyle=c;x.fillRect(a,b,w,h);};
-  HOME_FLAG(x,cl,'#2d2323',34);
-  const m=[[56,42,50],[78,56,60],[38,30,40]],hw=y=>6+(y-8)*.52;
-  for(let y=8;y<46;y++){const w=hw(y);for(let i=0;i<52;i++){if(Math.abs(i-26)>w)continue;const n=noise(i*6,y*6+cl.seed*30);x.fillStyle=css(m[n>.58?1:n<.42?2:0]);x.fillRect(i,y,1,1);}}
-  P('#e89217',21,6,10,3);P('#f2d378',23,6,6,1);P('#b83b26',20,9,12,2);P('#3e3c3c',24,1,3,3);P('#302d2e',28,3,2,2);P('#3e3c3c',21,3,2,2);
-  const crack=[[12,44,3,-3],[39,44,-2,-3],[22,12,-2,3],[31,12,2,3]];
-  for(const c of crack){let a=c[0],b=c[1];for(let k=0;k<7;k++){x.fillStyle=k%2?'#d85f15':'#e89217';x.fillRect(a,b,1,3);a+=k%2?c[2]>0?1:-1:0;b+=c[3];}}
-  for(const s of [-1,1]){P('#121010',26+s*8-1,16,4,3);P('#9a8966',26+s*10-1,13,3,3);P('#c9b998',26+s*12-1,10,3,3);P('#e8dcc0',26+s*14-1,7,2,3);P('#f9eac7',26+s*15-1,5,2,2);}
-  P('#d1a915',19,19,5,2);P('#d1a915',29,19,5,2);P('#090a0c',21,19,1,2);P('#090a0c',31,19,1,2);P('#090a0c',20,18,5,1);P('#090a0c',28,18,5,1);
-  HOME_DOOR(x,'#d15315','#e9b61e','#5a2617');},
+  HOME_FLAG(x,cl,'#2d2323',30);
+  const bricks=['#2e2b2d','#3c3639','#4a4448','#55392e','#6a625c'],mort='#161314',N=(a,b)=>noise(a*7,b*7+cl.seed*20);
+  // tiers from the foot up: [top, bottom, half-width at the swell, lean]
+  const tiers=[[29,43,21,0],[17,30,15,1],[7,18,9,-1]];
+  for(const [t0,t1,w,ln] of tiers){for(let y=t0;y<t1;y++){const u=(y-t0)/(t1-t0),hw=w*(.78+.22*Math.sin(u*Math.PI))+N(y,w)*3.2-(y%5===0?1:0),cxx=26+ln*u*2;
+    for(let i=0;i<52;i++){const d=i-cxx;if(Math.abs(d)>hw)continue;const sag=Math.round((d*d)/(hw*hw)*2),row=((y+sag-t0)/3)|0,off=row%2?3:0;let col;
+     if((y+sag-t0)%3===2||((i+off)%6===0))col=mort;else{const n=noise(((i+off)/6|0)*31+row*17+t0,cl.seed*7);col=bricks[Math.min(4,n*5|0)];if(n>.92)col='#6e3820';}
+     x.fillStyle=Math.abs(d)>hw-1.2?'#1e1b1d':col;x.fillRect(i,y,1,1);}}
+   // a drooping eave of dark slate over the top of the tier, its ends sagging past the walls
+   const ew=w+4;for(let i=-ew;i<=ew;i++){const dr=Math.round((i*i)/(ew*ew)*4),yy=t0-1+dr;P(i%3?'#2a2220':'#3e302c',26+i,yy,1,2);P('#1c1617',26+i,yy+2,1,1);}}
+  // buttress lumps at the foot
+  for(const [a,w] of [[3,7],[42,7]]){for(let y=34;y<44;y++){const hw=w*(y-33)/10;for(let i=0;i<52;i++)if(Math.abs(i-a-w/2)<hw){x.fillStyle=N(i,y)>.55?'#3c3639':'#2e2b2d';x.fillRect(i,y,1,1);}}}
+  // a few bricks still warm, and slit windows glowing with ember light
+  for(const [a,b] of [[11,34],[38,37],[16,22],[33,24],[24,12]]){P('#a8481a',a,b,2,1);P('#ff8a20',a,b,1,1);}
+  for(const [a,b] of [[18,20],[31,20]]){P('#090a0c',a,b,3,5);P('#c2561a',a+1,b+1,1,3);P('#ffb43a',a+1,b+2,1,1);}
+  // a crooked chimney with a spark at the top
+  P('#2e2b2d',30,3,5,6);P('#4a4448',31,4,1,5);P('#2e2b2d',29,5,1,3);P('#ff8a20',31,3,3,1);P('#ffd9a0',32,3,1,1);
+  // cracked lava rock underfoot
+  for(let i=0;i<52;i++){const t=42+(noise(i*7,cl.seed*3)*3|0);for(let y=t;y<46;y++){x.fillStyle=noise(i*9,y*9)>.55?'#2a2426':'#1e1a1c';x.fillRect(i,y,1,1);}}
+  for(const [a,b,dd] of [[4,43,1],[46,43,-1],[13,44,1],[40,44,-1]]){let q=a;for(let k=0;k<4;k++){P(k%2?'#d85f15':'#e89217',q,b+(k%2),1,1);q+=dd;}}
+  HOME_DOOR(x,'#d15315','#e9b61e','#3a2a2a');},
  // a hollow dead tree, its knothole the door, with silk cocoons and a roosting moth
  fairy(x,cl){const P=(c,a,b,w,h)=>{x.fillStyle=c;x.fillRect(a,b,w,h);};
   HOME_FLAG(x,cl,'#3a3432',20);
@@ -3190,18 +3224,22 @@ const RACE_HOME={
   P('#f1d176',23,15,6,3);P('#987838',23,17,6,1);P('#7b612d',25,18,2,5);
   HOME_DOOR(x,'#dd7c16','#ebbc36','#262728');
   for(let k=0;k<3;k++){P('#262728',19,31+k*5,14,1);P('#595a5e',19,31+k*5,1,1);P('#595a5e',32,31+k*5,1,1);}},
- // a riveted boiler with a big brass gear and a tin chimney
+ // a warren mouth dug into a heap of rubble, rusted scrap and bones, framed by two rib bones lashed with sinew, with a hide bellows worked by bone handles
  rat(x,cl){const P=(c,a,b,w,h)=>{x.fillStyle=c;x.fillRect(a,b,w,h);};
   HOME_FLAG(x,cl,'#463b31');
-  P('#47403b',11,6,5,12);P('#6c6153',11,6,1,12);P('#60584f',10,4,7,2);P('#7c776e',12,1,3,2);P('#605d56',15,0,2,2);
-  const ramp=[[74,44,30],[116,70,42],[158,96,54],[192,124,70],[158,96,54],[116,70,42],[84,50,34]];
-  for(let y=17;y<46;y++)for(let i=7;i<45;i++){const n=noise(i*7,y*7+cl.seed*30),t=(i-7)/38*6.99|0;const c=ramp[t];x.fillStyle=css(n>.68?[c[0]*.72,c[1]*.82,c[2]*.72]:c);x.fillRect(i,y,1,1);}
-  for(const r of [17,27,37]){P('#38241a',7,r,38,2);P('#a97b4c',7,r,38,1);for(let k=0;k<7;k++){P('#e3c995',9+k*6,r,1,1);}}
-  for(let y=-11;y<=11;y++)for(let i=-11;i<=11;i++){const d=Math.hypot(i,y),a=Math.atan2(y,i),t=Math.cos(a*8)>.2;if(d>(t?10.5:8.4))continue;x.fillStyle=d<3?'#432e15':d<4.5?'#d8b435':(i-y>4?'#675224':'#987838');x.fillRect(26+i,12+y,1,1);}
-  P('#e9bd23',35,20,8,1);P('#e9bd23',37,19,6,1);P('#e9bd23',35,21,8,4);P('#987838',38,22,2,1);P('#987838',36,23,1,1);P('#987838',41,23,1,1);
-  P('#3a3c3f',17,26,18,20);P('#62666c',17,26,18,1);P('#62666c',17,26,1,20);P('#292a2d',34,26,1,20);
-  HOME_DOOR(x,'#e9a21e','#bdac5d','#1d1e20');
-  for(const r of [29,36,43]){P('#7f8a99',17,r,1,1);P('#7f8a99',34,r,1,1);}},
+  const top=i=>{const dx=(i-25)/24;return dx*dx>=1?99:46-26*Math.sqrt(1-dx*dx)*(.85+noise(i*6,cl.seed*30)*.3);};
+  // scrap and bone spikes jutting from the heap
+  for(const [a,b,e,g,col] of [[10,28,6,16,'#6e3e24'],[19,22,17,10,'#d8d0b8'],[30,21,34,8,'#7a7068'],[38,28,42,18,'#d8d0b8'],[25,20,25,12,'#8a5232']]){const st=Math.max(Math.abs(e-a),Math.abs(g-b));for(let k=0;k<=st;k++)P(col,Math.round(a+(e-a)*k/st),Math.round(b+(g-b)*k/st),k<st-1?2:1,1);}
+  for(let i=1;i<50;i++){const t=top(i)|0;for(let y=Math.max(t,4);y<46;y++){const n=noise(i*5,y*5+cl.seed*40),m=noise(i*2,y*2+90);
+   x.fillStyle=m>.72?(n>.5?'#8a5232':'#6e3e24'):m<.22?(n>.5?'#6a625c':'#5e5650'):n>.6?'#4e4234':n<.38?'#3a3026':'#463a2e';x.fillRect(i,y,1,1);}}
+  // bones scattered in the heap
+  for(const [a,b,h] of [[8,34,1],[40,36,0],[14,41,0],[34,26,1]]){if(h){P('#d8d0b8',a,b,1,5);P('#d8d0b8',a-1,b,3,1);P('#d8d0b8',a-1,b+4,3,1);}else{P('#d8d0b8',a,b,5,1);P('#d8d0b8',a,b-1,1,3);P('#d8d0b8',a+4,b-1,1,3);}}
+  // a hide bellows on the left, squeezed by bone handles
+  P('#5a3e2a',3,30,9,8);P('#7a5a40',4,31,7,6);P('#5a3e2a',4,33,7,1);P('#d8d0b8',1,29,4,1);P('#d8d0b8',1,38,4,1);P('#a87c74',11,33,3,2);
+  // the warren mouth, framed by two ribs lashed together with sinew at the top
+  HOME_DOOR(x,'#c89a3a','#e0c070','#1d1612');
+  for(let k=0;k<20;k++){const u=k/19,dx=Math.round(Math.sin(u*Math.PI*.5)*3);P('#d8d0b8',17+dx,45-k,2,1);P('#d8d0b8',33-dx,45-k,2,1);}
+  P('#d8d0b8',19,24,14,2);P('#a89c80',19,25,14,1);P('#a87c74',24,23,4,4);P('#6e4a44',25,24,2,2);},
  // a hut framed in bone: rib arches for a roof, rag panels, and a skull over the door
  bone(x,cl){const P=(c,a,b,w,h)=>{x.fillStyle=c;x.fillRect(a,b,w,h);};
   HOME_FLAG(x,cl,'#8e8878',16);
@@ -3249,16 +3287,16 @@ const RACES={
   clan({name:'REEDBACK',skin:'#516549',skinD:'#31432c',skinL:'#84a967',hood:'#987e38',hoodD:'#5b4620',tun:'#987e38',tunD:'#5b4620',boot:'#293426',ui:'#72a552',head:FROG,headO:FROGO,perk:{skill:'tongue'},perkT:'+1 TONGUE IF MAP HAS IT',seed:2}),
   clan({name:'MUDGILL',skin:'#807046',skinD:'#51462b',skinL:'#978d61',hood:'#49586e',hoodD:'#303744',tun:'#49586e',tunD:'#303744',boot:'#382e20',ui:'#50709b',head:FROG,headO:FROGO,perk:{dry:1.1},perkT:'DRY OUT 10% SLOWER',seed:3})]},
  imp:{n:'IMPS',play:1,world:'cinder',home:'CINDER FORGE',like:'FIRE-LOVING PRANKSTERS',good:'WALK ON LAVA, IGNORE FIRE',bad:'WATER KILLS THEM',mana:'CINDERS',loss:1.25,pitch:300,chat:{refuse:['Hee hee, no!','Burn it!'],grumble:['Boo hiss!','Too cold!']},say:['Every last one. Nothing even caught fire.','Good enough for imp work.','The Forgemaster is not cross. She is disappointed. And on fire.'],swap:{flap:'hop',climb:'firepot'},clans:[
-  clan({name:'CINDERHORN',glow:'#ff8a20',skin:'#b04329',skinD:'#732a2a',skinL:'#ea742a',hood:'#e8d5a6',hoodD:'#99815b',tun:'#212227',tunD:'#141519',boot:'#0f0f11',ui:'#e9661e',head:IMP,headO:IMPO,tail:1,perk:{skill:'firepot'},perkT:'+1 FIREPOT IF MAP HAS IT',seed:4}),
-  clan({name:'SOOTWING',glow:'#ff8a20',skin:'#484c5d',skinD:'#2b2e3a',skinL:'#61688c',hood:'#f0c36b',hoodD:'#846937',tun:'#b05b29',tunD:'#69351c',boot:'#16161b',ui:'#5362a2',head:IMP,headO:IMPO,tail:1,perk:{hop:1.05},perkT:'HOP REACHES 5% FURTHER',seed:5})]},
+  clan({name:'CINDERHORN',glow:'#ff8a20',skin:'#3a383d',skinD:'#211f24',skinL:'#5e5b62',hood:'#e8d5a6',hoodD:'#99815b',tun:'#212227',tunD:'#141519',boot:'#0f0f11',ui:'#e9661e',head:IMP,headO:IMPO,tail:1,perk:{skill:'firepot'},perkT:'+1 FIREPOT IF MAP HAS IT',seed:4}),
+  clan({name:'SOOTWING',glow:'#ff8a20',skin:'#48423c',skinD:'#29241f',skinL:'#6e665c',hood:'#f0c36b',hoodD:'#846937',tun:'#b05b29',tunD:'#69351c',boot:'#16161b',ui:'#5362a2',head:IMP,headO:IMPO,tail:1,perk:{hop:1.05},perkT:'HOP REACHES 5% FURTHER',seed:5})]},
  fairy:{n:'FAIRIES',play:1,world:'garden',home:'GIANT GARDEN',like:'WINGED, FLIGHTY TRICKSTERS',good:'SAFE FALLS, FLUTTER OVER GAPS',bad:'IRON HURTS, WIND BLOWS THEM',mana:'GLIMMER',loss:1.2,pitch:380,chat:{refuse:['Tee hee, no!','Too heavy!'],grumble:['Me wings!','So rude!'],last:['Oh, poo!','Pretty!']},say:['Every last one. How sparkly.','Good enough for fairy work.','The Queen is not cross. She is disappointed. And glittering.'],swap:{flap:'glide',bash:'dust'},clans:[
   clan({name:'THISTLEWING',glow:'#bcd8ff',skin:'#b8b0a4',skinD:'#7a7268',skinL:'#dcd4c8',hood:'#3e4a30',hoodD:'#222a1c',tun:'#3e4a30',tunD:'#222a1c',boot:'#2a3022',ui:'#94a754',head:FAIRY,headO:FAIRYO,wings:1,perk:{skill:'glide'},perkT:'+1 GLIDE IF MAP HAS IT',seed:8}),
   clan({name:'MOONMOTH',glow:'#bcd8ff',skin:'#a8acbc',skinD:'#6a6e80',skinL:'#d0d4e0',hood:'#3a3450',hoodD:'#201c30',tun:'#3a3450',tunD:'#201c30',boot:'#201c30',ui:'#5f71ac',head:FAIRY,headO:FAIRYO,wings:1,perk:{calm:1},perkT:'WIND PUSHES 10% LESS',seed:9})]},
  dwarf:{n:'DWARVES',play:1,world:'halls',home:'DEEP HALLS',like:'GRUMPY TUNNELLERS',good:'2 HEARTS, DRILL THROUGH IRON',bad:'SLOW, MORALE RUNS ON ALE',mana:'ALE',loss:.6,pitch:115,chat:{refuse:['Ale first!','Hmph. No.'],grumble:['Me throat!','Dry work!'],last:['To the ale!','Good beard!']},say:['Every last one. Pour the ale.','Good enough for dwarf work.','The Thane is not cross. He is disappointed. And sober.'],swap:{flap:'steam',climb:'cannon'},clans:[
   clan({name:'IRONBROW',skin:'#c68354',skinD:'#805b43',skinL:'#e7bb94',hood:'#5a5d61',hoodD:'#3b3d40',tun:'#5c3227',tunD:'#381c17',boot:'#2d221b',ui:'#bd7f49',head:DWARF,headO:DWARFO,perk:{skill:'cannon'},perkT:'+1 CANNON IF MAP HAS IT',seed:10}),
   clan({name:'DEEPDELVER',skin:'#b5774b',skinD:'#734f3a',skinL:'#deb087',hood:'#987838',hoodD:'#5b4620',tun:'#293426',tunD:'#192117',boot:'#201a14',ui:'#cfa237',head:DWARF,headO:DWARFO,perk:{ale:1.25},perkT:'ALE LASTS 25% LONGER',seed:11})]},
- rat:{n:'RATFOLK',play:1,world:'sewers',home:'CLOCKWORK SEWERS',like:'SCURRYING INVENTORS',good:'VERY FAST, CHEW THROUGH WOOD',bad:'GADGETS NEED SCRAP, AND BACKFIRE',mana:'SCRAP',loss:1.1,pitch:340,chat:{refuse:['Busy! Busy!','No scrap, no way!'],grumble:['Too wet!','Bad gear!'],last:['Oops!','It worked!']},say:['Every last one. Suspiciously well built.','Good enough for scrap work.','The Chief Engineer is not cross. He is disappointed. And on fire.'],swap:{flap:'spring',pick:'ratmine'},clans:[
-  clan({name:'GEARNOSE',skin:'#7b6e61',skinD:'#534842',skinL:'#a8947b',hood:'#987838',hoodD:'#5b4620',tun:'#51462b',tunD:'#2f2816',boot:'#201c14',ui:'#c6a054',head:RATH,headO:RATHO,tail:1,perk:{skill:'ratmine'},perkT:'+1 RAT MINE IF MAP HAS IT',seed:12}),
+ rat:{n:'RATFOLK',play:1,world:'sewers',home:'THE WARRENS',like:'SCURRYING BREEDERS',good:'VERY FAST, CHEW THROUGH WOOD',bad:'GADGETS NEED SCRAP, AND BACKFIRE',mana:'SCRAP',loss:1.1,pitch:340,chat:{refuse:['Busy! Busy!','No scrap, no way!'],grumble:['Too wet!','Bad graft!'],last:['Oops!','It worked!']},say:['Every last one. Suspiciously well bred.','Good enough for the Litters.','The Master of Litters is not cross. He is disappointed. And hungry.'],swap:{flap:'spring',pick:'ratmine'},clans:[
+  clan({name:'STITCHNOSE',skin:'#7b6e61',skinD:'#534842',skinL:'#a8947b',hood:'#7d4a2c',hoodD:'#4a2a18',tun:'#51462b',tunD:'#2f2816',boot:'#201c14',ui:'#c6a054',head:RATH,headO:RATHO,tail:1,perk:{skill:'ratmine'},perkT:'+1 RAT MINE IF MAP HAS IT',seed:12}),
   clan({name:'SEWERCLAW',skin:'#434344',skinD:'#2b2c2d',skinL:'#616163',hood:'#545c4a',hoodD:'#31382a',tun:'#32372e',tunD:'#1e221b',boot:'#1a1b19',ui:'#7d9362',head:RATH,headO:RATHO,tail:1,perk:{scrap:2},perkT:'+2 STARTING SCRAP',seed:13})]},
  bone:{n:'SKELETONS',play:1,world:'crypts',home:'THE CRYPTS',like:'WILL NOT STAY DEAD',good:'BONE PILES, CANNOT DROWN',bad:'FIRE DESTROYS THEM',mana:'BONE DUST',loss:.25,pitch:125,chat:{refuse:['Bone idle!','Rattle off!'],grumble:['Need bones!','Where is Steve?'],last:['Use me!','Keep me femur!']},say:['Every last one. How dull.','Good enough. Some of us are still attached.','The Bonelord is not cross. He is disappointed. And hollow.'],swap:{flap:'raise',climb:'merge',build:'bonebr'},clans:[
   clan({name:'GREYBONE',glow:'#ff4a2a',skin:'#d8d2b8',skinD:'#8a846e',skinL:'#f0ead4',hood:'#313236',hoodD:'#1e1f23',tun:'#27282c',tunD:'#18191c',boot:'#1c1d1f',ui:'#96927f',hi:1,head:SKULL,headO:SKULLO,perk:{skill:'bonebr'},perkT:'+1 BONE BRIDGE IF MAP HAS IT',seed:6}),
@@ -3271,7 +3309,7 @@ for(const k of RK)if(!RACES[k].swap)RACES[k].swap={};
 // worlds whose own backdrop is underground. Any map can override with its Setting
 const UNDER_DEF={mine:1,halls:1,sewers:1,caves:1};
 function isUnder(theme,under){return under===undefined||under===null?!!UNDER_DEF[theme]:!!under;}
-const WORLDS=[['bog','GOBLIN BOG'],['mine','GOBLIN MINES'],['marsh','DROWNED MARSH'],['cinder','CINDER FORGE'],['garden','GIANT GARDEN'],['halls','DEEP HALLS'],['sewers','CLOCKWORK SEWERS'],['crypts','THE CRYPTS'],['caves','GLOWING CAVES'],['forge','WAR FORGE'],['frost','FROST CAVES'],['dunes','DUNE SEA'],['canopy','GIANT FOREST'],['vortex','VORTEX LANDS'],['shatter','SHATTERED BORDER'],['ruins','TEMPLE RUINS']];
+const WORLDS=[['bog','GOBLIN BOG'],['mine','GOBLIN MINES'],['marsh','DROWNED MARSH'],['cinder','CINDER FORGE'],['garden','GIANT GARDEN'],['halls','DEEP HALLS'],['sewers','THE WARRENS'],['crypts','THE CRYPTS'],['caves','GLOWING CAVES'],['forge','WAR FORGE'],['frost','FROST CAVES'],['dunes','DUNE SEA'],['canopy','GIANT FOREST'],['vortex','VORTEX LANDS'],['shatter','SHATTERED BORDER'],['ruins','TEMPLE RUINS']];
 const artCache=new Map();
 // grimdark homes: dull the cheerful colours, then add stakes and a skull post
 function grimHome(h){const x=h.getContext('2d'),d=x.getImageData(0,0,h.width,h.height),a=d.data;for(let i=0;i<a.length;i+=4){if(!a[i+3])continue;const r=a[i]/255,g=a[i+1]/255,b=a[i+2]/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),L=(mx+mn)/2,S=mx===mn?0:(mx-mn)/(1-Math.abs(2*L-1));if(S<.7&&L>.72){a[i]*=.66;a[i+1]*=.62;a[i+2]*=.58;}else if(g>=r&&g>=b&&L>.38&&S>.25){const m=(r+g+b)/3;a[i]=(m+(r-m)*.45)*180;a[i+1]=(m+(g-m)*.45)*180;a[i+2]=(m+(b-m)*.45)*180;}}x.putImageData(d,0,0);const P=(px,py,c,w=1,hh=1)=>{x.fillStyle=c;x.fillRect(px,py,w,hh);};const H=h.height;for(const sx of [1,4,h.width-5,h.width-2]){P(sx-1,H-7,'#120c10',3,7);P(sx,H-8,'#120c10',1,1);P(sx,H-7,'#5a4028',1,6);}P(6,H-18,'#120c10',3,18);P(7,H-17,'#4a3424',1,17);P(5,H-23,'#120c10',5,5);P(6,H-22,'#c8c0a4',3,3);P(6,H-21,'#120c10',1,1);P(8,H-21,'#120c10',1,1);return h;}
@@ -3548,7 +3586,8 @@ const Play={world:null,paused:false,ff:false,acc:0,test:false,begin(def,ser,o={}
   for(const e of w.ents){if(e.k==='hat'){const x=e.x-ox|0,y=e.y-oy|0;C.fillStyle='#090a0c';C.fillRect(x-4,y-3,9,4);C.fillStyle=e.c;C.fillRect(x-3,y-3,7,3);C.fillRect(x-1,y-5,3,2);}else if(e.k==='boots'){const x=e.x-ox|0,y=e.y-oy|0;C.fillStyle='#090a0c';C.fillRect(x-6,y-4,5,4);C.fillRect(x+1,y-4,5,4);C.fillStyle='#442f21';C.fillRect(x-5,y-3,4,3);C.fillRect(x+2,y-3,4,3);}else if(e.k==='ghost'){const x=e.x-ox|0,y=e.y-oy|0;C.globalAlpha=Math.min(1,e.l/30);C.fillStyle='#7693b8';C.fillRect(x-3,y-8,7,8);C.fillRect(x-4,y-5,9,5);C.fillStyle='#090a0c';C.fillRect(x-2,y-6,1,2);C.fillRect(x+2,y-6,1,2);C.fillStyle='#f0d16b';C.fillRect(x-3,y-11,7,1);C.globalAlpha=1;}}
   for(const e of w.ents)if(e.k==='say'){const W=e.s.length*6+7,x=clamp((e.g.x-ox)-(W>>1)|0,v.x+2,v.x+v.w-W-2),y=clamp(e.g.y-oy-(e.g.s==='sit'?47:36)|0,2,VIEWH-16);C.fillStyle='#090a0c';C.fillRect(x-1,y-1,W+2,13);C.fillStyle='#e8dcc0';C.fillRect(x,y,W,11);C.fillRect((e.g.x-ox|0)-1,y+11,3,2);txt(C,e.s,x+4,y+2,'#141519');}
   for(const g of w.gobs){if(!w.alive(g))continue;const c=g.zz>0?'#50739b':g.daze>0?'#f0d16b':g.hypno>0?'#515d9d':g.ward>0?'#76bd5d':null;if(c){C.fillStyle=c;C.fillRect(g.x-ox-1|0,g.y-oy-20+((w.tick>>3)&1)|0,3,3);}}for(const m of w.mobs){if(m.dead)continue;const c=m.sleep>0?'#50739b':m.daze>0?'#f0d16b':m.charm>0?'#515d9d':null;if(c){C.fillStyle=c;C.fillRect(m.x-ox-1|0,m.y-oy-24+((w.tick>>3)&1)|0,3,3);}}
-  for(const e of w.ents)if(e.k==='rmine'){const x=e.x-ox|0,y=e.y-oy|0;C.fillStyle='#090a0c';C.fillRect(x-5,y-6,10,6);C.fillStyle=(e.t>>2)&1?'#e72417':'#3b3d40';C.fillRect(x-4,y-5,8,4);}
+  for(const e of w.ents)if(e.k==='rmine'){// a bloated, bred creature stuffed with scrap and blackpowder, waddling on stubby legs, its fuse sparking
+   const x=e.x-ox|0,y=e.y-oy|0,w=(e.t>>2)&1;C.fillStyle='#090a0c';C.fillRect(x-5,y-7,10,6);C.fillRect(x-4,y-8,8,1);C.fillStyle='#6e6a66';C.fillRect(x-4,y-7,8,5);C.fillStyle='#a87c74';C.fillRect(x-2,y-5,4,1);C.fillStyle='#d8b84a';C.fillRect(x+2,y-6,1,1);C.fillStyle='#4a3622';C.fillRect(x-4,y-1,1,1+w);C.fillRect(x+3,y-1,1,2-w);C.fillStyle=w?'#ffcf5a':'#e72417';C.fillRect(x-1,y-10,1,2);}
   for(const e of w.ents)if(e.k==='meteor'&&e.rock){const tx=e.tx-ox|0,ty=e.ty-oy|0;if((w.tick>>2)&1){C.fillStyle='#e72417';C.fillRect(tx-12,ty-1,8,2);C.fillRect(tx+5,ty-1,8,2);C.fillRect(tx-1,ty-13,2,8);}if(!e.wait){const x=e.x-ox|0,y=e.y-oy|0;C.fillStyle='rgba(120,110,100,.35)';for(let q=1;q<5;q++)C.fillRect(x-q*3,y-q*6,3,3);C.fillStyle='#090a0c';C.fillRect(x-8,y-7,16,14);C.fillRect(x-6,y-9,12,18);C.fillStyle='#4a4e38';C.fillRect(x-7,y-8,14,4);C.fillStyle='#5e5852';C.fillRect(x-7,y-4,14,9);C.fillRect(x-5,y+5,10,3);C.fillStyle='#3a3430';C.fillRect(x-1,y-2,6,8);C.fillStyle='#1a1416';C.fillRect(x-4,y-11,1,4);}}
 for(const e of w.ents)if(e.k==='meteor'&&!e.rock){const tx=e.tx-ox|0,ty=e.ty-oy|0;if((w.tick>>2)&1){C.fillStyle='#e72417';C.fillRect(tx-12,ty-1,8,2);C.fillRect(tx+5,ty-1,8,2);C.fillRect(tx-1,ty-13,2,8);}if(!e.wait){const x=e.x-ox|0,y=e.y-oy|0;for(let q=1;q<6;q++){C.fillStyle=['#b5a64b','#db9016','#b64c1e','#772921','#392424'][q-1];C.fillRect(x-q*2-4+q,y-q*5,8-q,6);}C.fillStyle='#090a0c';C.fillRect(x-7,y-6,14,13);C.fillStyle='#5d4237';C.fillRect(x-6,y-5,12,11);C.fillStyle='#81624d';C.fillRect(x-4,y-4,5,3);}}
   for(const e of w.ents)if(e.k==='lurker'){const x=e.x-ox|0,y=e.y-oy|0,t=w.tick,r=5+((t>>2)%12),fl=(t>>3)&1;C.fillStyle='rgba(190,205,195,'+(0.5-r/30).toFixed(2)+')';C.fillRect(x-r,y,r*2,1);C.fillRect(x-r+3,y+1,r*2-6,1);

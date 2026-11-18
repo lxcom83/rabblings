@@ -121,8 +121,8 @@ glide:['............','..g.....g...','.ggg...ggg..','ggggg.ggggg.','gg.gg.gg.gg.
 dust:['..a....a....','....g.....a.','.a....a.....','...g.....g..','a.....a.....','....a.....a.','..g.....a...','.....g......','.a.....a....','....a.......'],
 steam:['...a..a.....','..a..a......','...a..a.....','...eeee.....','..eeeeee....','..eeddee....','..eeeeee....','...eeee.....','...d..d.....','...a..a.....'],
 cannon:['..........d.','.........dd.','.......eee..','.....eeeee..','...eeeeeb...','..eeeeebb...','..eee.bbbb..','.....bcccb..','.....bcccb..','......bbb...'],
-spring:['....eeee....','...e....e...','....eeee....','...e....e...','....eeee....','...e....e...','....eeee....','..cccccccc..','.cccccccccc.','............'],
-ratmine:['.....d......','......a.....','....eeee....','..eeeeeeee..','.eeeddeeeee.','.eeeddeeeee.','.eeeeeeeee..','..eeeeeeee..','....eeee....','............'],
+spring:['......aa....','.....aaaa...','.....dad....','....aa......','...aa.......','..dad.......','..aa........','...aa.......','....aa......','..aaaaaa....'],
+ratmine:['......d.....','.....c......','...eeeee....','..eeeeeee...','.eaeeeeeee..','.eeececeeee.','.eeeeeeeeee.','..eeeeeeee..','..c.c..c.c..','............'],
 vine:['........eee.','.......eeeee','........c...','....eee.c...','...eeeee....','....c.......','.eee.c......','eeeee.......','.c..........','.c..........'],
 puff:['............','...gg.gg....','..gggggggg..','.gggggggggg.','..gggggggg..','...gggggg...','....f.ff....','.....f......','.....f......','............'],
 sword:['..........aa','.........aae','........aae.','.......aae..','......aae...','.b...aae....','.bb.aae.....','..bcae......','..cbb.......','.c..b.......'],
@@ -235,7 +235,12 @@ function buildBackdrop(name){const T=THEME[name],[sky,sx]=ditherSky(VW,VH,T.sky)
   layer(.5,x=>{ridge(x,240,3,1.2,'#17120e','#b48d33');});}
  else if(name==='sewers'){layer(.14,x=>{for(let y=0;y<270;y+=10)for(let i=0;i<LW;i+=22){const o=(y/10&1)*11;x.fillStyle=noise(i,y)>.5?'#191c18':'#151713';x.fillRect((i+o)%LW,y,21,9);}});
   layer(.3,x=>{for(let i=0;i<3;i++){const a=i*170+85;x.strokeStyle='#31322d';x.lineWidth=16;x.beginPath();x.arc(a,190,76,Math.PI,0);x.stroke();x.fillStyle='#090a08';x.beginPath();x.arc(a,190,68,Math.PI,0);x.fill();x.fillRect(a-68,190,136,80);for(let k=0;k<70;k+=2){const q=Math.sin(k*.09+i)*3;x.fillStyle='#454e36';x.fillRect(a-3+q,190+k,6,2);x.fillStyle='#636945';x.fillRect(a-1+q,190+k,2,2);}}x.fillStyle='#463c2f';x.fillRect(0,40,LW,14);x.fillStyle='#6b593e';x.fillRect(0,40,LW,3);for(let i=0;i<8;i++)x.fillRect(i*64+6,36,8,22);});
-  layer(.52,x=>{for(let i=0;i<4;i++){const a=60+i*128,b=90+(i%2)*50,cr=24;x.fillStyle='#463c2f';for(let k=0;k<12;k++){const q=k/12*TAU;x.fillRect(a+Math.cos(q)*cr-3,b+Math.sin(q)*cr-3,7,7);}x.beginPath();x.arc(a,b,cr-1,0,TAU);x.fill();x.fillStyle='#121410';x.beginPath();x.arc(a,b,9,0,TAU);x.fill();}ridge(x,244,4,2,'#0e100d','#636945');});}
+  layer(.52,x=>{// the Warrens: big spoked treadwheels (no gears), worked by bred muscle, and chains hanging from the main pipe
+   for(let i=0;i<4;i++){const a=60+i*128,b=90+(i%2)*50,cr=26;x.strokeStyle='#463c2f';x.lineWidth=6;x.beginPath();x.arc(a,b,cr,0,TAU);x.stroke();x.strokeStyle='#2d2924';x.lineWidth=2;x.beginPath();x.arc(a,b,cr-4,0,TAU);x.stroke();
+    x.strokeStyle='#3a3127';x.lineWidth=3;for(let k=0;k<6;k++){const q=k/6*Math.PI+i*.4;x.beginPath();x.moveTo(a+Math.cos(q)*(cr-3),b+Math.sin(q)*(cr-3));x.lineTo(a-Math.cos(q)*(cr-3),b-Math.sin(q)*(cr-3));x.stroke();}
+    x.fillStyle='#5e5040';for(let k=0;k<16;k++){const q=k/16*TAU;x.fillRect(a+Math.cos(q)*(cr-1)-1,b+Math.sin(q)*(cr-1)-1,2,2);}x.fillStyle='#121410';x.beginPath();x.arc(a,b,5,0,TAU);x.fill();x.fillStyle='#6a5a46';x.fillRect(a-1,b-1,2,2);}
+   x.fillStyle='#2d2924';for(let i=0;i<7;i++){const a=30+i*74,len=30+(i*37)%50;for(let k=0;k<len;k+=4)x.fillRect(a+(k/4&1),54+k,2,3);}
+   ridge(x,244,4,2,'#0e100d','#636945');});}
  else if(name==='crypts'){sx.fillStyle='#7c796e';sx.beginPath();sx.arc(240,84,44,0,TAU);sx.fill();sx.fillStyle='#1b1d21';sx.fillRect(238,40,4,88);sx.fillRect(196,82,88,4);
   layer(.2,x=>{x.fillStyle='#151619';x.fillRect(0,0,LW,26);for(let i=0;i<6;i++){const a=i*86;x.fillRect(a,0,16,270);x.beginPath();x.arc(a+51,26,36,0,Math.PI);x.lineTo(a+87,0);x.lineTo(a+16,0);x.fill();}});
   layer(.42,x=>{ridge(x,226,6,2,'#121316','#32353a');for(let i=0;i<11;i++){const a=r()*LW|0,h=20+r()*22|0;x.fillStyle='#202225';x.fillRect(a,226-h,16,h+6);x.beginPath();x.arc(a+8,226-h,8,Math.PI,0);x.fill();x.fillStyle='#404348';x.fillRect(a+7,226-h-1,2,12);x.fillRect(a+4,226-h+3,8,2);if(i%3===0){x.fillStyle='#f0c36b';x.fillRect(a+18,216,3,10);x.fillStyle='#c0ae65';x.fillRect(a+18,213,3,3);}}});}

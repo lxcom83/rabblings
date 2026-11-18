@@ -1,6 +1,6 @@
 // 48px Ratfolk rig (HR=2). Same pose() as the 24px rig, doubled; same cell, ground line and centre as rig48 in art48.js.
-// Gadget-keeping rat: big round ears, goggle lens over one eye, long snout with whiskers and buck teeth, patched tunic,
-// scrap backpack with a cog, segmented bare tail, clawed hands and feet.
+// Ratfolk of the Litters: big round ears, a beady eye with a bred second eye above it, long snout with whiskers and buck teeth, patched tunic,
+// bred mutations (an extra eye, a growth or a scrap-and-bone graft), segmented bare tail bound with sinew, clawed hands and feet. No cogs, brass or goggles: Ratfolk machines are meat and scrap.
 RIG48.rat=function(x,c,s,f,n){
  if(s==='splat'){x.save();x.scale(2,2);drawRig(x,c,s,f,n);x.restore();return;}
  const p=pose(s,f,n),t=f/n*Math.PI*2,S=Math.sin,C=Math.cos,R=Math.round;
@@ -15,33 +15,35 @@ RIG48.rat=function(x,c,s,f,n){
  if(s==='float'){af=[2,-12];ab=[2,-12];}
  by=Math.max(by,-6);x.save();x.translate(-2,-3);
  if(s==='drown'||s==='swim'){x.beginPath();x.rect(0,0,52,44);x.clip();}
- const ol='#090a0c',claw='#e8e0cc',brass=c.hood,brassD=c.hoodD,steel='#8a8f96',steelL='#c4c9cf',leather='#4a3622';
+ const ol='#090a0c',claw='#e8e0cc',brass=c.hood,brassD=c.hoodD,steel='#6e6a66',steelL='#9a948c',leather='#4a3622',sinew='#a87c74',sinewD='#6e4a44',bone='#d8d0b8',boneD='#a89c80',graft=c.name!=='SEWERCLAW';
  const cx=24+bx,hy=36+by,sx=cx+lean,sy=hy-5;
- // tail: long bare tail with segment rings and a brass ring near the tip
+ // tail: long bare tail with segment rings, bound with sinew near the tip
  {const sw=s==='walk'||s==='panic'?R(S(t*2)*2):0,P0=[cx-5+lean,hy+2],P1=[cx-13,hy+7+sw],P2=[cx-18,hy+2+sw],P3=[cx-20,hy-6-sw];
   let prev=P0;for(let i=1;i<=22;i++){const u=i/22,q=1-u,X=q*q*q*P0[0]+3*q*q*u*P1[0]+3*q*u*u*P2[0]+u*u*u*P3[0],Y=q*q*q*P0[1]+3*q*q*u*P1[1]+3*q*u*u*P2[1]+u*u*u*P3[1];
-   L(prev[0],prev[1],X,Y,i%3===0?c.skin:c.skinD,i<14?3:2);prev=[X,Y];if(i===19)P(X-1|0,Y-1|0,brass,4,4),P(X|0,Y|0,brassD,2,2);}
+   L(prev[0],prev[1],X,Y,i%3===0?c.skin:c.skinD,i<14?3:2);prev=[X,Y];if(i===19)P(X-1|0,Y-1|0,sinew,3,3),P(X|0,Y|0,sinewD,2,1);}
   P(P3[0]-1|0,P3[1]-3|0,c.skinD,2,3);}
- // scrap backpack: small sack, patch, a cog and a copper pipe sticking out
- P(cx-12+lean,hy-8,6,10);P(cx-12+lean,hy-8,c.hoodD,6,10);P(cx-11+lean,hy-9,brass,4,2);P(cx-12+lean,hy-7,c.hood,1,8);P(cx-10+lean,hy-4,c.tun,3,3);
- P(cx-11+lean,hy-12,steel,4,3);P(cx-10+lean,hy-13,steel,2,1);P(cx-10+lean,hy-11,c.hoodD,2,1);P(cx-9+lean,hy-12,steelL,1,1);
- L(cx-8+lean,hy-9,cx-8+lean,hy-13,brass,2);
+ // a bred growth on the back: a lumpy, bald, grey-pink swelling with a bone lashed across it
+ {const gx=cx-11+lean,gy=hy-10;for(let j=0;j<9;j++){const w=j<2?4:j<6?7:6;P(gx+(j<2?2:0),gy+j,j<3?sinew:c.skinD,w,1);}P(gx+2,gy+2,'#c49a90',2,2);P(gx+5,gy+4,sinewD,1,2);P(gx+1,gy+6,sinewD,2,1);
+  L(gx-1,gy+8,gx+7,gy+2,bone,2);P(gx-2,gy+8,bone,2,2);P(gx+7,gy+1,bone,2,2);P(gx+3,gy+4,leather,1,3);}
  // back arm: sleeve, forearm, clawed hand
  const bs=[sx-3,sy+3],be=[bs[0]+ab[0]*0.5-1,bs[1]+ab[1]*0.5+2],bh=[sx-3+ab[0],sy+3+ab[1]];
- L(bs[0],bs[1],be[0],be[1],c.tunD,3);L(be[0],be[1],bh[0],bh[1],c.skinD,2);P(bh[0]|0,bh[1]|0,c.skinD,4,3);P(bh[0]+3|0,bh[1]+1|0,claw,2,1);P(bh[0]+2|0,bh[1]+3|0,claw,1,1);
+ L(bs[0],bs[1],be[0],be[1],c.tunD,3);
+ if(graft){// a forearm of scrap iron and bone, lashed on with sinew
+  L(be[0],be[1],bh[0],bh[1],steel,3);L(be[0],be[1]-1,bh[0],bh[1]-1,steelL,1);P(be[0]|0,be[1]|0,sinew,3,2);P((be[0]+bh[0])/2|0,(be[1]+bh[1])/2|0,sinew,3,1);P(bh[0]|0,bh[1]|0,bone,4,3);P(bh[0]+3|0,bh[1]+1|0,boneD,3,1);P(bh[0]+2|0,bh[1]+3|0,boneD,2,1);}
+ else{L(be[0],be[1],bh[0],bh[1],c.skinD,2);P(bh[0]|0,bh[1]|0,c.skinD,4,3);P(bh[0]+3|0,bh[1]+1|0,claw,2,1);P(bh[0]+2|0,bh[1]+3|0,claw,1,1);}
  // legs: thigh, knee, shin, big clawed foot in a patched boot
  const leg=(l,col,lt)=>{const fx=cx+l[0]-(bx<=4?bx:2),fy=45+l[1],kx=(cx+fx)/2+(l[0]>0?3:-2),ky=(hy+3+fy)/2;
   L(cx,hy+3,kx,ky,col,3);L(kx,ky,fx,fy-1,col,2);P(kx-1|0,ky-1|0,lt,3,2);
   P(fx-2|0,Math.min(fy+1,47),c.boot,9,1);P(fx-2|0,Math.min(fy,46),c.boot,8,1);P(fx-1|0,Math.min(fy-1,45),c.boot,5,1);P(fx|0,Math.min(fy,46),c.hood,2,1);
   P(fx+6|0,Math.min(fy+1,47),claw,1,1);P(fx+4|0,Math.min(fy+1,47),c.skinD,2,1);};
  leg(lb,c.skinD,c.skin);leg(lf,c.skin,c.skinL);
- // hunched torso: patched tunic, belt with cog buckle
+ // hunched torso: patched tunic, belt with a knucklebone buckle
  P(sx-6,hy-6,c.tun,12,9);P(sx-6,hy-6,c.tunD,2,9);P(sx-7,hy-4,c.tun,2,5);P(sx-6,hy+2,c.tunD,12,1);
  P(sx+1,hy-5,c.hood,4,4);P(sx+2,hy-4,c.hoodD,2,1);P(sx+1,hy-2,c.hoodD,4,1);// patch with stitches
  P(sx-3,hy-3,c.tunD,1,3);
- P(sx-6,hy-1,leather,12,2);P(sx-1,hy-2,steel,4,4);P(sx,hy-1,leather,2,2);P(sx,hy-2,steelL,1,1);P(sx+3,hy-1,steelL,1,1);
+ P(sx-6,hy-1,leather,12,2);P(sx-1,hy-2,bone,4,3);P(sx,hy-1,boneD,2,1);P(sx-2,hy,bone,1,1);P(sx+3,hy,bone,1,1);// a knucklebone buckle
  P(sx-6,hy+3,c.tun,3,3);P(sx-1,hy+3,c.tun,2,2);P(sx+3,hy+3,c.tun,3,1);// ragged hem
- // head: big skull, round ears, long snout, goggle lens, whiskers, buck teeth
+ // head: big skull, round ears, long snout, bred eyes, bald patches, whiskers, buck teeth
  const hx=sx+2,hy2=hy-22+hd;
  P(hx-8,hy2+5,c.skin,12,12);P(hx-7,hy2+4,c.skin,10,1);P(hx-7,hy2+17,c.skinD,10,1);P(hx-9,hy2+7,c.skinD,2,8);P(hx-6,hy2+5,c.skinL,8,2);P(hx-7,hy2+7,c.skinL,3,2);P(hx+2,hy2+8,c.skinD,2,8);
  P(hx+3,hy2+9,c.skin,6,7);P(hx+9,hy2+10,c.skin,3,5);P(hx+3,hy2+9,c.skinL,7,1);P(hx+3,hy2+15,c.skinD,9,1);
@@ -49,9 +51,11 @@ RIG48.rat=function(x,c,s,f,n){
  // ears: outer skin, inner pink
  P(hx-7,hy2,c.skinD,6,6);P(hx-6,hy2-1,c.skinD,4,1);P(hx-6,hy2+1,'#c98f8a',4,4);P(hx-5,hy2+1,'#e1b0aa',2,2);
  P(hx,hy2,c.skinD,6,6);P(hx+1,hy2-1,c.skinD,4,1);P(hx+1,hy2+1,'#c98f8a',4,4);P(hx+2,hy2+1,'#e1b0aa',2,2);
- // goggle strap + lens over the eye
- P(hx-8,hy2+9,brassD,9,2);P(hx+1,hy2+7,brass,7,7);P(hx+2,hy2+6,brass,5,1);P(hx+2,hy2+14,brassD,5,1);P(hx+2,hy2+8,'#a8d6dc',5,5);P(hx+3,hy2+8,'#d8f0f0',1,1);
- P(hx+4,hy2+9,c.glow||'#f0c040',2,3);P(hx+5,hy2+10,ol,1,2);
+ // a beady eye, and a second, smaller one bred in above it; bald patches on the skull
+ P(hx+2,hy2+8,ol,5,4);P(hx+3,hy2+9,'#d8b84a',3,2);P(hx+4,hy2+9,ol,1,2);P(hx+3,hy2+8,c.skinD,4,1);
+ P(hx+5,hy2+5,ol,3,3);P(hx+6,hy2+6,'#c86a4a',1,1);
+ P(hx-5,hy2+7,'#b49a92',3,2);P(hx-2,hy2+11,'#b49a92',2,2);P(hx-6,hy2+12,'#8e7670',1,2);
+ if(!graft){P(hx-9,hy2+9,sinew,3,4);P(hx-10,hy2+10,'#c49a90',2,2);P(hx-9,hy2+12,sinewD,2,1);}
  // whiskers
  L(hx+9,hy2+13,hx+15,hy2+11,'#b8b2a6',1);L(hx+9,hy2+14,hx+15,hy2+16,'#b8b2a6',1);
  // mouth and teeth
