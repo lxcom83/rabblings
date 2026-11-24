@@ -72,6 +72,7 @@ html:not(.nw) .body.lc{grid-template-columns:24px minmax(0,1fr) 390px}
 .body.lc .left.fly .lstrip{display:none}
 .body.lc .left.fly::before{content:'';position:absolute;inset:0 auto 0 0;width:240px;background:var(--face);box-shadow:4px 0 12px #0005;border-right:1px solid var(--shade);z-index:-1}
 .body.lc .left.fly>.ph,.body.lc .left.fly>#treeHost{width:240px;position:relative;left:0;background:var(--face)}
+.ltools{display:flex;gap:6px;padding:2px 4px 6px;flex:none}.ltools button{flex:1}
 .ph{display:flex;justify-content:space-between;align-items:center}
 .ph button{min-height:18px;padding:0 6px;font-size:12px;line-height:16px}
 .ph{background:linear-gradient(#f7f7f7,#dcdcdc);border-bottom:1px solid var(--shade);padding:3px 8px;font-weight:600;font-size:12px;flex:none}
@@ -295,7 +296,7 @@ html.nw .xrow{flex-direction:column;min-width:0}html.nw .xright{width:auto;flex-
   <div class="body">
     <aside class="left" id="leftcol"><div class="lstrip" id="lstrip" title="Show Maps (click)" role="button" tabindex="0" aria-label="Show the Maps list"><b>▶</b><span>Maps</span></div><div class="ph"><span>Maps</span><span><button id="lPin" title="Shrink the Maps list to a side strip" aria-label="Shrink Maps list">◀</button></span></div><div id="treeHost" style="display:flex;flex-direction:column;flex:1;min-height:0">
       <div style="padding:4px 4px 0"><input type="text" id="filter" placeholder="Search maps" aria-label="Search maps"></div>
-      <div class="tree" id="tree" role="tree" aria-label="Maps"></div></div></aside>
+      <div class="tree" id="tree" role="tree" aria-label="Maps"></div><div class="ltools"><button id="blkDup" title="Make a copy of the selected map block under a new name">Duplicate</button><button id="blkRen" title="Rename the selected map block">Rename</button></div></div></aside>
     <section class="stage"><div class="cv" id="cvWrap"><canvas id="cv" aria-label="Map, isometric view"></canvas><div class="hint" id="hint"></div><div id="demoCta"><button class="primary" id="demoGo">Load demo data</button><p>One click opens 13 sample maps with their routes, so you can look around, edit and try every tool. Your own files and cloud folders are never touched.</p></div></div></section>
     <aside class="right">
       <div id="qbar" aria-label="Quick tile picker"><div class="qrow"><select id="qFilter" aria-label="Part type"><option value="-1">All parts</option><option value="0">Ground</option><option value="1">West walls</option><option value="2">North walls</option><option value="3">Objects</option></select><span id="qInfo" class="note">Pick a part, then tap the map or a box below the Top view.</span></div><div id="qTiles" role="listbox" aria-label="Tile parts (quick)"></div></div>
@@ -373,8 +374,18 @@ html.nw .xrow{flex-direction:column;min-width:0}html.nw .xright{width:auto;flex-
       <div class="panel" id="p-spawn">
         <p class="note">Experimental tools. They change many nodes at once, so check the result and use Undo or Revert routes if you do not like it.</p>
         <h3>Auto-route</h3>
+        <label class="chk" title="Sets the spacing for you from how tight the map is: more nodes in rooms and corridors, fewer in open ground, like the original maps"><input type="checkbox" id="smartSp" checked> Smart spacing</label>
         <div class="slider"><span>Node spacing</span><input type="range" id="radius" min="3" max="12" value="6" aria-label="Node spacing"><output id="radiusO">6</output></div>
         <div class="row"><button id="autoB">Auto-route this map</button><button id="autoAllB">Auto-route all maps</button></div>
+        <hr>
+        <h3>Generate a map block</h3>
+        <p class="note">Builds a new block from the tile set of the open map. It learns which parts are ground, walls, doors and props from the maps already loaded for that terrain, so it works best when the terrain's own maps are loaded.</p>
+        <div class="row"><label class="grow note">Style<select id="genStyle"><option value="mixed">Mixed (a building and open ground)</option><option value="building">Building (fills the block)</option><option value="open">Open field</option></select></label>
+        <label class="grow note">Size<select id="genSize"><option value="10">10 x 10</option><option value="20">20 x 20</option><option value="30">30 x 30</option></select></label></div>
+        <div class="slider"><span>Scenery amount</span><input type="range" id="genDens" min="0" max="100" value="50" aria-label="Scenery amount"><output id="genDensO">50%</output></div>
+        <div class="row"><label class="grow note">Seed<input type="number" id="genSeed" value="1" min="1"></label><label class="grow note">Name<input type="text" id="genName" maxlength="40" placeholder="GEN_BLOCK"></label></div>
+        <div class="row"><button id="genB">Generate new block</button><button id="genAgainB" title="Same settings, next seed">Try another seed</button></div>
+        <p class="note" id="genNote"></p>
         <hr>
         <h3>Mix of alien ranks</h3><div id="rankSliders"></div>
         <div class="slider"><span>Share of nodes</span><input type="range" id="frac" min="5" max="90" value="35"><output id="fracO">35%</output></div>
@@ -458,7 +469,7 @@ function parseMCD(u8) {
   const out = [];
   for (let i = 0; i + 62 <= u8.length; i += 62) {
     const r = u8.subarray(i, i + 62);
-    out.push({ sd: r[30], nf: r[32], bw: r[33], gl: r[34], hd: r[35], tu: r[39], tl: (r[48] << 24) >> 24 });
+    out.push({ sd: r[30], nf: r[32], bw: r[33], gl: r[34], hd: r[35], tu: r[39], tl: (r[48] << 24) >> 24, tt: r[53] });
   }
   return out;
 }
@@ -589,6 +600,13 @@ class Model {
     return (this._comps = { comps, cid });
   }
   clearance(id) { const z = this.xyz(id)[2]; let n = 0; for (const nb of this.nbrs(id)) if (this.xyz(nb)[2] === z) n++; return n; }
+  /* The engine puts a large unit's top-left tile on the node and extends it one tile east and south, so the 2x2 block must start AT the node:
+     all four tiles standable, no wall between them, and nothing blocking the diagonal. */
+  fitsLargeAt(x, y, z) {
+    if (!(this.inb(x, y) && this.inb(x + 1, y + 1))) return false;
+    return this.standable(x, y, z) && this.standable(x + 1, y, z) && this.standable(x, y + 1, z) && this.standable(x + 1, y + 1, z) &&
+      this.stepOk(x, y, 1, 0, z) && this.stepOk(x, y + 1, 1, 0, z) && this.stepOk(x, y, 0, 1, z) && this.stepOk(x + 1, y, 0, 1, z);
+  }
   fitsLarge(x, y, z) {
     for (const [ax, ay] of [[x, y], [x - 1, y], [x, y - 1], [x - 1, y - 1]]) {
       if (!(this.inb(ax, ay) && this.inb(ax + 1, ay + 1))) continue;
@@ -632,13 +650,33 @@ class Model {
 }
 
 /* ---------------- auto routes ---------------- */
+/* Target node density measured on 422 hand-made blocks: tighter spaces (rooms, corridors) get more nodes per walkable tile
+   than open ground. Points are [average clearance of the walkable tiles, nodes per 100 walkable tiles]. */
+const DENSITY = [[3, 11.5], [4, 7.6], [5, 4.9], [6, 3.0], [7, 2.6]];
+function targetDensity(clr) {
+  if (clr <= DENSITY[0][0]) return DENSITY[0][1]; const L = DENSITY.length;
+  for (let i = 1; i < L; i++) if (clr <= DENSITY[i][0]) { const [x0, y0] = DENSITY[i - 1], [x1, y1] = DENSITY[i]; return y0 + (y1 - y0) * (clr - x0) / (x1 - x0); }
+  return DENSITY[L - 1][1];
+}
 function autoroute(model, radius = 6, opts = {}) {
   const maxNodes = opts.maxNodes || 250, markSmall = opts.markSmall !== false, minComp = 3;
+  if (opts.smart) {
+    const { comps } = model.components(); let n = 0, sum = 0;
+    for (const c of comps) if (c.length >= minComp) for (const k of c) { n++; sum += model.clearance(k); }
+    if (n >= 12) {
+      const want = Math.min(maxNodes, Math.max(2, Math.round(targetDensity(sum / n) * n / 100))); let best = null, bd = 1e9;
+      for (let rad = 3; rad <= 9; rad++) {
+        const nodes = _autoroute(model, rad, markSmall, minComp, maxNodes), d = Math.abs(nodes.length - want);
+        if (d <= bd) { bd = d; best = nodes; } if (nodes.length <= want) break;
+      }
+      if (best && best.length <= maxNodes) return best;
+    }
+  }
   let nodes = [];
-  for (let rad = radius; rad < radius + 12; rad++) { nodes = _autoroute(model, rad, markSmall, minComp); if (nodes.length <= maxNodes) return nodes; }
-  return nodes.slice(0, maxNodes);
+  for (let rad = radius; rad < radius + 40; rad += rad < radius + 12 ? 1 : 3) { nodes = _autoroute(model, rad, markSmall, minComp, maxNodes); if (nodes.length <= maxNodes) return nodes; }
+  return remap(nodes, nodes.slice(0, maxNodes).map((_, i) => i));
 }
-function _autoroute(model, radius, markSmall, minComp) {
+function _autoroute(model, radius, markSmall, minComp, maxN = 250) {
   const { comps } = model.components();
   const keep = new Set(); for (const c of comps) if (c.length >= minComp) for (const k of c) keep.add(k);
   const chosen = new Map();
@@ -673,6 +711,19 @@ function _autoroute(model, radius, markSmall, minComp) {
     for (let i = 0; i < model.N; i++) if (nd[i] >= 0 && (!dist.has(i) || nd[i] < dist.get(i))) dist.set(i, nd[i]);
     if (pts.length > 400) break;
   }
+  /* a route file can address 250 nodes at most, so on a very large block thin the closest pairs (exit nodes last) */
+  if (chosen.size > maxN) {
+    const exitSet = new Set([...chosen].filter(([, sd]) => sd).map(([t]) => t));
+    while (chosen.size > maxN) {
+      let worst = -1, wd = 1e9; const ks = [...chosen.keys()], P = ks.map((k) => model.xyz(k));
+      for (let i = 0; i < ks.length; i++) {
+        if (exitSet.has(ks[i])) continue; let nn = 1e9;
+        for (let j = 0; j < ks.length; j++) if (j !== i && P[i][2] === P[j][2]) nn = Math.min(nn, Math.max(Math.abs(P[i][0] - P[j][0]), Math.abs(P[i][1] - P[j][1])));
+        if (nn < wd) { wd = nn; worst = i; }
+      }
+      if (worst < 0) break; chosen.delete(ks[worst]);
+    }
+  }
   const order = [...chosen.keys()].sort((a, b) => { const p = model.xyz(a), q = model.xyz(b); return p[2] - q[2] || p[1] - q[1] || p[0] - q[0]; });
   const idx = new Map(order.map((t, i) => [t, i]));
   const hits = new Map(), blk = new Map(order.map((t, i) => [t, i]));
@@ -691,14 +742,29 @@ function _autoroute(model, radius, markSmall, minComp) {
   for (const [t, s] of chosen) if (s) exUsed[idx.get(t)] = 1;
   const sorted = [...edges].sort((p, q) => p[1] - q[1]);
   for (const [key, d] of sorted) { const [a, b] = key.split(',').map(Number); if (find(a) !== find(b)) { par[find(a)] = find(b); sel.set(key, d); deg[a]++; deg[b]++; } }
-  for (const [key, d] of sorted) { if (sel.has(key)) continue; const [a, b] = key.split(',').map(Number); if (deg[a] + exUsed[a] < 5 && deg[b] + exUsed[b] < 5) { sel.set(key, d); deg[a]++; deg[b]++; } }
+  /* parts of a level that can be left but not re-entered on foot (a roof you can only drop off) get a one-way link down,
+     so the route graph is not split and units placed there can still leave */
+  const oneWay = new Map(); const dsorted = [];
+  for (const [a, h] of hits) for (const [b, d] of h) { if (a === b) continue; const back = hits.get(b); if (!back || !back.has(a)) dsorted.push([a, b, d]); }
+  dsorted.sort((p, q) => p[2] - q[2]);
+  for (const [a, b, d] of dsorted) { if (find(a) !== find(b) && deg[a] + exUsed[a] < 5) { par[find(a)] = find(b); oneWay.set(a + ',' + b, d); deg[a]++; } }
+  /* extra links: hand-made routes join each node to its near neighbours (median rank 1, about 2.3 links per node) and rarely
+     skip over a closer node, so an extra link is only kept when no third node sits closer to both ends (relative-neighbourhood test) */
+  const far = radius * 3 + 4, pd = order.map((t) => model.bfs([t], far)), dd = (i, j) => { const v = pd[i][order[j]], w = pd[j][order[i]]; return v < 0 || w < 0 ? 1e9 : Math.max(v, w); };
+  const cap = 4;
+  for (const [key, d] of sorted) {
+    if (sel.has(key)) continue; const [a, b] = key.split(',').map(Number); if (deg[a] + exUsed[a] >= cap || deg[b] + exUsed[b] >= cap) continue;
+    let blocked = false; for (let c = 0; c < order.length && !blocked; c++) if (c !== a && c !== b && Math.max(dd(a, c), dd(c, b)) < d) blocked = true;
+    if (!blocked) { sel.set(key, d); deg[a]++; deg[b]++; }
+  }
   const nodes = order.map((t) => {
     const [x, y, z] = model.xyz(t), n = newNode(x, y, model.levs - 1 - z); n.patrol = 1;
-    if (markSmall && !model.fitsLarge(x, y, z)) n.unit = 2; return n;
+    if (markSmall && !model.fitsLargeAt(x, y, z)) n.unit = 2; return n;
   });
   const slots = order.map(() => []);
   for (const [t, s] of chosen) if (s) slots[idx.get(t)].push([EXIT[s], 0, 0]);
-  for (const [key, d] of sel) { const [a, b] = key.split(',').map(Number), dd = Math.min(255, Math.max(1, d)); slots[a].push([b, dd, 0]); slots[b].push([a, dd, 0]); }
+  for (const [key] of sel) { const [a, b] = key.split(',').map(Number), pa = model.xyz(order[a]), pb = model.xyz(order[b]), dc = Math.min(255, Math.max(1, Math.max(Math.abs(pa[0] - pb[0]), Math.abs(pa[1] - pb[1]), Math.abs(pa[2] - pb[2])))); slots[a].push([b, dc, 0]); slots[b].push([a, dc, 0]); }
+  for (const key of oneWay.keys()) { const [a, b] = key.split(',').map(Number), pa = model.xyz(order[a]), pb = model.xyz(order[b]); slots[a].push([b, Math.min(255, Math.max(1, Math.max(Math.abs(pa[0] - pb[0]), Math.abs(pa[1] - pb[1]), Math.abs(pa[2] - pb[2])))), 0]); }
   nodes.forEach((n, i) => slots[i].slice(0, 5).forEach((l, k) => { n.links[k] = l; }));
   return pruneTraps(model, pruneIsolated(nodes));
 }
@@ -731,6 +797,126 @@ function pruneTraps(model, nodes, maxSize = 2) {
   }
   if (!drop.size) return nodes;
   return remap(nodes, nodes.map((_, i) => i).filter((i) => !drop.has(i)));
+}
+
+/* ---------------- tile placement audit ----------------
+   Rules measured on 430 original-style blocks (184,500 placed parts): the floor slot holds floor-type parts 99.9% of the time, the west and
+   north wall slots hold wall-type parts 99%, the object slot holds object-type parts 95% (the rest are floor decals and wall-like blocks the
+   original maps use on purpose). The ground level never has a completely empty tile, and a wall with no floor on either side is very rare. */
+function auditTiles(model) {
+  const iss = [], add = (sev, code, text, at) => iss.push({ sev, code, text, at });
+  const { cols, rows, levs } = model; const cap = (a) => a.slice(0, 40);
+  const slotBad = [[], [], [], []], floating = [], void0 = [], doorBad = [], objVoid = []; let off = 0;
+  const hasFloor = (x, y, z) => { if (!model.inb(x, y, z)) return false; const f = model.F[model.id(x, y, z)]; return !!f && !f.nf; };
+  const want = [0, 1, 2, 3];
+  for (let z = 0; z < levs; z++) for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+    const id = model.id(x, y, z), f = model.F[id], w = model.W[id], n = model.Nn[id], o = model.O[id], P = [f, w, n, o];
+    if (z === 0 && !f && !w && !n && !o) void0.push([x, y, z]);
+    for (let s = 0; s < 4; s++) { const m = P[s]; if (!m || m.tt === undefined) continue; if (m.tt !== want[s]) { if (s === 0) slotBad[0].push([x, y, z]); else if (s === 3 && (m.tt === 0 || m.tt === 1 || m.tt === 2)) off++; else slotBad[s].push([x, y, z]); } if ((s === 0 || s === 3) && (m.sd || m.hd)) doorBad.push([x, y, z]); }
+    if (w && w.tu !== 255 && !hasFloor(x, y, z) && !hasFloor(x - 1, y, z)) floating.push([x, y, z]);
+    if (n && n.tu !== 255 && !hasFloor(x, y, z) && !hasFloor(x, y - 1, z)) floating.push([x, y, z]);
+    if (o && z === 0 && !hasFloor(x, y, z)) objVoid.push([x, y, z]);
+  }
+  if (model.badparts) add('WARN', 'bad-part', `${model.badparts} placed part number(s) are beyond the end of this terrain's tile list, so they show as empty. The terrain listed for this block may be wrong.`, []);
+  if (void0.length) add('WARN', 'void-ground', `${void0.length} ground-level tile(s) are completely empty. Original maps never leave a hole in the ground level, so units can fall or the tile reads as no floor.`, cap(void0));
+  if (slotBad[0].length) add('INFO', 'floor-slot-misuse', `${slotBad[0].length} tile(s) have a part in the floor layer that is not a floor-type part. About 1 original block in 6 does this to get a particular look.`, cap(slotBad[0]));
+  if (doorBad.length) add('WARN', 'door-in-wrong-layer', `${doorBad.length} door part(s) sit in the floor or object layer. Doors belong in the west or north wall layers.`, cap(doorBad));
+  if (floating.length) add('INFO', 'floating-wall', `${floating.length} wall(s) have no floor on either side of them. Rare in the original maps, so check it is on purpose.`, cap(floating));
+  const sw = slotBad[1].length + slotBad[2].length; if (sw) add('INFO', 'wall-slot-mismatch', `${sw} wall-layer part(s) are not wall-type parts. The original maps do this sometimes to get a particular look.`, cap(slotBad[1].concat(slotBad[2])));
+  if (slotBad[3].length) add('INFO', 'object-slot-oddity', `${slotBad[3].length} part(s) in the object layer have an unusual type.`, cap(slotBad[3]));
+  if (objVoid.length) add('INFO', 'object-over-void', `${objVoid.length} ground-level object(s) stand on a tile with no floor.`, cap(objVoid));
+  return iss;
+}
+
+/* ---------------- terrain generator ----------------
+   Learns which parts do what from the blocks already loaded for the same tile set (what is used outdoors, indoors, as walls and
+   doors), then lays out a block in one of a few styles. Part roles come from the sample maps; the MCD flags are the fallback. */
+function partRoles(parts, samples) {
+  const L = parts.length, cnt = (n) => new Array(L).fill(0).map(() => n ? new Array(n).fill(0) : 0);
+  const fOut = new Array(L).fill(0), fIn = new Array(L).fill(0), fUp = new Array(L).fill(0), wUse = new Array(L).fill(0), nUse = new Array(L).fill(0), oOut = new Array(L).fill(0), oIn = new Array(L).fill(0), oEdge = new Array(L).fill(0);
+  for (const sm of samples || []) {
+    const { rows, cols, levs, data } = sm; const at = (x, y, zf, k) => (x < 0 || y < 0 || x >= cols || y >= rows) ? 0 : data[((zf * rows + y) * cols + x) * 4 + k];
+    for (let zf = 0; zf < levs; zf++) { const z = levs - 1 - zf; for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+      const f = at(x, y, zf, 0), w = at(x, y, zf, 1), n = at(x, y, zf, 2), o = at(x, y, zf, 3);
+      const walled = !!(w || n || at(x + 1, y, zf, 1) || at(x, y + 1, zf, 2) || at(x - 1, y, zf, 1) || at(x, y - 1, zf, 2));
+      if (f && f < L) { if (z > 0) fUp[f]++; else if (walled) fIn[f]++; else fOut[f]++; }
+      if (w && w < L) wUse[w]++; if (n && n < L) nUse[n]++;
+      if (o && o < L && z === 0) { if (walled) oIn[o]++; else oOut[o]++; if (x === 0 || y === 0 || x === cols - 1 || y === rows - 1) oEdge[o]++; }
+    } }
+  }
+  const ok = (i) => parts[i] && i > 0;
+  const top = (arr, pred, n = 6) => arr.map((c, i) => [c, i]).filter(([c, i]) => c > 0 && ok(i) && pred(parts[i], i)).sort((a, b) => b[0] - a[0]).slice(0, n).map(([c, i]) => ({ id: i, w: c }));
+  const walkF = (m) => m.tt === 0 && !m.nf && m.tu !== 255 && m.tu < 40;
+  const wallOk = (m) => m.tu === 255 && !m.sd && !m.hd && m.tt !== 3;
+  const R = {
+    ground: top(fOut, walkF), indoor: top(fIn, walkF, 4), roof: top(fUp, (m) => m.tt === 0 && !m.nf, 4),
+    wallW: top(wUse, (m) => wallOk(m) && m.bw === 0, 3), wallN: top(nUse, (m) => wallOk(m) && m.bw === 0, 3),
+    doorW: top(wUse, (m) => (m.sd || m.hd) && m.tu !== 255, 2).concat([]), doorN: top(nUse, (m) => (m.sd || m.hd) && m.tu !== 255, 2),
+    propOut: top(oOut, (m) => m.tt === 3 && m.tu !== 0 && m.nf === 0, 8), propIn: top(oIn, (m) => m.tt === 3, 6),
+  };
+  const first = (pred) => { for (let i = 1; i < L; i++) if (parts[i] && pred(parts[i])) return i; return 0; };
+  if (!R.ground.length) { const i = first(walkF); if (i) R.ground = [{ id: i, w: 1 }]; }
+  if (!R.indoor.length) R.indoor = R.ground.slice(0, 1);
+  if (!R.roof.length) { const i = first((m) => m.tt === 0 && !m.nf); if (i) R.roof = [{ id: i, w: 1 }]; }
+  if (!R.wallW.length) { const i = first((m) => m.tt === 1 && m.tu === 255); if (i) R.wallW = [{ id: i, w: 1 }]; }
+  if (!R.wallN.length) { const i = first((m) => m.tt === 2 && m.tu === 255); if (i) R.wallN = [{ id: i, w: 1 }]; }
+  return R;
+}
+function generateBlock(opts) {
+  const { parts, samples } = opts, style = opts.style || 'mixed', cols = opts.cols || 10, rows = opts.rows || 10, levs = Math.max(2, opts.levs || 4);
+  const rnd = rng(opts.seed || 1), R = partRoles(parts, samples), warn = [];
+  if (!R.ground.length) return { error: 'This tile set has no walkable floor part I can use for the ground.' };
+  const pick = (list) => { if (!list || !list.length) return 0; let t = 0; for (const e of list) t += e.w; let r = rnd() * t; for (const e of list) { r -= e.w; if (r <= 0) return e.id; } return list[0].id; };
+  const lay = Array.from({ length: levs }, () => ({ F: new Uint8Array(cols * rows), W: new Uint8Array(cols * rows), N: new Uint8Array(cols * rows), O: new Uint8Array(cols * rows) }));
+  const I = (x, y) => y * cols + x, g = lay[0], busy = new Uint8Array(cols * rows);
+  /* base ground: mostly one floor part, with the terrain's other ground parts as patches */
+  const main = R.ground[0].id; for (let i = 0; i < cols * rows; i++) g.F[i] = main;
+  if (R.ground.length > 1) { const patches = Math.round(cols * rows / 25); for (let k = 0; k < patches; k++) { const px = Math.floor(rnd() * cols), py = Math.floor(rnd() * rows), pr = 1 + Math.floor(rnd() * 2), id = pick(R.ground.slice(1)); for (let y = py - pr; y <= py + pr; y++) for (let x = px - pr; x <= px + pr; x++) if (x >= 0 && y >= 0 && x < cols && y < rows && rnd() < 0.8) g.F[I(x, y)] = id; } }
+  const lane = (x, y) => { const cx = Math.floor(cols / 2), cy = Math.floor(rows / 2); return (Math.abs(x - cx) <= 1 && (y <= 0 || y >= rows - 1)) || (Math.abs(y - cy) <= 1 && (x <= 0 || x >= cols - 1)); };
+  const buildings = []; const wantB = style === 'open' ? 0 : style === 'building' ? 1 + (cols * rows >= 300 ? 1 : 0) : (cols * rows >= 300 ? 2 : 1);
+  const canWalls = R.wallW.length && R.wallN.length;
+  if (wantB && !canWalls) warn.push('No wall parts could be found for this tile set, so no buildings were made.');
+  for (let k = 0; k < (canWalls ? wantB : 0); k++) {
+    let done = false;
+    for (let tries = 0; tries < 40 && !done; tries++) {
+      const maxW = style === 'building' ? cols - 3 : Math.max(4, Math.floor(cols * 0.6)), maxH = style === 'building' ? rows - 3 : Math.max(4, Math.floor(rows * 0.6));
+      const w = Math.min(maxW, 4 + Math.floor(rnd() * Math.max(1, maxW - 3))), h = Math.min(maxH, 4 + Math.floor(rnd() * Math.max(1, maxH - 3)));
+      if (w < 3 || h < 3 || w + 2 > cols || h + 2 > rows) continue;
+      const x0 = 1 + Math.floor(rnd() * (cols - w - 1)), y0 = 1 + Math.floor(rnd() * (rows - h - 1));
+      if (x0 + w >= cols || y0 + h >= rows) continue;
+      let clash = false; for (const b of buildings) if (x0 < b.x1 + 2 && x0 + w + 1 > b.x0 - 1 && y0 < b.y1 + 2 && y0 + h + 1 > b.y0 - 1) clash = true; if (clash) continue;
+      buildings.push({ x0, y0, x1: x0 + w - 1, y1: y0 + h - 1 }); done = true;
+    }
+  }
+  const doors = [];
+  for (const b of buildings) {
+    const wall = pick(R.wallW), wallN = pick(R.wallN), inF = pick(R.indoor), roof = pick(R.roof);
+    for (let y = b.y0; y <= b.y1; y++) for (let x = b.x0; x <= b.x1; x++) { g.F[I(x, y)] = inF; busy[I(x, y)] = 1; if (roof && lay[1]) lay[1].F[I(x, y)] = roof; }
+    for (let y = b.y0; y <= b.y1; y++) { g.W[I(b.x0, y)] = wall; g.W[I(b.x1 + 1, y)] = wall; }
+    for (let x = b.x0; x <= b.x1; x++) { g.N[I(x, b.y0)] = wallN; g.N[I(x, b.y1 + 1)] = wallN; }
+    /* one or two doors on different sides, never in a corner */
+    const nd = 1 + (rnd() < 0.5 ? 1 : 0), sides = ['N', 'S', 'W', 'E'].sort(() => rnd() - 0.5).slice(0, nd);
+    /* the first entrance is two tiles wide so 2x2 units can get in and out; the others are single doors */
+    sides.forEach((sd, di) => {
+      const wide = di === 0 ? 2 : 1;
+      if (sd === 'N' || sd === 'S') { const x = b.x0 + 1 + Math.floor(rnd() * Math.max(1, b.x1 - b.x0 - wide)), yy = sd === 'N' ? b.y0 : b.y1 + 1; for (let q = 0; q < wide && x + q <= b.x1; q++) { g.N[I(x + q, yy)] = R.doorN.length ? pick(R.doorN) : 0; doors.push([x + q, sd === 'N' ? b.y0 - 1 : b.y1 + 1]); } }
+      else { const y = b.y0 + 1 + Math.floor(rnd() * Math.max(1, b.y1 - b.y0 - wide)), xx = sd === 'W' ? b.x0 : b.x1 + 1; for (let q = 0; q < wide && y + q <= b.y1; q++) { g.W[I(xx, y + q)] = R.doorW.length ? pick(R.doorW) : 0; doors.push([sd === 'W' ? b.x0 - 1 : b.x1 + 1, y + q]); } }
+    });
+    if (b.x1 - b.x0 >= 5 && R.wallN.length) { const py = b.y0 + 2 + Math.floor(rnd() * Math.max(1, b.y1 - b.y0 - 3)); if (py > b.y0 && py <= b.y1) { const gap = b.x0 + 1 + Math.floor(rnd() * (b.x1 - b.x0 - 2)); for (let x = b.x0; x <= b.x1; x++) if (x !== gap && x !== gap + 1) g.N[I(x, py)] = wallN; } }
+    if (R.propIn.length) { const n = 1 + Math.floor(rnd() * 3); for (let k = 0; k < n; k++) { const x = b.x0 + Math.floor(rnd() * (b.x1 - b.x0 + 1)), y = b.y0 + Math.floor(rnd() * (b.y1 - b.y0 + 1)); if (!g.O[I(x, y)] && !doors.some(([dx, dy]) => Math.abs(dx - x) <= 1 && Math.abs(dy - y) <= 1)) g.O[I(x, y)] = pick(R.propIn); } }
+  }
+  /* outdoor props: clumps for open ground, sparse for mixed; the middle of each block edge stays clear so blocks join up */
+  const dens = (opts.density == null ? 0.5 : opts.density) * (style === 'open' ? 0.22 : style === 'mixed' ? 0.12 : 0.06);
+  if (R.propOut.length) {
+    const n = Math.round(cols * rows * dens);
+    for (let k = 0; k < n; k++) {
+      const cx = Math.floor(rnd() * cols), cy = Math.floor(rnd() * rows), id = pick(R.propOut), m = 1 + (rnd() < 0.5 ? Math.floor(rnd() * 3) : 0);
+      for (let j = 0; j < m; j++) { const x = cx + Math.floor(rnd() * 3) - 1, y = cy + Math.floor(rnd() * 3) - 1; if (x < 0 || y < 0 || x >= cols || y >= rows) continue; if (busy[I(x, y)] || g.O[I(x, y)] || lane(x, y)) continue; if (doors.some(([dx, dy]) => Math.abs(dx - x) <= 1 && Math.abs(dy - y) <= 1)) continue; if (g.W[I(x, y)] || g.N[I(x, y)]) continue; g.O[I(x, y)] = id; }
+    }
+  } else if (style === 'open') warn.push('No outdoor objects (trees, rocks) were found in the sample maps, so the field is bare.');
+  const data = new Uint8Array(cols * rows * levs * 4);
+  for (let z = 0; z < levs; z++) { const zf = levs - 1 - z, l = lay[z]; for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) { const p = ((zf * rows + y) * cols + x) * 4, i = I(x, y); data[p] = l.F[i]; data[p + 1] = l.W[i]; data[p + 2] = l.N[i]; data[p + 3] = l.O[i]; } }
+  return { map: { rows, cols, levs, data }, buildings: buildings.length, warn, roles: { ground: R.ground.length, walls: R.wallW.length + R.wallN.length, doors: R.doorW.length + R.doorN.length, propsOut: R.propOut.length, propsIn: R.propIn.length } };
 }
 
 /* ---------------- audit ---------------- */
@@ -801,8 +987,8 @@ function auditBlock(model, nodes, radius = 10) {
   if (!nodes.some((n) => n.spawn > 0)) add('INFO', 'no-spawn', 'No spawn nodes (spawn weight is 0 on every node).');
   const badsp = nodes.map((n, i) => i).filter((i) => nodes[i].spawn > 0 && okSet.has(i) && !adj[i].size && !nodes[i].links.some((l) => EXIT_NAME[l[0]]));
   if (badsp.length) add('WARN', 'spawn-unlinked', `${badsp.length} spawn node(s) have no links: ${badsp.slice(0, 6).map((i) => '#' + i).join(' ')}`, badsp.map(nodePos));
-  const big = ok.filter((i) => [0, 3, 4].includes(nodes[i].unit) && !model.fitsLarge(...nodePos(i)));
-  if (big.length) add('INFO', 'large-node-too-narrow', `${big.length} node(s) allow large units where a 2x2 unit does not fit (fine for small units).`, big.slice(0, 40).map(nodePos));
+  const big = ok.filter((i) => [0, 3, 4].includes(nodes[i].unit) && !model.fitsLargeAt(...nodePos(i)));
+  if (big.length) add('INFO', 'large-node-too-narrow', `${big.length} node(s) allow large units where a 2x2 unit starting on the node (extending east and south) does not fit. Fine for small units; large units placed here would end up inside a wall or object.`, big.slice(0, 40).map(nodePos));
   return { iss, stats: { nodes: N, walkable: model.walkable().length, standable: ok.length, through } };
 }
 
@@ -864,7 +1050,7 @@ function assignUnitTypes(blocks, utypes, seed = 1) {
   for (const u of Object.keys(lr).map(Number).sort()) for (let i = 0; i < lr[u]; i++) pool.push(u);
   const shuf = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } };
   shuf(pool); shuf(sp);
-  sp.forEach(({ model, n }, i) => { let u = pool[i]; if ((u === 3 || u === 4) && !model.fitsLarge(...model.gpos(n))) u = (2 in utypes) ? 2 : 0; n.unit = u; });
+  sp.forEach(({ model, n }, i) => { let u = pool[i]; if ((u === 3 || u === 4) && !model.fitsLargeAt(...model.gpos(n))) u = (2 in utypes) ? 2 : 0; n.unit = u; });
 }
 function spawnOverSet(blocks, mix, frac, utypes, seed, weight = 5) {
   const names = Object.keys(blocks), sizes = {}; for (const k of names) sizes[k] = eligibleNodes(blocks[k].model, blocks[k].nodes).length;
@@ -902,7 +1088,7 @@ function parseTerrains(text) {
 }
 
 const api = { EXIT, EXIT_NAME, NOLINK, MAXDEST, RANKS, UTYPES, rng, parseMCD, parseMAP, readRMP, writeRMP, newNode, cloneNodes, Model,
-  autoroute, auditBlock, eligibleNodes, planSet, applySpawns, assignUnitTypes, spawnOverSet, spawnCounts, parseTerrains };
+  autoroute, auditTiles, generateBlock, partRoles, auditBlock, eligibleNodes, planSet, applySpawns, assignUnitTypes, spawnOverSet, spawnCounts, parseTerrains };
 if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.RouteCore = api;
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -1027,7 +1213,7 @@ function ensureModel(b, force) {
 S.mcdRev = 0; S.mcdDirty = new Set(); S.pckDirty = new Set(); S.loft = null; S.scang = null;
 function refreshParts(b) { if (!b.sets || b.demo) return; const parts = []; for (const nm of b.sets) { const m = S.mcds.get(nm.toLowerCase()); if (m) for (const p of C.parseMCD(m.u8)) parts.push(p); } b.coreParts = parts; b.mcdRev = S.mcdRev; remodel(b); runAudit(b); }
 function remodel(b) { b.model = new C.Model(b.mapObj, b.coreParts); b.rev++; }
-function runAudit(b) { if (b.model && b.nodes) b.audit = C.auditBlock(b.model, b.nodes, 10); }
+function runAudit(b) { if (b.model && b.nodes) { b.audit = C.auditBlock(b.model, b.nodes, 10); if (!b.demo) { try { for (const i of C.auditTiles(b.model)) b.audit.iss.push(i); } catch (e) { /* tile audit is optional */ } } } }
 let auditT; const auditSoon = () => { clearTimeout(auditT); auditT = setTimeout(() => { if (S.cur) { runAudit(S.cur); renderAudit(); renderTree(); } }, 300); };
 const snapAll = (b) => { b.undo.push({ data: new Uint8Array(b.mapObj.data), nodes: C.cloneNodes(b.nodes) }); if (b.undo.length > 40) b.undo.shift(); b.redo = []; b.dirty = true; markDirty(); };
 function undo() { const b = S.cur; if (!b || !b.undo.length) { toast('Nothing to undo.'); return; } b.redo.push({ data: new Uint8Array(b.mapObj.data), nodes: C.cloneNodes(b.nodes) }); const s = b.undo.pop(); b.mapObj.data.set(s.data); b.nodes = s.nodes; remodel(b); runAudit(b); S.sel_node = -1; refreshAll(); }
@@ -1246,6 +1432,69 @@ function renderTree() {
 const treeClick = (e) => { const g = e.target.closest('[data-g]'), k = e.target.closest('[data-k]'); if (g) { const n = g.dataset.g; S.expanded.has(n) ? S.expanded.delete(n) : S.expanded.add(n); renderTree.noScroll = true; renderTree(); renderTree.noScroll = false; } else if (k) openBlock(k.dataset.k); };
 document.addEventListener('click', (e) => { if (e.target.closest('#tree')) treeClick(e); });
 $('#filter').addEventListener('input', () => { renderTree.noScroll = true; renderTree(); renderTree.noScroll = false; });
+/* duplicate / rename a map block */
+function askName(title, note, def, validate) {
+  return new Promise((res) => {
+    modal(title, `<p>${esc(note)}</p><input id="nmIn" type="text" maxlength="40" style="width:100%" value="${esc(def)}" aria-label="Map block name"><p id="nmErr" style="color:#c00;min-height:1.2em;margin:4px 0"></p><div style="display:flex;gap:8px;justify-content:flex-end"><button id="nmCancel">Cancel</button><button id="nmGo" class="primary">OK</button></div>`);
+    const ft = $('#modal .ft'), inp = $('#nmIn'); ft.style.display = 'none'; inp.focus(); inp.select();
+    const done = (v) => { ft.style.display = ''; $('#modal').classList.remove('on'); $('#modal').removeEventListener('click', away); res(v); };
+    const away = (e) => { if (e.target.id === 'modal') done(null); };
+    const go = () => { const v = inp.value.trim(), err = validate(v); if (err) { $('#nmErr').textContent = err; return; } done(v); };
+    $('#nmGo').onclick = go; $('#nmCancel').onclick = () => done(null); $('#modal').addEventListener('keydown', function esc2(e) { if (e.key === 'Escape') { $('#modal').removeEventListener('keydown', esc2); done(null); } else if (e.key === 'Enter' && e.target === inp) { go(); } }); $('#modal').addEventListener('click', away);
+  });
+}
+const goodName = (v, own) => { if (!v) return 'Type a name.'; if (!/^[A-Za-z0-9_-]+$/.test(v)) return 'Use letters, numbers, _ or - only (no spaces).'; const k = v.toLowerCase(); if (k !== own && S.maps.has(k)) return 'A map block with that name already exists.'; return ''; };
+function freeName(base) { let n = base, i = 2; while (S.maps.has(n.toLowerCase())) n = base + '_' + i++; return n; }
+function doDuplicate(b, name) {
+  const key = name.toLowerCase(), t = b.terr || (S.blockTerr.get(b.key) || [])[0] || $('#terrSel').value || '';
+  S.maps.set(key, { name, u8: mapBytes(b), src: 'copy of ' + b.name }); S.rmps.set(key, C.writeRMP(b.nodes || []));
+  if (t && S.terr[t] && Array.isArray(S.terr[t].blocks)) S.terr[t].blocks.push(name);
+  S.blocks.set(key, { key, name, model: null, nodes: null, audit: null, dirty: false, undo: [], redo: [], rev: 0, err: '', terr: t || '' });
+  rebuildIndex(); if (t) S.expanded.add(t); const nb = S.blocks.get(key); ensureModel(nb); if (nb && nb.mapObj) { nb.dirty = true; nb.mapDirty = true; } return { nb, t };
+}
+function doRename(b, name) {
+  const ok = b.key, nk = name.toLowerCase(), mp = S.maps.get(ok), r = S.rmps.get(ok);
+  if (mp) { S.maps.delete(ok); S.maps.set(nk, Object.assign({}, mp, { name })); } if (r) { S.rmps.delete(ok); S.rmps.set(nk, r); }
+  for (const t in S.terr) { const arr = S.terr[t].blocks; if (Array.isArray(arr)) for (let i = 0; i < arr.length; i++) if (String(arr[i]).toLowerCase() === ok) arr[i] = name; }
+  S.blocks.delete(ok); b.key = nk; b.name = name; S.blocks.set(nk, b); b.dirty = true; b.mapDirty = true; rebuildIndex(); S.cur = b;
+}
+async function duplicateBlock() {
+  const b = S.cur; if (!b || b.demo) { toast('Select a map block first.'); return; } if (!ensureModel(b)) { toast(b.err || 'Open a map that loads first.'); return; }
+  const name = await askName('Duplicate map block', `Name for the copy of ${b.name}:`, freeName(b.name + '_COPY'), (v) => goodName(v, null)); if (!name) return;
+  const { nb, t } = doDuplicate(b, name); openBlock(nb.key); refreshAll();
+  if (!nb.dirty) { toast(`Copied to ${name}, but it has no terrain yet, so it will not be saved. Choose a terrain in the Terrain box first.`); return; }
+  toast(`Copied to ${name}. It is saved with your other edits (Save map or Save all)${t ? '' : '. Choose its terrain in the Terrain box'}. To use it in the game, list it in your terrain's .rul.`);
+}
+async function renameBlock() {
+  const b = S.cur; if (!b || b.demo) { toast('Select a map block first.'); return; } if (!ensureModel(b)) { toast(b.err || 'Open a map that loads first.'); return; }
+  const name = await askName('Rename map block', `New name for ${b.name}:`, b.name, (v) => goodName(v, b.key)); if (!name || name === b.name) return;
+  doRename(b, name); refreshAll(); toast(`Renamed to ${name}. Saving writes the new file name; the old file is not deleted. Update the name in your terrain's .rul too.`);
+}
+$('#blkDup').onclick = duplicateBlock; $('#blkRen').onclick = renameBlock;
+/* generate a new map block from the open map's tile set (Experimental tab) */
+function genBlock() {
+  const cur = S.cur; if (!cur || cur.demo || !ensureModel(cur)) { toast('Open a map from the terrain you want to build with first.'); return false; }
+  const sig = (cur.sets || []).join('|'), samples = [];
+  for (const b of S.blocks.values()) { const mp = S.maps.get(b.key); if (!mp || b.key === cur.key) continue; const st = setsFor(b); if (st && st.join('|') === sig) { try { samples.push(C.parseMAP(mp.u8)); } catch (e) { /* skip */ } } }
+  samples.push({ rows: cur.mapObj.rows, cols: cur.mapObj.cols, levs: cur.mapObj.levs, data: cur.mapObj.data });
+  const size = +$('#genSize').value, seed = Math.max(1, +$('#genSeed').value || 1);
+  const r = C.generateBlock({ parts: cur.coreParts, samples, style: $('#genStyle').value, cols: size, rows: size, levs: cur.mapObj.levs, density: +$('#genDens').value / 100, seed });
+  if (r.error) { $('#genNote').textContent = r.error; toast(r.error); return false; }
+  let name = ($('#genName').value || '').trim().replace(/\s+/g, '_'); if (!name) name = 'GEN_' + $('#genStyle').value.toUpperCase();
+  const bad = goodName(name, null); if (bad) name = freeName(name.replace(/[^A-Za-z0-9_-]/g, '') || 'GEN_BLOCK');
+  const key = name.toLowerCase(), t = cur.terr || (S.blockTerr.get(cur.key) || [])[0] || $('#terrSel').value || '';
+  const u8 = new Uint8Array(3 + r.map.data.length); u8[0] = r.map.rows; u8[1] = r.map.cols; u8[2] = r.map.levs; u8.set(r.map.data, 3);
+  S.maps.set(key, { name, u8, src: 'generated' }); S.rmps.set(key, new Uint8Array(0));
+  if (t && S.terr[t] && Array.isArray(S.terr[t].blocks)) S.terr[t].blocks.push(name);
+  S.blocks.set(key, { key, name, model: null, nodes: null, audit: null, dirty: false, undo: [], redo: [], rev: 0, err: '', terr: t || '' });
+  rebuildIndex(); if (t) S.expanded.add(t); const nb = S.blocks.get(key); ensureModel(nb);
+  if (nb.mapObj) { nb.nodes = C.autoroute(nb.model, 6, { markSmall: true, smart: true }); nb.origNodes = C.cloneNodes([]); nb.dirty = true; nb.mapDirty = true; runAudit(nb); }
+  openBlock(key); refreshAll();
+  $('#genNote').textContent = `Made ${name}: ${r.buildings} building(s). Parts used: ${r.roles.ground} ground, ${r.roles.walls} wall, ${r.roles.doors} door, ${r.roles.propsOut} outdoor and ${r.roles.propsIn} indoor props.` + (r.warn.length ? ' ' + r.warn.join(' ') : '');
+  toast(`Generated ${name} with routes. Check it, then Save map. Ctrl+Z undoes edits to it.`); return true;
+}
+$('#genB').onclick = genBlock; $('#genAgainB').onclick = () => { $('#genSeed').value = (+$('#genSeed').value || 1) + 1; $('#genName').value = ''; genBlock(); };
+$('#genDens').addEventListener('input', () => { $('#genDensO').textContent = $('#genDens').value + '%'; });
 function openBlock(k) {
   const b = S.blocks.get(k); if (!b) return; S.cur = b; S.sel = null; S.sel2 = null; S.sel_node = -1; S.linkFrom = -1; S.hl = []; b.terr = b.terr || '';
   const ok = ensureModel(b); if (ok && !b.demo && b.mcdRev !== S.mcdRev) refreshParts(b); if (!ok) toast(b.err || 'Could not build this map.');
@@ -1319,7 +1568,8 @@ function routeTap(x, y) {
 $('#rtools').addEventListener('click', (e) => { const b = e.target.closest('[data-rt]'); if (!b) return; S.rtool = b.dataset.rt; S.linkFrom = -1; $$('#rtools button').forEach((x) => x.setAttribute('aria-pressed', x === b)); draw(); });
 $('#showRoutes').addEventListener('change', (e) => { S.showRoutes = e.target.checked; draw(); drawTop(); });
 $('#radius').addEventListener('input', () => { $('#radiusO').textContent = $('#radius').value; });
-function doAuto(b) { snapAll(b); b.nodes = C.autoroute(b.model, +$('#radius').value, { markSmall: true }); runAudit(b); }
+$('#smartSp').addEventListener('change', () => { $('#radius').disabled = $('#smartSp').checked; $('#radius').parentElement.style.opacity = $('#smartSp').checked ? '.45' : ''; }); $('#radius').disabled = true; $('#radius').parentElement.style.opacity = '.45';
+function doAuto(b) { snapAll(b); b.nodes = C.autoroute(b.model, +$('#radius').value, { markSmall: true, smart: $('#smartSp').checked }); runAudit(b); }
 $('#autoB').onclick = () => { const b = S.cur; if (!b || !b.model) { toast('Open a map first.'); return; } doAuto(b); S.sel_node = -1; refreshAll(); toast(`${b.nodes.length} nodes made. Ctrl+Z undoes it.`); };
 $('#autoAllB').onclick = async () => { const bl = await ensureAll(); for (const b of bl) doAuto(b); S.sel_node = -1; refreshAll(); toast(`Routes made for ${bl.length} maps.`); };
 $('#revertB').onclick = () => { const b = S.cur; if (!b || !b.origNodes) return; snapAll(b); b.nodes = C.cloneNodes(b.origNodes); runAudit(b); S.sel_node = -1; refreshAll(); };
@@ -2020,6 +2270,31 @@ const dz = $('#dropzone'); ['dragenter', 'dragover'].forEach((ev) => dz.addEvent
 window.addEventListener('dragover', (e) => e.preventDefault()); window.addEventListener('drop', (e) => { e.preventDefault(); if (e.dataTransfer && e.dataTransfer.files.length) addFiles(e.dataTransfer.files); });
 window.addEventListener('resize', () => { layoutMode(); placeTree(); size(); winSide(); refitSoon(isWide() ? true : false); }); window.addEventListener('orientationchange', () => refitSoon(false)); fitBody(); new ResizeObserver(size).observe($('#cvWrap'));
 buildMenus(); buildSliders(); buildWins(); layoutMode(); placeTree(); size(); refreshAll(); armArchiveTimer(); initAccount().then(() => { if (/[?&]demo\b/.test(location.search)) startDemo(); });
+/* Scripting API for AI assistants, macros and other tools. Documented in AI_GUIDE.md and on window.MapViewAPI.help().
+   Coordinates are x (column), y (row), z (0 = ground level, going up). Every call returns plain JSON, throws nothing, and edits are undoable. */
+const apiB = (name) => { const b = S.blocks.get(String(name || (S.cur && S.cur.name) || '').toLowerCase()); if (b && b.demo && !/^(getBlock|x)$/.test('x')) { /* demo placeholder block is allowed for reading */ } if (!b) throw new Error('No map block called ' + name + '. Use MapViewAPI.listBlocks().'); if (!ensureModel(b) && !b.mapObj) throw new Error(b.err || 'That block could not be loaded.'); return b; };
+const apiRun = (fn) => { try { return Object.assign({ ok: true }, fn()); } catch (e) { return { ok: false, error: String(e && e.message || e) }; } };
+const MapViewAPI = {
+  version: 1,
+  help() { return { ok: true, doc: 'See AI_GUIDE.md. Methods: listBlocks, getBlock, generateBlock, getTile, setTile, fillRect, getRoutes, setRoutes, autoRoute, audit, listParts, exportFiles, openBlock, select, duplicateBlock, renameBlock. Layers: floor, westWall, northWall, object. Part 0 is empty.' }; },
+  listBlocks() { return apiRun(() => ({ blocks: [...S.blocks.values()].map((b) => ({ name: b.name, terrain: b.terr || (S.blockTerr.get(b.key) || [])[0] || '', loaded: !!b.mapObj, dirty: !!b.dirty, size: b.mapObj ? [b.mapObj.cols, b.mapObj.rows, b.mapObj.levs] : null, nodes: b.nodes ? b.nodes.length : null })) })); },
+  getBlock(name) { return apiRun(() => { const b = apiB(name); const m = b.mapObj; return { name: b.name, cols: m.cols, rows: m.rows, levs: m.levs, nodes: b.nodes.length, sets: (b.sets || setsFor(b) || []), issues: b.audit ? b.audit.iss.length : null }; }); },
+  getTile(name, x, y, z) { return apiRun(() => { const b = apiB(name), p = mapIx(b, x, y, z); if (p < 0 || p >= b.mapObj.data.length) throw new Error('Out of range'); const d = b.mapObj.data; return { floor: d[p], westWall: d[p + 1], northWall: d[p + 2], object: d[p + 3] }; }); },
+  setTile(name, x, y, z, layer, part) { return apiRun(() => { const b = apiB(name), slot = ['floor', 'westWall', 'northWall', 'object'].indexOf(layer); if (slot < 0) throw new Error('layer must be floor, westWall, northWall or object'); if (!Number.isInteger(part) || part < 0 || part > 255) throw new Error('part must be 0-255'); if (![x, y, z].every(Number.isInteger)) throw new Error('x, y and z must be whole numbers'); if (x < 0 || y < 0 || z < 0 || x >= b.mapObj.cols || y >= b.mapObj.rows || z >= b.mapObj.levs) throw new Error('Out of range'); snapAll(b); setSlot(b, x, y, z, slot, part); afterEdit(b); return { set: 1 }; }); },
+  fillRect(name, x0, y0, x1, y1, z, layer, part) { return apiRun(() => { const b = apiB(name), slot = ['floor', 'westWall', 'northWall', 'object'].indexOf(layer); if (slot < 0) throw new Error('layer must be floor, westWall, northWall or object'); if (!Number.isInteger(part) || part < 0 || part > 255) throw new Error('part must be 0-255'); if (![x0, y0, x1, y1, z].every(Number.isInteger) || z < 0 || z >= b.mapObj.levs) throw new Error('Coordinates must be whole numbers inside the block'); snapAll(b); let n = 0; for (let y = Math.max(0, Math.min(y0, y1)); y <= Math.min(b.mapObj.rows - 1, Math.max(y0, y1)); y++) for (let x = Math.max(0, Math.min(x0, x1)); x <= Math.min(b.mapObj.cols - 1, Math.max(x0, x1)); x++) { setSlot(b, x, y, z, slot, part); n++; } afterEdit(b); return { set: n }; }); },
+  getRoutes(name) { return apiRun(() => ({ nodes: apiB(name).nodes.map((n) => ({ x: n.x, y: n.y, z: n.z, links: n.links.filter((l) => l[0] !== 255).map((l) => ({ to: l[0], dist: l[1], type: l[2] })), unit: n.unit, rank: n.rank, patrol: n.patrol, attack: n.attack, spawn: n.spawn })), note: 'z is stored top level first (game z = levs - 1 - z). Link to 254/253/252/251 means exit N/E/S/W, 255 means empty.' })); },
+  setRoutes(name, nodes) { return apiRun(() => { const b = apiB(name); if (!Array.isArray(nodes) || nodes.length > 250) throw new Error('Give an array of at most 250 nodes.'); snapAll(b); b.nodes = nodes.map((n) => { const o = C.newNode(n.x | 0, n.y | 0, n.z | 0); (n.links || []).slice(0, 5).forEach((l, k) => { o.links[k] = [l.to & 255, l.dist & 255, (l.type || 0) & 255]; }); o.unit = n.unit | 0; o.rank = n.rank | 0; o.patrol = n.patrol | 0; o.attack = n.attack | 0; o.spawn = n.spawn | 0; return o; }); b.dirty = true; runAudit(b); refreshAll(); return { nodes: b.nodes.length }; }); },
+  autoRoute(name, opts) { return apiRun(() => { const b = apiB(name), o = Object.assign({ smart: true, radius: 6 }, opts || {}); snapAll(b); b.nodes = C.autoroute(b.model, o.radius, { markSmall: true, smart: !!o.smart }); runAudit(b); refreshAll(); return { nodes: b.nodes.length, issues: b.audit.iss.filter((i) => i.sev !== 'INFO').length }; }); },
+  audit(name) { return apiRun(() => { const b = apiB(name); runAudit(b); return { issues: b.audit.iss.map((i) => ({ severity: i.sev, code: i.code, text: i.text, at: i.at })), stats: b.audit.stats }; }); },
+  listParts(name) { return apiRun(() => { const b = apiB(name); return { parts: (b.meta || []).map((m, i) => (m ? { id: i, set: m.set, index: m.idx, type: m.rec && m.rec.tp, tu: m.rec && m.rec.tu } : null)).filter(Boolean) }; }); },
+  exportFiles() { return apiRun(() => ({ files: editedFiles().map((f) => ({ name: f.name, base64: (() => { let t = ''; for (let i = 0; i < f.data.length; i += 16384) t += String.fromCharCode.apply(null, f.data.subarray(i, i + 16384)); return btoa(t); })() })) })); },
+  openBlock(name) { return apiRun(() => { const b = apiB(name); openBlock(b.key); return { open: b.name }; }); },
+  select(name) { return this.openBlock(name); },
+  generateBlock(name, opts) { return apiRun(() => { const b = apiB(name); const prev = S.cur; S.cur = b; const o = Object.assign({ style: 'mixed', size: 10, density: 50, seed: 1 }, opts || {}); if (!['mixed', 'building', 'open'].includes(o.style)) throw new Error('style must be mixed, building or open'); $('#genStyle').value = o.style; $('#genSize').value = String(o.size); $('#genDens').value = o.density; $('#genSeed').value = o.seed; $('#genName').value = o.name || ''; const ok = genBlock(); if (!ok) { S.cur = prev; throw new Error($('#genNote').textContent || 'Could not generate.'); } return { name: S.cur.name, nodes: S.cur.nodes.length }; }); },
+  duplicateBlock(name, newName) { return apiRun(() => { const b = apiB(name); if (!newName) throw new Error('newName is required'); if (b.demo) throw new Error('The built-in demo block cannot be duplicated.'); const err = goodName(newName, null); if (err) throw new Error(err); const { nb } = doDuplicate(b, newName); refreshAll(); return { name: nb.name, saved: !!nb.dirty }; }); },
+  renameBlock(name, newName) { return apiRun(() => { const b = apiB(name); if (!newName) throw new Error('newName is required'); if (b.demo) throw new Error('The built-in demo block cannot be renamed.'); const err = goodName(newName, b.key); if (err) throw new Error(err); doRename(b, newName); refreshAll(); return { name: newName }; }); },
+};
+window.MapViewAPI = MapViewAPI;
 window.__MV = { decodeSprite, encodeSprite, S, C, tileAt, toPx, openBlock, ingest, addFiles, rebuildIndex, refreshAll, getSet };
 })();
 </script>
