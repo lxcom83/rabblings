@@ -60,6 +60,20 @@ input[type=range]{width:100%}
 .left,.right{display:flex;flex-direction:column;min-height:0;background:var(--face)}
 .left{border-right:1px solid var(--shade)}
 .right{border-left:1px solid var(--shade)}
+html:not(.nw) .body.lc{grid-template-columns:24px minmax(0,1fr) 390px}
+.body.lc .left{position:relative;overflow:visible}
+.body.lc .left>.ph,.body.lc .left>#treeHost{display:none!important}
+.body.lc .left .lstrip{display:flex}
+.lstrip{display:none;flex-direction:column;align-items:center;gap:8px;padding:6px 0;flex:1;min-height:80px;cursor:pointer;background:linear-gradient(90deg,#f0f0f0,#d8d8d8);user-select:none}
+.lstrip span{writing-mode:vertical-rl;font-weight:600;font-size:12px;letter-spacing:.5px}
+.body.lc .left.fly>.ph{display:flex!important}
+.body.lc .left.fly>#treeHost{display:flex!important}
+.body.lc .left.fly{z-index:60}
+.body.lc .left.fly .lstrip{display:none}
+.body.lc .left.fly::before{content:'';position:absolute;inset:0 auto 0 0;width:240px;background:var(--face);box-shadow:4px 0 12px #0005;border-right:1px solid var(--shade);z-index:-1}
+.body.lc .left.fly>.ph,.body.lc .left.fly>#treeHost{width:240px;position:relative;left:0;background:var(--face)}
+.ph{display:flex;justify-content:space-between;align-items:center}
+.ph button{min-height:18px;padding:0 6px;font-size:12px;line-height:16px}
 .ph{background:linear-gradient(#f7f7f7,#dcdcdc);border-bottom:1px solid var(--shade);padding:3px 8px;font-weight:600;font-size:12px;flex:none}
 .tree{flex:1;min-height:0;overflow:auto;background:#fff;border:1px solid var(--shade);margin:4px}
 .tn{padding:2px 4px;white-space:nowrap;cursor:default;display:flex;gap:4px;align-items:center;min-height:22px}
@@ -95,16 +109,17 @@ h3{margin:12px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.06e
 .tiles{display:flex;flex-wrap:wrap;gap:3px;background:#101010;padding:5px;border:1px solid var(--shade);max-height:330px;overflow:auto}
 #demoCta{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:20px;color:#ddd;pointer-events:none}#demoCta.on{display:flex}#demoCta *{pointer-events:auto}#demoCta p{max-width:380px;margin:0;color:#bbb}#demoCta button{font-size:16px;padding:10px 22px;background:#1a4f9c;color:#fff;border:2px solid #fff;font-weight:600;cursor:pointer}#demoCta.on~.hint,.cv:has(#demoCta.on) .hint{display:none!important}
 #demoBar{background:#fff3c4;border-bottom:1px solid #d9b94a;padding:3px 10px;font-size:12px;display:none}#demoBar.on{display:block}
-#tileDock{flex:none;height:178px;min-height:96px;max-height:60vh;display:flex;flex-direction:column;background:var(--face);border-top:2px solid #fff;box-shadow:0 -2px 6px #0003;position:relative}
-#tileDock .dgrip{position:absolute;left:0;right:0;top:-5px;height:8px;cursor:ns-resize;touch-action:none;z-index:2}
+#tileDock{flex:none;height:178px;min-height:70px;max-height:60vh;display:flex;flex-direction:column;background:var(--face);border-top:2px solid #fff;box-shadow:0 -2px 6px #0003;position:relative}
+#tileDock .dgrip{position:absolute;left:0;right:0;top:-8px;height:12px;cursor:ns-resize;touch-action:none;z-index:2;background:linear-gradient(#0000,#8a98ab88)}
+#tileDock .dgrip::after{content:'';position:absolute;left:50%;top:3px;width:60px;height:4px;margin-left:-30px;border-radius:2px;background:#566;opacity:.8}
 #tileDock .wt{background:linear-gradient(#8a98ab,#6f7d90);color:#fff;font-weight:600;padding:2px 4px 2px 8px;display:flex;justify-content:space-between;align-items:center;flex:none;user-select:none}
 #tileDock .wt button{min-height:18px;padding:0 8px;font-size:12px;line-height:16px}
 #tileDockBody{flex:1;min-height:0;display:flex}
 #tileDockBody .panel{display:grid!important;grid-template-columns:250px minmax(0,1fr) 330px;grid-template-rows:minmax(0,1fr);gap:0;width:100%;overflow:hidden}
 #tileDockBody .panel>*{min-height:0;margin:0}
 #tileDockBody .tv-ctl{padding:6px 8px;overflow:auto;border-right:1px solid var(--shade)}
-#tileDockBody .tiles{flex-wrap:nowrap;max-height:none;height:100%;overflow-x:scroll;overflow-y:hidden;align-items:flex-start;border:0;border-right:1px solid var(--shade)}
-#tileDockBody .tiles::-webkit-scrollbar{height:16px}#tileDockBody .tiles::-webkit-scrollbar-track{background:#d4d0c8}#tileDockBody .tiles::-webkit-scrollbar-thumb{background:#8a98ab;border:2px solid #d4d0c8}
+#tileDockBody .tiles{flex-wrap:wrap;max-height:none;height:100%;overflow-x:hidden;overflow-y:auto;align-items:flex-start;align-content:flex-start;border:0;border-right:1px solid var(--shade)}
+#tileDockBody .tiles::-webkit-scrollbar{width:16px;height:16px}#tileDockBody .tiles::-webkit-scrollbar-track{background:#d4d0c8}#tileDockBody .tiles::-webkit-scrollbar-thumb{background:#8a98ab;border:2px solid #d4d0c8}
 #tileDockBody .tiles .tl{flex:none;width:44px;height:54px}
 #tileDockBody .tiles .tl canvas{width:100%;height:100%;object-fit:contain}
 #tileDockBody .tv-info{padding:4px 8px;overflow:auto}
@@ -144,7 +159,19 @@ kbd{font:11px var(--mono);border:1px solid var(--shade);border-radius:3px;paddin
 .drophere{border:2px dashed var(--shade);background:#fafafa;padding:14px;text-align:center;margin:6px 0}
 .drophere.over{border-color:var(--sel);background:#eaf3ff}
 .prog{height:8px;background:var(--face2);border:1px solid var(--shade);margin:6px 0;display:none}.prog i{display:block;height:100%;background:var(--sel);width:0}
-html.nw .body{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(200px,calc(40vh / var(--z,1))) minmax(0,1fr)}
+html.nw .body{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(160px,calc(36vh / var(--z,1))) minmax(0,1fr)}
+#qbar{display:none}
+html.nw #qbar{display:flex;flex-direction:column;flex:none;background:var(--face);border-bottom:1px solid var(--shade)}
+#qbar .qrow{display:flex;align-items:center;gap:8px;padding:3px 6px}
+#qbar select{width:auto;min-height:26px}
+#qTiles{display:flex;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;gap:3px;padding:3px 6px 6px;height:64px;background:#000;touch-action:pan-x}
+#qTiles .tl{flex:none;width:44px;height:54px;padding:0}
+#qTiles .tl canvas{width:100%;height:100%;object-fit:contain}
+html.nw,html.nw body{overflow-x:hidden}
+html.nw .toolbar{gap:4px;padding:3px 4px}
+html.nw .toolbar button,html.nw .toolbar select{min-height:34px;padding:0 9px}
+html.nw #demoBar{font-size:12px;padding:2px 6px}
+html.nw #fsBtn{margin-left:0!important}
 html.nw .left{display:none}
 html.nw .right{border-left:0;border-top:1px solid var(--shade)}
 html.nw .app{height:auto;min-height:100%}
@@ -153,6 +180,7 @@ html.nw .body{height:calc(100vh / var(--z,1) - 100px)}
 @supports (height:100dvh){html.nw .body{height:calc(100dvh / var(--z,1) - 100px)}}
 html:not(.nw) #tabMaps{display:none}
 html:not(.nw) .body{grid-template-columns:230px minmax(0,1fr)}
+html:not(.nw) .body.lc{grid-template-columns:24px minmax(0,1fr)}
 html:not(.nw) .right{display:none}
 html.nw .dlg{max-height:calc(88vh / var(--z,1))}
 #gate{position:fixed;inset:0;background:#000b;z-index:6000;display:none;align-items:center;justify-content:center;padding:14px}
@@ -223,7 +251,10 @@ html.nw .dlg{max-height:calc(88vh / var(--z,1))}
 html.nw .xw{left:0!important;top:0!important;width:100vw!important;height:100%;max-height:none;border-width:0}
 html.nw .xrow{flex-direction:column;min-width:0}html.nw .xright{width:auto;flex-direction:row;flex-wrap:wrap;align-items:flex-start;gap:10px}html.nw .xmid,html.nw .xfields{flex-wrap:wrap}html.nw .xcols{flex-wrap:wrap}html.nw .xshow{overflow-x:auto;flex:1 1 100%}html.nw #mcdDark{max-width:none}html.nw #mcdLofts{display:grid;grid-template-columns:repeat(2,auto);gap:2px}
 #winLayer{position:fixed;inset:0;pointer-events:none;z-index:20}
-.win{position:absolute;pointer-events:auto;background:var(--face);border:2px solid var(--dark);border-top-color:#fff;border-left-color:#fff;box-shadow:3px 4px 10px #0006;display:flex;flex-direction:column;resize:both;overflow:hidden;min-width:260px;min-height:120px}
+.win::after{content:'';position:absolute;right:2px;bottom:2px;width:14px;height:14px;pointer-events:none;background:linear-gradient(135deg,#0000 48%,#556 48%,#556 56%,#0000 56%,#0000 66%,#556 66%,#556 74%,#0000 74%)}
+#stackSplit{position:absolute;height:8px;cursor:ns-resize;touch-action:none;z-index:50;pointer-events:auto;display:none;background:linear-gradient(#0000,#667a,#0000)}
+#stackSplit::after{content:'';position:absolute;left:50%;top:2px;width:60px;height:4px;margin-left:-30px;border-radius:2px;background:#334;opacity:.7}
+.win{position:absolute;pointer-events:auto;background:var(--face);border:2px solid var(--dark);border-top-color:#fff;border-left-color:#fff;box-shadow:3px 4px 10px #0006;display:flex;flex-direction:column;resize:both;overflow:hidden;min-width:260px;min-height:70px}
 .win .wt{background:linear-gradient(#2d6fc4,#1a4f9c);color:#fff;font-weight:600;padding:3px 4px 3px 8px;display:flex;justify-content:space-between;align-items:center;cursor:move;touch-action:none;user-select:none;flex:none}
 .win.inactive .wt{background:linear-gradient(#8a98ab,#6f7d90)}
 .win .wt button{min-height:20px;padding:0 8px;font-size:12px;line-height:18px}
@@ -237,7 +268,7 @@ html.nw .xrow{flex-direction:column;min-width:0}html.nw .xright{width:auto;flex-
 </head>
 <body>
 <div class="app">
-  <div style="display:flex;background:var(--face);border-bottom:1px solid var(--shade);position:relative;z-index:30;flex:none;flex-wrap:wrap"><div class="menubar" id="menubar" role="menubar" style="border:0;flex:0 1 auto"></div><div class="acctbox" id="acctBox"></div></div>
+  <div style="display:flex;background:var(--face);border-bottom:1px solid var(--shade);position:relative;z-index:30;flex:none;flex-wrap:wrap"><div class="menubar" id="menubar" role="menubar" style="border:0;flex:0 1 auto"></div><button id="fsBtn" class="fsbtn" title="Hide the browser bar and tabs to get more screen space" aria-label="Full screen" style="margin-left:auto;align-self:center;min-height:20px;padding:0 10px;font-size:12px;line-height:18px">⛶ Full screen</button><div class="acctbox" id="acctBox"></div></div>
   <div id="demoBar">Demo mode: sample maps from the OXC Factions mod. Edits stay in this browser tab and are not saved or archived. <button id="demoExit" style="min-height:20px;padding:0 8px">Leave demo</button></div>
   <div class="toolbar">
     <div class="g" role="group" aria-label="Level"><button id="lvDn" title="Level down (Page Down)" aria-label="Level down">▼</button><span class="lv" id="lvLbl">Level –</span><button id="lvUp" title="Level up (Page Up)" aria-label="Level up">▲</button></div>
@@ -253,11 +284,12 @@ html.nw .xrow{flex-direction:column;min-width:0}html.nw .xright{width:auto;flex-
     <label>Terrain <select id="terrSel" aria-label="Terrain for this map"></select></label>
   </div>
   <div class="body">
-    <aside class="left" id="leftcol"><div class="ph">Maps</div><div id="treeHost" style="display:flex;flex-direction:column;flex:1;min-height:0">
+    <aside class="left" id="leftcol"><div class="lstrip" id="lstrip" title="Show Maps (click)" role="button" tabindex="0" aria-label="Show the Maps list"><b>▶</b><span>Maps</span></div><div class="ph"><span>Maps</span><span><button id="lPin" title="Shrink the Maps list to a side strip" aria-label="Shrink Maps list">◀</button></span></div><div id="treeHost" style="display:flex;flex-direction:column;flex:1;min-height:0">
       <div style="padding:4px 4px 0"><input type="text" id="filter" placeholder="Search maps" aria-label="Search maps"></div>
       <div class="tree" id="tree" role="tree" aria-label="Maps"></div></div></aside>
     <section class="stage"><div class="cv" id="cvWrap"><canvas id="cv" aria-label="Map, isometric view"></canvas><div class="hint" id="hint"></div><div id="demoCta"><button class="primary" id="demoGo">Load demo data</button><p>One click opens 13 sample maps with their routes, so you can look around, edit and try every tool. Your own files and cloud folders are never touched.</p></div></div></section>
     <aside class="right">
+      <div id="qbar" aria-label="Quick tile picker"><div class="qrow"><select id="qFilter" aria-label="Part type"><option value="-1">All parts</option><option value="0">Ground</option><option value="1">West walls</option><option value="2">North walls</option><option value="3">Objects</option></select><span id="qInfo" class="note">Pick a part, then tap the map or a box below the Top view.</span></div><div id="qTiles" role="listbox" aria-label="Tile parts (quick)"></div></div>
       <div class="tabs" role="tablist" id="tabs">
         <button role="tab" id="tabMaps" data-tab="maps" aria-selected="false">Maps</button>
         <button role="tab" data-tab="files" aria-selected="true">Files</button>
@@ -1112,7 +1144,7 @@ function updateStatus(t) {
 const tv = $('#tv'), tctx = tv.getContext('2d'); let tcell = 14;
 function drawTop() {
   const b = S.cur; const hint = $('#topHint'); if (!b || !b.mapObj) { hint.style.display = ''; tv.height = 0; return; } hint.style.display = 'none';
-  const { cols, rows } = b.mapObj, wpx = Math.max(200, $('#p-top').clientWidth - 16 || 360); tcell = Math.max(5, Math.min(24, Math.floor(wpx / cols))); const w = cols * tcell, h = rows * tcell, d = window.devicePixelRatio || 1;
+  const { cols, rows } = b.mapObj, wpx = Math.max(200, $('#p-top').clientWidth - 16 || 360); tcell = Math.max(5, Math.min(isWide() ? 24 : 16, Math.floor(wpx / cols))); const w = cols * tcell, h = rows * tcell, d = window.devicePixelRatio || 1;
   tv.style.width = w + 'px'; tv.style.height = h + 'px'; tv.width = w * d; tv.height = h * d; tctx.setTransform(d, 0, 0, d, 0, 0); tctx.fillStyle = '#000'; tctx.fillRect(0, 0, w, h);
   for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
     const p = mapIx(b, x, y, S.z), dd = b.mapObj.data, X = x * tcell, Y = y * tcell;
@@ -1155,12 +1187,19 @@ function renderTiles() {
   const names = b.sets || []; ts.innerHTML = '<option value="">All tilesets</option>' + names.map((n) => `<option value="${esc(n)}" ${S.tileSet === n ? 'selected' : ''}>${esc(n)}</option>`).join('');
   host.innerHTML = ''; const frag = document.createDocumentFragment(); let count = 0;
   for (let v = 1; v < b.meta.length; v++) { const m = b.meta[v]; if (S.tileFilter >= 0 && Math.min(3, m.rec.type) !== S.tileFilter) continue; if (S.tileSet && m.set.name !== S.tileSet) continue; const t = document.createElement('button'); t.className = 'tl'; t.dataset.v = v; t.setAttribute('aria-pressed', v === S.part); t.title = `${m.set.name}:${m.i}  (part ${v}, ${SLOT[Math.min(3, m.rec.type)]})`; const c = document.createElement('canvas'); c.width = 32; c.height = 40; const sc = spriteCanvas(m.set, m.rec.f[0]); if (sc) c.getContext('2d').drawImage(sc, 0, 0); t.append(c); const i = document.createElement('i'); i.textContent = v; t.append(i); frag.append(t); if (++count > 1500) break; }
-  host.append(frag); renderPartInfo();
+  host.append(frag); renderPartInfo(); renderQuick();
 }
 function renderPartInfo() {
   const b = S.cur, box = $('#partInfo'); if (!b || S.part < 1 || !b.meta[S.part]) { box.textContent = 'Tap a tile above, then use the Place tool.'; return; }
   const m = b.meta[S.part], r = m.rec; box.innerHTML = `<dl class="kv"><dt>Part</dt><dd>${S.part} (${esc(m.set.name)} #${m.i})</dd><dt>Goes in</dt><dd>${SLOT[Math.min(3, r.type)]}</dd><dt>TU to walk</dt><dd>${r.tu}${r.tu === 255 ? ' (blocks)' : ''}</dd><dt>Armour / HE block</dt><dd>${r.armor} / ${r.he}</dd><dt>Stand offset</dt><dd>${r.tl}</dd><dt>Sprite offset</dt><dd>${r.yoff}</dd><dt>Flags</dt><dd>${[r.sd && 'sliding door', r.hd && 'hinged door', r.gl && 'grav lift', r.nf && 'no floor', r.bw && 'big wall ' + r.bw].filter(Boolean).join(', ') || '–'}</dd><dt>Dies into</dt><dd>${r.die || '–'}</dd></dl><div class="row"><button id="editPart">Edit this part…</button></div>`;
 }
+function renderQuick() {
+  const q = $('#qTiles'), src = $$('#tiles .tl'); q.innerHTML = ''; $('#qFilter').value = String(S.tileFilter);
+  for (const t of src) { const c = t.cloneNode(true), a = t.querySelector('canvas'), d = c.querySelector('canvas'); if (a && d) { d.getContext('2d').drawImage(a, 0, 0); } q.append(c); }
+  const b = S.cur, m = b && b.meta && b.meta[S.part]; $('#qInfo').textContent = m ? `Part ${S.part}: ${SLOT[Math.min(3, m.rec.type)]} (${m.set.name} #${m.i})` : 'Pick a part, then tap the map or a box below the Top view.';
+}
+$('#qFilter').addEventListener('change', (e) => { S.tileFilter = +e.target.value; renderTiles(); });
+$('#qTiles').addEventListener('click', (e) => { const t = e.target.closest('.tl'); if (!t) return; S.part = +t.dataset.v; $$('#tiles .tl').forEach((x) => x.setAttribute('aria-pressed', +x.dataset.v === S.part)); $$('#qTiles .tl').forEach((x) => x.setAttribute('aria-pressed', x === t)); renderPartInfo(); renderQuick(); if (S.tool === 'select' && !S.keepSelect) setTool('place'); });
 $('#partInfo').addEventListener('click', (e) => { if (e.target.id === 'editPart') openMcd(S.part); });
 $('#tileSeg').addEventListener('click', (e) => { const f = e.target.closest('[data-f]'); if (f) { S.tileFilter = +f.dataset.f; renderTiles(); } });
 $('#tileSet').addEventListener('change', (e) => { S.tileSet = e.target.value; renderTiles(); });
@@ -1360,8 +1399,8 @@ function buildWins() {
     const wt = w.querySelector('.wt'); let drag = null;
     wt.addEventListener('pointerdown', (e) => { if (e.target.closest('button')) return; focusWin(k); wt.setPointerCapture(e.pointerId); drag = { x: e.clientX - w.offsetLeft, y: e.clientY - w.offsetTop }; });
     wt.addEventListener('pointermove', (e) => { if (!drag) return; w.style.left = Math.max(-w.offsetWidth + 60, Math.min(innerWidth - 60, e.clientX - drag.x)) + 'px'; w.style.top = Math.max(0, Math.min(innerHeight - 40, e.clientY - drag.y)) + 'px'; });
-    wt.addEventListener('pointerup', () => { drag = null; }); w.addEventListener('pointerdown', () => focusWin(k), true);
-    new ResizeObserver(() => { if (k === 'top') drawTop(); }).observe(w);
+    wt.addEventListener('pointerup', () => { drag = null; if (window.placeSplit) placeSplit(); }); w.addEventListener('pointerdown', () => focusWin(k), true);
+    new ResizeObserver(() => { if (k === 'top') drawTop(); if (window.placeSplit) placeSplit(); }).observe(w);
   }
 }
 function focusWin(k) { if (k === 'tiles') return; for (const j in WS) if (j !== 'tiles') WS[j].el.classList.toggle('inactive', j !== k); WS[k].el.style.zIndex = ++zTop; }
@@ -1371,8 +1410,8 @@ function placeWin(k) {
   if (frac) { const order = ['top', 'route']; let y = top0; for (const j of order) { if (j === k) break; y += Math.round(avail * WINS[j][3]) + 4; } el.style.left = (W_ - w - 8) + 'px'; el.style.top = y + 'px'; el.style.width = w + 'px'; el.style.height = Math.round(avail * frac) + 'px'; }
   else { el.style.left = Math.max(10, Math.round((W_ - w) / 2) - 100) + 'px'; el.style.top = (top0 + 30) + 'px'; el.style.width = w + 'px'; el.style.height = Math.min(avail - 30, 560) + 'px'; }
 }
-function openWin(k) { const ws = WS[k]; if (!ws) return; if (!ws.open) { ws.open = true; if (!ws.placed) { placeWin(k); ws.placed = true; } ws.el.style.display = 'flex'; } focusWin(k); winSide(); if (k === 'top') { drawTop(); renderQuad(); } if (k === 'tiles') renderTiles(); if (k === 'audit') renderAudit(); if (k === 'spawn') renderSpawnTable(); if (k === 'route') renderInspector(); if (k === 'cloud') renderLocs(); buildMenus(); draw(); }
-function closeWin(k) { WS[k].open = false; WS[k].el.style.display = 'none'; winSide(); buildMenus(); draw(); }
+function openWin(k) { const ws = WS[k]; if (!ws) return; if (!ws.open) { ws.open = true; if (!ws.placed) { placeWin(k); ws.placed = true; } ws.el.style.display = 'flex'; } focusWin(k); winSide(); if (window.placeSplit) placeSplit(); if (k === 'top') { drawTop(); renderQuad(); } if (k === 'tiles') renderTiles(); if (k === 'audit') renderAudit(); if (k === 'spawn') renderSpawnTable(); if (k === 'route') renderInspector(); if (k === 'cloud') renderLocs(); buildMenus(); draw(); }
+function closeWin(k) { WS[k].open = false; WS[k].el.style.display = 'none'; winSide(); if (window.placeSplit) placeSplit(); buildMenus(); draw(); }
 function winSide() { const any = ['top', 'route'].some(isOpen); $('.body').style.paddingRight = isWide() && any ? '416px' : '0'; }
 function refit(force) {
   const W_ = innerWidth, H_ = innerHeight;
@@ -1380,7 +1419,7 @@ function refit(force) {
     if (fr && force !== 'clamp') { placeWin(k); WS[k].placed = true; }
     const w = Math.min(el.offsetWidth || 300, W_ - 8), h = Math.min(el.offsetHeight || 200, Math.max(120, H_ - 40));
     el.style.width = w + 'px'; el.style.height = h + 'px'; el.style.left = Math.max(0, Math.min(parseFloat(el.style.left) || 0, W_ - w - 4)) + 'px'; el.style.top = Math.max(0, Math.min(parseFloat(el.style.top) || 0, H_ - 40)) + 'px'; }
-  winSide();
+  winSide(); if (window.placeSplit) placeSplit();
 }
 let refitT = 0; const refitSoon = (m) => { clearTimeout(refitT); refitT = setTimeout(() => { if (isWide()) refit(m); fitBody(); size(); draw(); }, 80); };
 function fitBody() {
@@ -1388,7 +1427,44 @@ function fitBody() {
   let top = 0; for (let e = b.previousElementSibling; e; e = e.previousElementSibling) top += e.offsetHeight; for (let e = b.nextElementSibling; e; e = e.nextElementSibling) top += e.offsetHeight; b.style.height = Math.max(300, Math.round((window.innerHeight / z) - top)) + 'px';
 }
 function arrange() { for (const k in WS) { WS[k].placed = false; if (WS[k].open) { placeWin(k); WS[k].placed = true; } } winSide(); }
-(() => { const g = $('#dockGrip'), d = $('#tileDock'); let st = null; g.addEventListener('pointerdown', (e) => { g.setPointerCapture(e.pointerId); st = { y: e.clientY, h: d.offsetHeight }; }); g.addEventListener('pointermove', (e) => { if (!st) return; d.style.height = Math.max(96, Math.min(innerHeight * 0.6, st.h + st.y - e.clientY)) + 'px'; }); g.addEventListener('pointerup', () => { st = null; }); })();
+(() => { const g = $('#dockGrip'), d = $('#tileDock'); let st = null; g.addEventListener('pointerdown', (e) => { g.setPointerCapture(e.pointerId); st = { y: e.clientY, h: d.offsetHeight }; }); g.addEventListener('pointermove', (e) => { if (!st) return; d.style.height = Math.max(70, Math.min(innerHeight * 0.6, st.h + st.y - e.clientY)) + 'px'; refit('clamp'); size(); draw(); }); g.addEventListener('pointerup', () => { st = null; refit(true); size(); draw(); }); })();
+const LC = { pin: true };
+function leftMode(collapsed, save) {
+  const b = $('.body'), l = $('#leftcol'); b.classList.toggle('lc', !!collapsed); l.classList.remove('fly'); LC.pin = !collapsed;
+  if (save) { try { localStorage.setItem('mv-left', collapsed ? '0' : '1'); } catch (e) { /* ignore */ } }
+  setTimeout(() => { size(); draw(); }, 30);
+}
+(() => {
+  const l = $('#leftcol'); let hideT = 0;
+  const open = () => { if (!$('.body').classList.contains('lc')) return; clearTimeout(hideT); l.classList.add('fly'); };
+  const close = () => { hideT = setTimeout(() => l.classList.remove('fly'), 350); };
+  $('#lPin').onclick = () => leftMode(!$('.body').classList.contains('lc') ? true : false, true);
+  $('#lstrip').addEventListener('click', open); $('#lstrip').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') open(); });
+  $('#lstrip').addEventListener('mouseenter', open); l.addEventListener('mouseenter', () => clearTimeout(hideT)); l.addEventListener('mouseleave', close);
+  document.addEventListener('pointerdown', (e) => { if (l.classList.contains('fly') && !l.contains(e.target)) l.classList.remove('fly'); });
+  $('#tree').addEventListener('click', () => { if ($('.body').classList.contains('lc')) setTimeout(() => l.classList.remove('fly'), 250); });
+  try { if (localStorage.getItem('mv-left') === '0') leftMode(true, false); } catch (e) { /* ignore */ }
+})();
+/* the bar between TopView and RouteView: drag it to share the side height */
+(() => {
+  const bar = document.createElement('div'); bar.id = 'stackSplit'; bar.title = 'Drag to change how the side height is shared'; let st = null;
+  window.placeSplit = () => { if (bar.parentElement !== $('#winLayer')) $('#winLayer').append(bar); const t = WS.top, r = WS.route; if (!t || !r || !t.open || !r.open || !isWide()) { bar.style.display = 'none'; return; } const a = t.el.getBoundingClientRect(), c = r.el.getBoundingClientRect(); if (Math.abs(a.left - c.left) > 6 || c.top < a.bottom - 4 || c.top > a.bottom + 14) { bar.style.display = 'none'; return; } bar.style.display = 'block'; bar.style.left = t.el.style.left; bar.style.width = t.el.style.width; bar.style.top = (a.bottom - 2) + 'px'; };
+  bar.addEventListener('pointerdown', (e) => { bar.setPointerCapture(e.pointerId); const a = WS.top.el.getBoundingClientRect(), c = WS.route.el.getBoundingClientRect(); st = { y: e.clientY, th: a.height, rt: c.top, rb: c.bottom }; });
+  bar.addEventListener('pointermove', (e) => {
+    if (!st) return; const t = WS.top.el, r = WS.route.el, tt = t.getBoundingClientRect().top, d = e.clientY - st.y, min = 70;
+    const th = Math.max(min, Math.min(st.th + d, st.rb - tt - min - 4)); t.style.height = th + 'px'; r.style.top = (tt + th + 4) + 'px'; r.style.height = (st.rb - tt - th - 4) + 'px'; placeSplit(); if (typeof drawTop === 'function') drawTop();
+  });
+  bar.addEventListener('pointerup', () => { if (!st) return; st = null; const a = WS.top.el.offsetHeight, b = WS.route.el.offsetHeight, sum = WINS.top[3] + WINS.route[3]; WINS.top[3] = sum * a / (a + b); WINS.route[3] = sum - WINS.top[3]; });
+})();
+(() => {
+  const b = $('#fsBtn'), de = document.documentElement, can = !!(de.requestFullscreen || de.webkitRequestFullscreen), cur = () => document.fullscreenElement || document.webkitFullscreenElement;
+  const sync = () => { b.textContent = cur() ? '⛶ Exit full screen' : '⛶ Full screen'; b.setAttribute('aria-label', cur() ? 'Exit full screen' : 'Full screen'); setTimeout(() => { if (typeof refitSoon === 'function') refitSoon(isWide()); }, 150); };
+  b.onclick = async () => {
+    if (!can) { toast('This browser cannot hide its bar from a page. On an iPhone, use Share, then Add to Home Screen, and open it from there.'); return; }
+    try { if (cur()) await (document.exitFullscreen || document.webkitExitFullscreen).call(document); else await (de.requestFullscreen || de.webkitRequestFullscreen).call(de); } catch (e) { toast('Full screen was blocked here. Try opening the page on its own tab, or press F11 on a computer.'); }
+  };
+  document.addEventListener('fullscreenchange', sync); document.addEventListener('webkitfullscreenchange', sync);
+})();
 let lastWide = null;
 function layoutMode() {
   const wide = isWide(); if (wide === lastWide) return; lastWide = wide; const right = $('.right');
@@ -1858,7 +1934,7 @@ function renderFiles() {
   $('#counts').innerHTML = [['Maps', S.maps.size], ['Routes', S.rmps.size], ['Tilesets (MCD)', S.mcds.size], ['Graphics (PCK)', S.pcks.size], ['Terrains', Object.keys(S.terr).length]].map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
   $('#palNote').innerHTML = S.pal ? 'Palette: battlescape colours loaded.' : '<span style="color:var(--warn)">No PALETTES.DAT yet, so tiles show in grey. It is in the UFO GEODATA folder, or inside the .apk.</span>';
 }
-function refreshAll() { demoCta(); renderTerrSel(); renderFiles(); renderTree(); updateLevel(); updateStatus(); renderQuad(); renderAudit(); renderInspector(); if (S.tab === 'tiles' || isOpen('tiles')) renderTiles(); if (S.tab === 'spawn' || isOpen('spawn')) renderSpawnTable(); drawTop(); draw(); }
+function refreshAll() { demoCta(); renderTerrSel(); renderFiles(); renderTree(); updateLevel(); updateStatus(); renderQuad(); renderAudit(); renderInspector(); if (S.tab === 'tiles' || isOpen('tiles') || !isWide()) renderTiles(); if (S.tab === 'spawn' || isOpen('spawn')) renderSpawnTable(); drawTop(); draw(); }
 function placeTree() { const host = $('#treeHost'), narrow = !isWide(), dest = narrow ? $('#p-maps') : $('#leftcol'); if (host.parentElement !== dest) dest.append(host); }
 function openDemo() { const b = makeDemo(); S.blocks.set(b.key, b); S.cur = b; S.z = 0; S.part = -1; S.sel = null; refreshAll(); fit(); toast('Demo map. Add your files to work on real maps.'); }
 $('#demoB').onclick = openDemo; $('#trialB').onclick = startDemo; $('#demoGo').onclick = startDemo; $('#demoExit').onclick = leaveDemo;
