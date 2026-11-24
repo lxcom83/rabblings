@@ -197,7 +197,8 @@ html.nw .dlg{max-height:calc(88vh / var(--z,1))}
 .fg input,.fg select{min-height:26px}
 .big{image-rendering:pixelated;background:#222;border:1px solid var(--shade)}
 .xw{position:fixed;display:none;flex-direction:column;background:var(--face);border:2px solid var(--dark);box-shadow:4px 6px 18px #0008;z-index:4500;font-size:12px;color:#000;max-width:100vw;max-height:calc(100vh - 8px);left:14px;top:44px}
-#mcdWin{width:736px}#pckWin{width:704px}
+#mcdWin{width:736px}
+#mcdWin[data-docked] .xb{overflow:auto;flex:1;min-height:0}#pckWin{width:704px}
 .xw.see{opacity:.68}
 .xt{background:linear-gradient(#2d6fc4,#1a4f9c);color:#fff;font-weight:600;padding:3px 6px;display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:move;user-select:none;flex:none}
 .xt button{min-height:20px;padding:0 8px}
@@ -251,10 +252,18 @@ html.nw .dlg{max-height:calc(88vh / var(--z,1))}
 html.nw .xw{left:0!important;top:0!important;width:100vw!important;height:100%;max-height:none;border-width:0}
 html.nw .xrow{flex-direction:column;min-width:0}html.nw .xright{width:auto;flex-direction:row;flex-wrap:wrap;align-items:flex-start;gap:10px}html.nw .xmid,html.nw .xfields{flex-wrap:wrap}html.nw .xcols{flex-wrap:wrap}html.nw .xshow{overflow-x:auto;flex:1 1 100%}html.nw #mcdDark{max-width:none}html.nw #mcdLofts{display:grid;grid-template-columns:repeat(2,auto);gap:2px}
 #winLayer{position:fixed;inset:0;pointer-events:none;z-index:20}
-.win::after{content:'';position:absolute;right:2px;bottom:2px;width:14px;height:14px;pointer-events:none;background:linear-gradient(135deg,#0000 48%,#556 48%,#556 56%,#0000 56%,#0000 66%,#556 66%,#556 74%,#0000 74%)}
+.win .rz{position:absolute;z-index:6;touch-action:none}
+.win .rz.r{right:0;top:28px;bottom:26px;width:12px;cursor:ew-resize}.win .rz.l{left:0;top:28px;bottom:26px;width:12px;cursor:ew-resize}
+.win .rz.b{left:26px;right:26px;bottom:0;height:12px;cursor:ns-resize}
+.win .rz.br{right:0;bottom:0;width:28px;height:28px;cursor:nwse-resize}.win .rz.bl{left:0;bottom:0;width:28px;height:28px;cursor:nesw-resize}
+.win.locked .rz{display:none}.win.locked .wt{cursor:default}.win.locked::after{display:none}
+.win .wt button.on{background:#ffd75e;color:#000}
+.win::after{content:'';position:absolute;right:2px;bottom:2px;width:16px;height:16px;pointer-events:none;background:linear-gradient(135deg,#0000 48%,#556 48%,#556 56%,#0000 56%,#0000 66%,#556 66%,#556 74%,#0000 74%)}
+#sideSplit{position:absolute;width:10px;cursor:ew-resize;touch-action:none;z-index:50;pointer-events:auto;display:none;background:linear-gradient(90deg,#0000,#556c,#0000)}
+#sideSplit::after{content:'';position:absolute;top:50%;left:3px;width:4px;height:60px;margin-top:-30px;border-radius:2px;background:#334;opacity:.7}
 #stackSplit{position:absolute;height:8px;cursor:ns-resize;touch-action:none;z-index:50;pointer-events:auto;display:none;background:linear-gradient(#0000,#667a,#0000)}
 #stackSplit::after{content:'';position:absolute;left:50%;top:2px;width:60px;height:4px;margin-left:-30px;border-radius:2px;background:#334;opacity:.7}
-.win{position:absolute;pointer-events:auto;background:var(--face);border:2px solid var(--dark);border-top-color:#fff;border-left-color:#fff;box-shadow:3px 4px 10px #0006;display:flex;flex-direction:column;resize:both;overflow:hidden;min-width:260px;min-height:70px}
+.win{position:absolute;pointer-events:auto;background:var(--face);border:2px solid var(--dark);border-top-color:#fff;border-left-color:#fff;box-shadow:3px 4px 10px #0006;display:flex;flex-direction:column;overflow:hidden;min-width:200px;min-height:70px}
 .win .wt{background:linear-gradient(#2d6fc4,#1a4f9c);color:#fff;font-weight:600;padding:3px 4px 3px 8px;display:flex;justify-content:space-between;align-items:center;cursor:move;touch-action:none;user-select:none;flex:none}
 .win.inactive .wt{background:linear-gradient(#8a98ab,#6f7d90)}
 .win .wt button{min-height:20px;padding:0 8px;font-size:12px;line-height:18px}
@@ -279,7 +288,7 @@ html.nw .xrow{flex-direction:column;min-width:0}html.nw .xright{width:auto;flex-
       <button data-tool="route" aria-pressed="false" title="Tap the map to work on route nodes (see RouteView)">Route</button>
     </div>
     <div class="g"><button id="zOut" aria-label="Zoom out">−</button><button id="zFit">Fit</button><button id="zIn" aria-label="Zoom in">+</button></div>
-    <div class="g"><button id="mcdB" title="Edit the tile parts (MCD) of this map. Slides over the map; close it to carry on.">MCD editor</button></div>
+    <div class="g"><button id="mcdB" title="Edit the tile parts (MCD) of this map. It takes the place of TopView/RouteView at the side; close it and they come back.">MCD editor</button><button id="animB" aria-pressed="false" title="Play the tile animations (the frame numbers set in MCD Edit) on the map. Click again to stop.">▶ Animate</button></div>
     <div class="g"><button id="undoB" title="Ctrl+Z">Undo</button><button id="saveB" title="Ctrl+S">Save map</button></div>
     <label>Terrain <select id="terrSel" aria-label="Terrain for this map"></select></label>
   </div>
@@ -1038,14 +1047,31 @@ function makeDemo() {
 /* ================= iso rendering ================= */
 const cv = $('#cv'), ctx = cv.getContext('2d'); let W = 0, H = 0, dpr = 1; const PAD = 40;
 const isoXY = (b, x, y, z) => [(x - y) * 16 + (b.mapObj.rows - 1) * 16, (x + y) * 8 + (b.mapObj.levs - 1 - z) * 24 + PAD];
+const isoKeyOf = (b) => b.rev + ':' + S.z + ':' + (S.pal ? 1 : 0) + (S.anim ? ':a' + S.tick : '');
+/* animation: a part cycles through its 8 frames, starting at its start phase; doors stay still */
+function animFrame(m) { const r = m.rec; if (r.sd || r.hd || !r.raw) return r.f[0]; return r.f[(r.raw[38] + S.tick) & 7]; }
+function mapAnimated(b) {
+  if (!b || !b.mapObj || !b.meta) return false; const seen = new Set(); let v = false; for (let i = 0; i < b.mapObj.data.length && !v; i++) { const n = b.mapObj.data[i]; if (!n || seen.has(n)) continue; seen.add(n); const m = b.meta[n]; if (m && m.rec && !m.rec.sd && !m.rec.hd && m.rec.f.some((f) => f !== m.rec.f[0])) v = true; }
+  return v;
+}
+const AN = { t: 0 };
+function animLoop() {
+  clearTimeout(AN.t); if (!S.anim) return;
+  AN.t = setTimeout(() => { let ms = 100; if (!document.hidden && S.cur && mapAnimated(S.cur)) { const t0 = performance.now(); S.tick++; draw(); ms = Math.max(100, Math.round((performance.now() - t0) * 1.6)); } animLoop.ms = ms; animLoop(); }, animLoop.ms || 100);
+}
+function setAnim(on) {
+  S.anim = !!on; S.tick = 0; const bt = $('#animB'); bt.setAttribute('aria-pressed', String(S.anim)); bt.textContent = S.anim ? '⏸ Animate' : '▶ Animate';
+  if (S.anim && S.cur && !mapAnimated(S.cur)) toast('No animated parts on this map yet. In MCD Edit, give a part different frame numbers (the 8 boxes under the pictures) and save.');
+  if (S.cur) S.cur.iso = null; draw(); animLoop();
+}
 function buildIso(b) {
   const { rows, cols, levs, data } = b.mapObj, w = (cols + rows) * 16, h = (cols + rows) * 8 + levs * 24 + PAD + 24;
   const c = b.iso && b.iso.width === w && b.iso.height === h ? b.iso : Object.assign(document.createElement('canvas'), { width: w, height: h }), x2 = c.getContext('2d'); x2.clearRect(0, 0, w, h);
   for (let z = 0; z <= S.z && z < levs; z++) for (let s = 0; s <= cols + rows - 2; s++) for (let x = Math.max(0, s - rows + 1); x <= Math.min(cols - 1, s); x++) {
     const y = s - x, p = (((levs - 1 - z) * rows + y) * cols + x) * 4;
-    for (let k = 0; k < 4; k++) { const v = data[p + k]; if (!v) continue; const m = b.meta[v]; if (!m) continue; const cn = spriteCanvas(m.set, m.rec.f[0]), [sx, sy] = isoXY(b, x, y, z); if (cn) x2.drawImage(cn, sx, sy - m.rec.yoff); else fallbackDraw(x2, m.rec, k, sx, sy); }
+    for (let k = 0; k < 4; k++) { const v = data[p + k]; if (!v) continue; const m = b.meta[v]; if (!m) continue; const cn = spriteCanvas(m.set, S.anim ? animFrame(m) : m.rec.f[0]) || spriteCanvas(m.set, m.rec.f[0]), [sx, sy] = isoXY(b, x, y, z); if (cn) x2.drawImage(cn, sx, sy - m.rec.yoff); else fallbackDraw(x2, m.rec, k, sx, sy); }
   }
-  b.iso = c; b.isoKey = b.rev + ':' + S.z + ':' + (S.pal ? 1 : 0);
+  b.iso = c; b.isoKey = isoKeyOf(b);
 }
 function fallbackDraw(g, rec, k, sx, sy) {
   g.lineWidth = 3; g.lineCap = 'round';
@@ -1067,7 +1093,7 @@ function selRect() { if (!S.sel) return null; const a = S.sel, c = S.sel2 || S.s
 function paint() {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H); const b = S.cur;
   $('#hint').innerHTML = !b ? '<div><b>MapView Web</b><br>Open the Files tab to add your game files,<br>or choose a map from the list.</div>' : b.err ? '<div>' + esc(b.err) + '</div>' : '';
-  if (!b || !b.mapObj || !b.model) return; const key = b.rev + ':' + S.z + ':' + (S.pal ? 1 : 0); if (!b.iso || b.isoKey !== key) buildIso(b);
+  if (!b || !b.mapObj || !b.model) return; const key = isoKeyOf(b); if (!b.iso || b.isoKey !== key) buildIso(b);
   ctx.imageSmoothingEnabled = false; const v = S.view; ctx.drawImage(b.iso, v.ox, v.oy, b.iso.width * v.s, b.iso.height * v.s);
   const r = selRect(); if (r) for (let y = r[1]; y <= r[3]; y++) for (let x = r[0]; x <= r[2]; x++) diamond(b, x, y, S.z, '#ffd24a30', '#ffd24a', 2);
   if (S.hover && S.tool !== 'select' && S.tool !== 'route') diamond(b, S.hover[0], S.hover[1], S.z, '#ffffff20', '#fff', 1.5);
@@ -1144,7 +1170,7 @@ function updateStatus(t) {
 const tv = $('#tv'), tctx = tv.getContext('2d'); let tcell = 14;
 function drawTop() {
   const b = S.cur; const hint = $('#topHint'); if (!b || !b.mapObj) { hint.style.display = ''; tv.height = 0; return; } hint.style.display = 'none';
-  const { cols, rows } = b.mapObj, wpx = Math.max(200, $('#p-top').clientWidth - 16 || 360); tcell = Math.max(5, Math.min(isWide() ? 24 : 16, Math.floor(wpx / cols))); const w = cols * tcell, h = rows * tcell, d = window.devicePixelRatio || 1;
+  const { cols, rows } = b.mapObj, wpx = Math.max(200, $('#p-top').clientWidth - 16 || 360); const hcap = isWide() ? Math.floor(($('#p-top').clientHeight - 4) / rows) : 0; tcell = Math.max(5, Math.min(isWide() ? 64 : 16, Math.floor(wpx / cols), hcap > 0 ? Math.max(hcap, 16) : 999)); const w = cols * tcell, h = rows * tcell, d = window.devicePixelRatio || 1;
   tv.style.width = w + 'px'; tv.style.height = h + 'px'; tv.width = w * d; tv.height = h * d; tctx.setTransform(d, 0, 0, d, 0, 0); tctx.fillStyle = '#000'; tctx.fillRect(0, 0, w, h);
   for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
     const p = mapIx(b, x, y, S.z), dd = b.mapObj.data, X = x * tcell, Y = y * tcell;
@@ -1389,39 +1415,65 @@ function saveAll() { archiveFiles(editedFiles(), true); const ed = [...S.blocks.
 
 /* ================= floating windows (like MapView II's separate viewers) ================= */
 const WINS = { top: ['TopView', 'p-top', 400, 0.50], tiles: ['TileView', 'p-tiles', 0, 0], route: ['RouteView', 'p-route', 400, 0.46], files: ['Files', 'p-files', 520, 0], cloud: ['My cloud files', 'p-cloud', 520, 0], audit: ['Audit', 'p-audit', 460, 0], spawn: ['Experimental', 'p-spawn', 460, 0] };
-const WS = {}; let zTop = 21;
+const WS = {}; let zTop = 21; let SIDEW = 400; const sideW = () => { const lc = document.getElementById('leftcol'); return Math.round(Math.min(SIDEW, Math.max(260, innerWidth - (lc ? lc.offsetWidth : 230) - 320))); }; try { const v = +localStorage.getItem('mv-sidew'); if (v >= 260 && v <= 2400) SIDEW = v; } catch (e) { /* ignore */ }
+function setupWinTools(k, w) {
+  const lk = w.querySelector('[data-wlock]'), mx = w.querySelector('[data-wmax]'), key = 'mv-lock-' + k;
+  const setLock = (on, save) => { w.classList.toggle('locked', on); lk.textContent = on ? '🔒' : '🔓'; lk.classList.toggle('on', on); lk.title = on ? 'Locked: click to unlock' : 'Lock this window so it cannot be moved or resized by accident'; mx.disabled = on; if (save) { try { localStorage.setItem(key, on ? '1' : '0'); } catch (e) { /* ignore */ } } };
+  lk.onclick = () => setLock(!w.classList.contains('locked'), true);
+  try { if (localStorage.getItem(key) === '1') setLock(true, false); } catch (e) { /* ignore */ }
+  mx.onclick = () => {
+    if (w.dataset.max) { const o = JSON.parse(w.dataset.max); delete w.dataset.max; w.style.left = o.l + 'px'; w.style.top = o.t + 'px'; w.style.width = o.w + 'px'; w.style.height = o.h + 'px'; mx.classList.remove('on'); if (window.refit) refit('clamp'); }
+    else { const r = w.getBoundingClientRect(), st = $('#cvWrap').getBoundingClientRect(), dk = isOpen('tiles') ? $('#tileDock').offsetHeight : 0; w.dataset.max = JSON.stringify({ l: r.left, t: r.top, w: r.width, h: r.height }); w.style.left = Math.max(0, st.left + 4) + 'px'; w.style.top = (st.top + 2) + 'px'; w.style.width = Math.max(300, innerWidth - st.left - 12) + 'px'; w.style.height = Math.max(150, innerHeight - st.top - dk - 34) + 'px'; mx.classList.add('on'); }
+    focusWin(k); if (window.placeSplit) placeSplit(); if (window.placeSideSplit) placeSideSplit(); if (k === 'top') drawTop();
+  };
+  let rz = null;
+  w.querySelectorAll('.rz').forEach((h) => {
+    h.addEventListener('pointerdown', (e) => { if (w.classList.contains('locked')) return; e.preventDefault(); h.setPointerCapture(e.pointerId); focusWin(k); const r = w.getBoundingClientRect(); const ro = (k === 'top' && WS.route && WS.route.open) ? WS.route.el.getBoundingClientRect() : null; rz = { dir: h.dataset.rz, x: e.clientX, y: e.clientY, l: r.left, t: r.top, w: r.width, h: r.height, rb: ro && !WS.route.el.classList.contains('locked') && Math.abs(ro.top - (r.top + r.height)) < 16 ? ro.bottom : null }; });
+    h.addEventListener('pointermove', (e) => {
+      if (!rz) return; const dx = e.clientX - rz.x, dy = e.clientY - rz.y, d = rz.dir, minW = 200, minH = 70; let l = rz.l, wd = rz.w, ht = rz.h;
+      if (d.includes('r')) wd = Math.max(minW, Math.min(rz.w + dx, innerWidth - rz.l));
+      if (d.includes('l')) { wd = Math.max(minW, rz.w - dx); l = Math.max(0, rz.l + rz.w - wd); wd = rz.l + rz.w - l; }
+      if (d.includes('b')) ht = Math.max(minH, Math.min(rz.h + dy, innerHeight - rz.t - 4));
+      if (rz.rb && d.includes('b')) { ht = Math.min(ht, rz.rb - rz.t - 4 - 70); const re = WS.route.el; re.style.top = (rz.t + ht + 4) + 'px'; re.style.height = (rz.rb - rz.t - ht - 4) + 'px'; } w.style.left = l + 'px'; w.style.width = wd + 'px'; w.style.height = ht + 'px'; delete w.dataset.max; mx.classList.remove('on');
+      if ((k === 'top' || k === 'route') && WS.top && WS.route) { SIDEW = Math.round(wd); const o = WS[k === 'top' ? 'route' : 'top']; if (o.open && !o.el.classList.contains('locked')) { o.el.style.width = wd + 'px'; o.el.style.left = l + 'px'; } winSide(); }
+      if (window.placeSplit) placeSplit(); if (window.placeSideSplit) placeSideSplit();
+    });
+    h.addEventListener('pointerup', () => { if (!rz) return; rz = null; if (k === 'top' || k === 'route') { try { localStorage.setItem('mv-sidew', String(SIDEW)); } catch (e) { /* ignore */ } } size(); draw(); });
+  });
+}
 function isOpen(k) { return !!(WS[k] && WS[k].open); }
 function buildWins() {
   const L = $('#winLayer'); L.innerHTML = '';
   for (const k in WINS) { if (k === 'tiles') { WS[k] = { open: false, el: $('#tileDock'), placed: true }; $('#dockClose').onclick = () => closeWin('tiles'); continue; } const [title, pid] = WINS[k], w = document.createElement('div'); w.className = 'win inactive'; w.id = 'w-' + k; w.style.display = 'none'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-label', title);
-    w.innerHTML = `<div class="wt"><span>${title}</span><span><button data-wmin aria-label="Close ${title}">✕</button></span></div>`; w.querySelector('[data-wmin]').onclick = () => closeWin(k);
+    w.innerHTML = `<div class="wt"><span>${title}</span><span><button data-wlock title="Lock this window so it cannot be moved or resized by accident" aria-label="Lock ${title}">🔓</button> <button data-wmax title="Make this window fill the map area (click again to restore)" aria-label="Fill screen ${title}">⤢</button> <button data-wmin aria-label="Close ${title}">✕</button></span></div><i class="rz l" data-rz="l"></i><i class="rz r" data-rz="r"></i><i class="rz b" data-rz="b"></i><i class="rz bl" data-rz="bl"></i><i class="rz br" data-rz="br"></i>`; w.querySelector('[data-wmin]').onclick = () => closeWin(k);
+    setupWinTools(k, w);
     const body = $('#' + pid); w.append(body); body.classList.add('on'); L.append(w); WS[k] = { open: false, el: w };
     const wt = w.querySelector('.wt'); let drag = null;
-    wt.addEventListener('pointerdown', (e) => { if (e.target.closest('button')) return; focusWin(k); wt.setPointerCapture(e.pointerId); drag = { x: e.clientX - w.offsetLeft, y: e.clientY - w.offsetTop }; });
+    wt.addEventListener('pointerdown', (e) => { if (e.target.closest('button') || w.classList.contains('locked') || w.dataset.max) return; focusWin(k); wt.setPointerCapture(e.pointerId); drag = { x: e.clientX - w.offsetLeft, y: e.clientY - w.offsetTop }; });
     wt.addEventListener('pointermove', (e) => { if (!drag) return; w.style.left = Math.max(-w.offsetWidth + 60, Math.min(innerWidth - 60, e.clientX - drag.x)) + 'px'; w.style.top = Math.max(0, Math.min(innerHeight - 40, e.clientY - drag.y)) + 'px'; });
-    wt.addEventListener('pointerup', () => { drag = null; if (window.placeSplit) placeSplit(); }); w.addEventListener('pointerdown', () => focusWin(k), true);
-    new ResizeObserver(() => { if (k === 'top') drawTop(); if (window.placeSplit) placeSplit(); }).observe(w);
+    wt.addEventListener('pointerup', () => { drag = null; if (window.placeSplit) placeSplit(); if (window.placeSideSplit) placeSideSplit(); }); w.addEventListener('pointerdown', () => focusWin(k), true);
+    new ResizeObserver(() => { if (k === 'top') drawTop(); if (window.placeSplit) placeSplit(); if (window.placeSideSplit) placeSideSplit(); }).observe(w);
   }
 }
 function focusWin(k) { if (k === 'tiles') return; for (const j in WS) if (j !== 'tiles') WS[j].el.classList.toggle('inactive', j !== k); WS[k].el.style.zIndex = ++zTop; }
 function placeWin(k) {
   if (k === 'tiles') return;
-  const el = WS[k].el, [, , w, frac] = WINS[k], W_ = innerWidth, H_ = innerHeight, top0 = $('.body').getBoundingClientRect().top + 4, avail = H_ - top0 - 32 - (isOpen('tiles') ? $('#tileDock').offsetHeight : 0);
-  if (frac) { const order = ['top', 'route']; let y = top0; for (const j of order) { if (j === k) break; y += Math.round(avail * WINS[j][3]) + 4; } el.style.left = (W_ - w - 8) + 'px'; el.style.top = y + 'px'; el.style.width = w + 'px'; el.style.height = Math.round(avail * frac) + 'px'; }
+  const el = WS[k].el, [, , w0, frac] = WINS[k], w = frac ? sideW() : w0, W_ = innerWidth, H_ = innerHeight, top0 = $('.body').getBoundingClientRect().top + 4, avail = H_ - top0 - 32 - (isOpen('tiles') ? $('#tileDock').offsetHeight : 0);
+  if (frac) { const order = ['top', 'route'].filter((j) => j === k || isOpen(j)); let y = top0; for (const j of order) { if (j === k) break; y += Math.round(avail * WINS[j][3]) + 4; } el.style.left = (W_ - w - 8) + 'px'; el.style.top = y + 'px'; el.style.width = w + 'px'; el.style.height = (order.length === 1 ? avail : Math.round(avail * frac)) + 'px'; }
   else { el.style.left = Math.max(10, Math.round((W_ - w) / 2) - 100) + 'px'; el.style.top = (top0 + 30) + 'px'; el.style.width = w + 'px'; el.style.height = Math.min(avail - 30, 560) + 'px'; }
 }
-function openWin(k) { const ws = WS[k]; if (!ws) return; if (!ws.open) { ws.open = true; if (!ws.placed) { placeWin(k); ws.placed = true; } ws.el.style.display = 'flex'; } focusWin(k); winSide(); if (window.placeSplit) placeSplit(); if (k === 'top') { drawTop(); renderQuad(); } if (k === 'tiles') renderTiles(); if (k === 'audit') renderAudit(); if (k === 'spawn') renderSpawnTable(); if (k === 'route') renderInspector(); if (k === 'cloud') renderLocs(); buildMenus(); draw(); }
-function closeWin(k) { WS[k].open = false; WS[k].el.style.display = 'none'; winSide(); if (window.placeSplit) placeSplit(); buildMenus(); draw(); }
-function winSide() { const any = ['top', 'route'].some(isOpen); $('.body').style.paddingRight = isWide() && any ? '416px' : '0'; }
+function openWin(k) { const ws = WS[k]; if (!ws) return; if (!ws.open) { ws.open = true; if (!ws.placed) { placeWin(k); ws.placed = true; } ws.el.style.display = 'flex'; } if ((k === 'top' || k === 'route') && isWide()) { for (const j of ['top', 'route']) if (isOpen(j) && !WS[j].el.classList.contains('locked') && !WS[j].el.dataset.max) { placeWin(j); WS[j].placed = true; } } focusWin(k); winSide(); if (window.placeSplit) placeSplit(); if (window.placeSideSplit) placeSideSplit(); if (k === 'top') { drawTop(); renderQuad(); } if (k === 'tiles') renderTiles(); if (k === 'audit') renderAudit(); if (k === 'spawn') renderSpawnTable(); if (k === 'route') renderInspector(); if (k === 'cloud') renderLocs(); buildMenus(); draw(); }
+function closeWin(k) { WS[k].open = false; WS[k].el.style.display = 'none'; winSide(); if ((k === 'top' || k === 'route') && isWide()) refit(true); if (window.placeSplit) placeSplit(); if (window.placeSideSplit) placeSideSplit(); buildMenus(); draw(); }
+function winSide() { const any = ['top', 'route'].some(isOpen), mw = document.getElementById('mcdWin'), dm = mw && mw.dataset.docked && mw.style.display === 'flex'; $('.body').style.paddingRight = isWide() && dm ? (mw.offsetWidth + 16) + 'px' : (isWide() && any ? (sideW() + 16) + 'px' : '0'); }
 function refit(force) {
-  const W_ = innerWidth, H_ = innerHeight;
+  const W_ = innerWidth, H_ = innerHeight; if (window.placeMcd) placeMcd();
   for (const k in WS) { if (!WS[k].open || k === 'tiles') continue; const el = WS[k].el, fr = WINS[k][3];
-    if (fr && force !== 'clamp') { placeWin(k); WS[k].placed = true; }
+    if (fr && force !== 'clamp' && !el.classList.contains('locked') && !el.dataset.max) { placeWin(k); WS[k].placed = true; }
     const w = Math.min(el.offsetWidth || 300, W_ - 8), h = Math.min(el.offsetHeight || 200, Math.max(120, H_ - 40));
     el.style.width = w + 'px'; el.style.height = h + 'px'; el.style.left = Math.max(0, Math.min(parseFloat(el.style.left) || 0, W_ - w - 4)) + 'px'; el.style.top = Math.max(0, Math.min(parseFloat(el.style.top) || 0, H_ - 40)) + 'px'; }
-  winSide(); if (window.placeSplit) placeSplit();
+  winSide(); if (window.placeSplit) placeSplit(); if (window.placeSideSplit) placeSideSplit();
 }
-let refitT = 0; const refitSoon = (m) => { clearTimeout(refitT); refitT = setTimeout(() => { if (isWide()) refit(m); fitBody(); size(); draw(); }, 80); };
+window.refit = refit; let refitT = 0; const refitSoon = (m) => { clearTimeout(refitT); refitT = setTimeout(() => { if (isWide()) refit(m); fitBody(); size(); draw(); }, 80); };
 function fitBody() {
   const b = $('.body'), z = window.__zoom || 1; if (isWide()) { b.style.height = ''; b.style.flex = ''; return; } b.style.flex = 'none';
   let top = 0; for (let e = b.previousElementSibling; e; e = e.previousElementSibling) top += e.offsetHeight; for (let e = b.nextElementSibling; e; e = e.nextElementSibling) top += e.offsetHeight; b.style.height = Math.max(300, Math.round((window.innerHeight / z) - top)) + 'px';
@@ -1464,6 +1516,20 @@ function leftMode(collapsed, save) {
     try { if (cur()) await (document.exitFullscreen || document.webkitExitFullscreen).call(document); else await (de.requestFullscreen || de.webkitRequestFullscreen).call(de); } catch (e) { toast('Full screen was blocked here. Try opening the page on its own tab, or press F11 on a computer.'); }
   };
   document.addEventListener('fullscreenchange', sync); document.addEventListener('webkitfullscreenchange', sync);
+})();
+/* the bar between the map and the side windows: drag it left to make TopView and RouteView wider */
+(() => {
+  const bar = document.createElement('div'); bar.id = 'sideSplit'; bar.title = 'Drag left or right to make the side windows wider or narrower'; let st = false;
+  window.placeSideSplit = () => {
+    if (bar.parentElement !== $('#winLayer')) $('#winLayer').append(bar); const t = WS.top, r = WS.route, a = [t, r].filter((x) => x && x.open);
+    if (!a.length || !isWide()) { bar.style.display = 'none'; return; } const top = Math.min(...a.map((x) => x.el.getBoundingClientRect().top)), bot = Math.max(...a.map((x) => x.el.getBoundingClientRect().bottom));
+    bar.style.display = 'block'; bar.style.left = Math.max(0, a[0].el.getBoundingClientRect().left - 9) + 'px'; bar.style.top = top + 'px'; bar.style.height = (bot - top) + 'px';
+  };
+  const apply = () => { for (const k of ['top', 'route']) if (WS[k] && WS[k].open) { const el = WS[k].el; el.style.width = sideW() + 'px'; el.style.left = (innerWidth - sideW() - 8) + 'px'; } winSide(); placeSideSplit(); if (window.placeSplit) placeSplit(); if (window.placeSideSplit) placeSideSplit(); size(); draw(); drawTop(); };
+  bar.addEventListener('pointerdown', (e) => { bar.setPointerCapture(e.pointerId); st = true; });
+  bar.addEventListener('pointermove', (e) => { if (!st) return; SIDEW = Math.round(Math.max(260, Math.min(innerWidth - $('#leftcol').offsetWidth - 320, innerWidth - e.clientX - 8))); apply(); });
+  bar.addEventListener('pointerup', () => { st = false; try { localStorage.setItem('mv-sidew', String(SIDEW)); } catch (e) { /* ignore */ } });
+  bar.addEventListener('dblclick', () => { SIDEW = 400; try { localStorage.removeItem('mv-sidew'); } catch (e) { /* ignore */ } apply(); });
 })();
 let lastWide = null;
 function layoutMode() {
@@ -1537,9 +1603,19 @@ function openMcd(v) {
   if (!name) { toast('Load some game or mod files first (File > Files).'); return; }
   M.set = (S.mcds.get(name.toLowerCase()) || {}).name || name; M.i = i; showX(mcdWin); mcdAll();
 }
-const closeMcd = () => { mcdWin.style.display = 'none'; };
+const MD = { hidden: [] };
+function dockMcd() {
+  if (!isWide()) return; const was = ['top', 'route'].filter(isOpen); if (was.length) MD.hidden = was; for (const k of was) closeWin(k);
+  mcdWin.dataset.docked = '1'; placeMcd();
+}
+function placeMcd() {
+  if (!mcdWin.dataset.docked || mcdWin.style.display !== 'flex' || !isWide()) return; const w = Math.max(480, Math.min(736, innerWidth - (document.getElementById('leftcol').offsetWidth || 230) - 300)), top0 = $('.body').getBoundingClientRect().top + 4, dk = isOpen('tiles') ? $('#tileDock').offsetHeight : 0;
+  mcdWin.style.width = w + 'px'; mcdWin.style.left = Math.max(4, innerWidth - w - 8) + 'px'; mcdWin.style.top = top0 + 'px'; mcdWin.style.height = Math.max(300, innerHeight - top0 - dk - 34) + 'px'; winSide(); size(); draw();
+}
+window.placeMcd = placeMcd;
+const closeMcd = () => { mcdWin.style.display = 'none'; if (mcdWin.dataset.docked) { delete mcdWin.dataset.docked; mcdWin.style.height = ''; const back = MD.hidden; MD.hidden = []; for (const k of back) openWin(k); winSide(); size(); draw(); } };
 let zX = 4500;
-function showX(w) { if (w.style.display === 'none' || !w.style.display) { w.style.display = 'flex'; if (!w.dataset.placed) { w.dataset.placed = 1; const wide = isWide(); if (wide) { w.style.left = (w === mcdWin ? 14 : Math.max(14, innerWidth - 740)) + 'px'; w.style.top = (w === mcdWin ? 44 : 70) + 'px'; } } } w.style.zIndex = ++zX; }
+function showX(w) { if (w.style.display === 'none' || !w.style.display) { w.style.display = 'flex'; if (w === mcdWin) dockMcd(); if (!w.dataset.placed) { w.dataset.placed = 1; const wide = isWide(); if (wide && !w.dataset.docked) { w.style.left = (w === mcdWin ? 14 : Math.max(14, innerWidth - 740)) + 'px'; w.style.top = (w === mcdWin ? 44 : 70) + 'px'; } } } w.style.zIndex = ++zX; }
 for (const w of [mcdWin, pckWin]) {
   const t = w.querySelector('.xt'); let d = null;
   w.addEventListener('pointerdown', () => { w.style.zIndex = ++zX; });
@@ -1549,7 +1625,7 @@ for (const w of [mcdWin, pckWin]) {
 }
 $('#mcdClose').onclick = closeMcd; $('#pckClose').onclick = () => { pckWin.style.display = 'none'; };
 $('#mcdSee').onclick = () => { const on = mcdWin.classList.toggle('see'); $('#mcdSee').setAttribute('aria-pressed', on); };
-$('#mcdB').onclick = () => (mcdWin.style.display === 'flex' ? closeMcd() : openMcd());
+$('#mcdB').onclick = () => (mcdWin.style.display === 'flex' ? closeMcd() : openMcd()); $('#animB').onclick = () => setAnim(!S.anim);
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (pckWin.style.display === 'flex') pckWin.style.display = 'none'; else if (mcdWin.style.display === 'flex') closeMcd(); } });
 
 /* ---- drawing the MCD window ---- */
