@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Thy Will Be Mud: Rabblings</title>
+<meta name="description" content="Rabblings: Thy Will Be Mud. A god game in the Rabblings world: shape the land, shape your people, weave the five strands through your shrines.">
+<link rel="icon" href="img/mark-64.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=IM+Fell+English:ital@0;1&family=Pirata+One&display=swap">
+<link rel="stylesheet" href="style.css">
+<meta name="theme-color" content="#100c09">
+<style>
+.mud-hero .spread{align-items:center}
+.mud-hero h1{font-size:clamp(40px,7vw,72px);line-height:1}
+.mud-hero .soon{display:inline-block;margin-top:6px;font:italic 400 18px/1.3 var(--fell);color:var(--sepia)}
+.mud-wide{margin-top:18px}
+.mud-wide .art img{image-rendering:auto}
+.strands{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr));gap:12px;margin-top:14px}
+.strand{padding:12px 14px;border:1px solid #3a2d20;background:rgba(16,12,9,.5)}
+.strand b{display:block;font:400 22px/1.1 var(--head);margin-bottom:4px}
+.strand i{display:inline-block;width:12px;height:12px;border:1px solid #000;margin-right:8px;vertical-align:middle}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:14px;margin-top:14px}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the page</a>
+<header class="top"><div class="wrap">
+ <a class="brand" href="./"><img class="mark" src="img/mark-64.png" width="30" height="30" alt="">Rabblings</a>
+ <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+ <nav class="nav" id="nav" aria-label="Main"><a class="play" href="./#play">Play</a><a href="lore.html">Lore</a><a href="lore.html#peoples">Races</a><a href="globe.html">Globe</a><a href="maps.html">Community maps</a><a href="./#news">News</a><button class="acct-btn" id="acct-btn" type="button">Sign in</button></nav>
+</div></header>
+<main id="main">
+
+<section class="mud-hero"><div class="wrap">
+ <div class="spread">
+  <div>
+   <p class="kicker">Next in the Rabblings series · in development</p>
+   <h1>Thy Will Be Mud</h1>
+   <p style="font-size:20px;max-width:34em">You are a petty demigod in an older age, when the demigods first fought over the scattered, freshly mutated survivors. Raise the bog, flatten the hills, and let your followers spread. Then breed them into something that can win.</p>
+   <div class="row" style="margin-top:14px"><a class="btn go" href="mud/">Play the demo</a><a class="btn" href="#how">How it plays</a></div>
+   <p class="soon" style="margin-top:10px">Early demo, art still arriving. Plays in your browser on phone, tablet, mouse and keyboard, or a controller. Progress saves on your device.</p>
+  </div>
+  <figure class="plate hero-plate pending" data-art="mud-screen.webp" data-alt="The demo: an isometric bog with three rival clans, homes at every size and a vortex surge twisting over the middle shrine">
+   <div class="art"><span class="await"><b>The god's-eye view</b>Plate awaiting its drawing<code>site/img/journal/mud-screen.webp</code></span></div>
+   <figcaption>The demo: three clans, one vortex surge. <b>PL. I</b></figcaption>
+  </figure>
+ </div>
+</div></section>
+
+<section class="band" id="how"><div class="wrap">
+ <div class="sec-head"><p class="kicker">How it plays</p><h2>Shape the land. Shape the people.</h2><p>Your followers do the rest themselves: they settle flat ground, breed, gather, haul and fight without orders. You steer them only by changing the world around them, and by the occasional flick.</p></div>
+ <div class="hub">
+  <div class="door"><h3>Raise and lower the land</h3><p>Flat ground lets your people build. Their homes grow from lean-tos to hill holds as your whole population rises. Water is the great barrier: bridge it to attack, sink land to cut a rival off.</p></div>
+  <div class="door"><h3>The flick</h3><p>One divine fingertip. A flicked follower works twice as hard, muttering, and your Dread rises. Flick too often and the village sits down on strike.</p></div>
+  <div class="door"><h3>The Shaping altar</h3><p>Between missions, spend what your people gathered to breed traits into the strain. Every gift has a price that comes due later. Your people's name changes as they do.</p></div>
+  <div class="door"><h3>Shrines</h3><p>Shrines are the lenses your magic passes through. Take your rivals' shrines to win; lose all of yours and your demigod is gone.</p></div>
+ </div>
+</div></section>
+
+<section id="settlements"><div class="wrap">
+ <div class="sec-head"><p class="kicker">Concept art</p><h2>From hovel to hill hold</h2><p>Five home sizes, chosen by how much flat ground a settlement has and how many followers you have across the whole map. The land changes them too: stilts over bog, homes dug into hillsides.</p></div>
+ <figure class="plate dark mud-wide pending" data-art="mud-homes.webp" data-alt="Five home sizes, from a lean-to of sticks and hide to a hold dug into a hill">
+  <div class="art"><span class="await"><b>Home tiers</b>Plate awaiting its drawing<code>site/img/journal/mud-homes.webp</code></span></div>
+  <figcaption>Lean-to, hut pair, longhouse, steading, hill hold. <b>PL. II</b></figcaption>
+ </figure>
+ <figure class="plate dark mud-wide pending" data-art="mud-works.webp" data-alt="Mines and fields at three sizes each">
+  <div class="art"><span class="await"><b>Mines and fields</b>Plate awaiting its drawing<code>site/img/journal/mud-works.webp</code></span></div>
+  <figcaption>Every building grows in three sizes, each with a reason to exist. <b>PL. III</b></figcaption>
+ </figure>
+</div></section>
+
+<section class="band" id="people"><div class="wrap">
+ <div class="sec-head"><p class="kicker">Your people</p><h2>An older people, not yet anything you know</h2><p>The early peoples only hint at who they might become. Breed in long arms, hard scales or an ember under the skin, and see what survives. The scholar has guesses. He never confirms them.</p></div>
+ <figure class="plate dark mud-wide pending" data-art="mud-followers.webp" data-alt="The walk cycle of one follower, in all four facings">
+  <div class="art"><span class="await"><b>Followers</b>Plate awaiting its drawing<code>site/img/journal/mud-followers.webp</code></span></div>
+  <figcaption>Followers at work, in four facings. <b>PL. IV</b></figcaption>
+ </figure>
+ <figure class="plate dark mud-wide pending" data-art="mud-strains.webp" data-alt="Six Shaped strains of the same follower, each with a side effect">
+  <div class="art"><span class="await"><b>Shaped strains</b>Plate awaiting its drawing<code>site/img/journal/mud-strains.webp</code></span></div>
+  <figcaption>Six strains of one people. Each gift came with a price. <b>PL. V</b></figcaption>
+ </figure>
+</div></section>
+
+<section id="magic"><div class="wrap">
+ <div class="sec-head"><p class="kicker">Magic</p><h2>Five strands, woven through shrines</h2><p>No fireballs, no lightning bolts. Mud Age shrine-keepers held that every power is a weave of the five strands. You cast within reach of a shrine you hold. Weave outside what your people are used to and it may snap back.</p></div>
+ <div class="strands">
+  <div class="strand"><b><i style="background:#ff9a30"></i>Heat and Cold</b>Floods, frost and scorched roofs.</div>
+  <div class="strand"><b><i style="background:#7a7e88"></i>Force</b>Shoves, upheavals, a follower sent flying.</div>
+  <div class="strand"><b><i style="background:#6a3a22"></i>Earth</b>Hills from bog, cracks through fields.</div>
+  <div class="strand"><b><i style="background:#4a6a32"></i>Life and Decay</b>Plagues that spread from hut to hut.</div>
+  <div class="strand"><b><i style="background:#1a1216"></i>Shadow and Light</b>Gloom that swallows a village whole.</div>
+ </div>
+ <figure class="plate dark mud-wide pending" data-art="mud-shrines.webp" data-alt="Five shrine stages, from a crooked standing stone to an ancestor monument">
+  <div class="art"><span class="await"><b>Shrines</b>Plate awaiting its drawing<code>site/img/journal/mud-shrines.webp</code></span></div>
+  <figcaption>A shrine grows as homes gather round it: standing stone, cairn, sanctuary, sunken pit, ancestor monument. <b>PL. VI</b></figcaption>
+ </figure>
+</div></section>
+
+<section class="band" id="lands"><div class="wrap">
+ <div class="sec-head"><p class="kicker">In the demo</p><h2>New lands, and ground that fights back</h2><p>Each mission moves to new country. The demo crosses the Mire, the Rime Flats and the Bake; the Twisted Lands and the Old Stones follow in the full game. Homes are built to suit the land, and some ground no god can move.</p></div>
+ <figure class="plate dark mud-wide pending" data-art="mud-lands.webp" data-alt="The same home built five ways: on stilts over bog, dug into a hill, slag lodges on ember rock, packed with snow, and mud huts in the desert">
+  <div class="art"><span class="await"><b>Five lands</b>Plate awaiting its drawing<code>site/img/journal/mud-lands.webp</code></span></div>
+  <figcaption>Stilts, hillside, ember rock, ice and sand. <b>PL. VII</b></figcaption>
+ </figure>
+ <div class="facts">
+  <div class="leaf"><h3>Works that matter</h3><p>Homes grow mines, fields, beast pens, substance works, ruin digs, burial grounds, war camps and watchtowers, each picked by the land around it and each doing a job.</p></div>
+  <div class="leaf"><h3>Traps</h3><p>Watchtowers and war camps lay pits, snares, stakes, log traps and blast mounds. Yours you can see. Theirs you find the hard way.</p></div>
+  <div class="leaf"><h3>The flick</h3><p>Manifesting the hand costs mana: a little to hurry your own, more to knock a rival flat. Flick your own too often and Dread rises.</p></div>
+ </div>
+ <figure class="plate dark mud-wide pending" data-art="mud-traps.webp" data-alt="Six traps: a hidden pit, a stake field, a log trap, a bone snare, a sunken log and a blast mound">
+  <div class="art"><span class="await"><b>Traps</b>Plate awaiting its drawing<code>site/img/journal/mud-traps.webp</code></span></div>
+  <figcaption>Pit, stakes, log, snare, sunken log, blast mound. <b>PL. VIII</b></figcaption>
+ </figure>
+</div></section>
+
+<section id="maps"><div class="wrap">
+ <div class="sec-head"><p class="kicker">Now and next</p><h2>Up to four demigods, and maps you make</h2></div>
+ <div class="facts">
+  <div class="leaf"><h3>In the demo now</h3><p>A three-mission campaign against one to three computer demigods, on small, medium or large maps, with the Shaping altar between missions.</p></div>
+  <div class="leaf"><h3>Ground no god can move</h3><p>Bedrock, ancient paving, deep water and warded ground make fixed cliffs, moats and chokepoints.</p></div>
+  <div class="leaf"><h3>Coming</h3><p>A map builder to paint height, shrines, herds and ruins and share your maps, then online play on the same system as Marching Orders.</p></div>
+ </div>
+ <div class="row" style="margin-top:18px"><a class="btn go" href="mud/">Play the demo</a><a class="btn" href="lore.html#ages">Read about the Mud Age</a></div>
+</div></section>
+
+</main>
+<footer><div class="wrap">
+ <nav class="fnav" aria-label="Footer"><a href="mud/">Play Thy Will Be Mud</a><a href="play/">Play Marching Orders</a><a href="builder/">Map builder</a><a href="lore.html">Lore</a><a href="maps.html">Community maps</a><a href="account.html">Account</a><a href="privacy.html">Privacy</a></nav>
+ <p>Rabblings is free to play and source available, by Luke83.</p>
+</div></footer>
+<script src="account.js"></script>
+<script src="site.js"></script>
+</body>
+</html>
